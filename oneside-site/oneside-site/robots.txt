@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://www.onesideaustralia.com.au/sitemap.xml

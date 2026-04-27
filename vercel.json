@@ -1,6 +1,12 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
+  "crons": [
+    {
+      "path": "/api/scan?secret=REPLACE_WITH_SCAN_SECRET",
+      "schedule": "0 22 * * 0"
+    }
+  ],
   "rewrites": [
     { "source": "/assessment", "destination": "/assessment.html" },
     { "source": "/prepare", "destination": "/prepare.html" },

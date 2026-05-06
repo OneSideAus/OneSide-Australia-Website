@@ -170,8 +170,9 @@ export default async function handler(req, res) {
   }
 
   // Simple auth check
-  const secret = req.headers['x-scan-secret'] || req.query.secret;
-  if (secret !== process.env.SCAN_SECRET) {
+const secret = req.headers['x-scan-secret'] || req.query.secret;
+const isCron = req.headers['x-vercel-cron'] === '1';
+if (!isCron && secret !== process.env.SCAN_SECRET) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 

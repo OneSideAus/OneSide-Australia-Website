@@ -3,8 +3,8 @@
   "trailingSlash": false,
   "crons": [
     {
-      "path": "/api/scan?secret=REPLACE_WITH_SCAN_SECRET",
-      "schedule": "0 22 * * 0"
+      "path": "/api/scan",
+      "schedule": "0 5 * * 5"
     }
   ],
   "rewrites": [

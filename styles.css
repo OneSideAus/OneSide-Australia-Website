@@ -248,4 +248,7 @@ footer { background: #080F1A; padding: 40px 2rem 32px; border-top: 1px solid rgb
 @media (max-width: 768px) {
   .nav-links { display: none; }
   .hamburger { display: flex; }
+  .hero-right-panel {
+  display: none;
+}
 }

@@ -82,34 +82,72 @@
 <main>
 
   <!-- HERO -->
-  <section style="min-height:100vh;background:var(--midnight);position:relative;overflow:hidden;display:flex;align-items:center;padding:100px 2rem 80px;">
-    <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden;">
-      <div style="position:absolute;top:-10%;right:-5%;width:55%;height:130%;background:linear-gradient(135deg,rgba(27,94,138,0.18) 0%,transparent 70%);transform:skewX(-10deg);"></div>
-      <div style="position:absolute;top:20%;right:5%;width:35%;height:80%;background:linear-gradient(135deg,rgba(46,134,193,0.08) 0%,transparent 70%);transform:skewX(-10deg);"></div>
-      <div style="position:absolute;bottom:20%;left:-5%;width:30%;height:60%;background:linear-gradient(135deg,rgba(212,97,78,0.07) 0%,transparent 70%);transform:skewX(-10deg);"></div>
-      <div style="position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,0.03) 1px,transparent 1px);background-size:32px 32px;"></div>
-      <div style="position:absolute;inset:0;background-image:url('data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\' opacity=\'0.04\'/%3E%3C/svg%3E');background-size:200px 200px;opacity:0.5;pointer-events:none;"></div>
-      <div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--coral) 20%,var(--coral) 80%,transparent);"></div>
-    </div>
-    <div style="max-width:1100px;margin:0 auto;width:100%;position:relative;z-index:1;">
-      <div style="max-width:760px;">
+<section style="background:var(--midnight);position:relative;overflow:hidden;padding-top:64px;">
+  <div style="display:grid;grid-template-columns:1.15fr 0.85fr;min-height:calc(100vh - 64px);">
+
+    <!-- LEFT PANEL -->
+    <div style="position:relative;overflow:hidden;display:flex;align-items:center;padding:80px 52px 80px 2rem;">
+      <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden;">
+        <div style="position:absolute;top:-10%;right:-5%;width:55%;height:130%;background:linear-gradient(135deg,rgba(27,94,138,0.18) 0%,transparent 70%);transform:skewX(-10deg);"></div>
+        <div style="position:absolute;top:20%;right:5%;width:35%;height:80%;background:linear-gradient(135deg,rgba(46,134,193,0.08) 0%,transparent 70%);transform:skewX(-10deg);"></div>
+        <div style="position:absolute;bottom:20%;left:-5%;width:30%;height:60%;background:linear-gradient(135deg,rgba(212,97,78,0.07) 0%,transparent 70%);transform:skewX(-10deg);"></div>
+        <div style="position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,0.03) 1px,transparent 1px);background-size:32px 32px;"></div>
+        <div style="position:absolute;inset:0;background-image:url('data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\' opacity=\'0.04\'/%3E%3C/svg%3E');background-size:200px 200px;opacity:0.5;pointer-events:none;"></div>
+        <div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--coral) 20%,var(--coral) 80%,transparent);"></div>
+      </div>
+      <div style="max-width:620px;position:relative;z-index:1;">
         <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(212,97,78,0.12);border:1px solid rgba(212,97,78,0.3);color:var(--coral-light);font-size:11px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;padding:6px 14px;border-radius:100px;margin-bottom:24px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--coral);display:inline-block;"></span>Child Safety in Sport, Australia</div>
         <h1 style="font-family:'DM Serif Display',serif;font-size:clamp(2.6rem,4.5vw,3.8rem);line-height:1.05;color:white;margin-bottom:20px;">Empowering clubs.<br><em style="font-style:italic;color:var(--coral-light);">Protecting children.</em></h1>
-        <p style="font-size:17px;color:rgba(255,255,255,0.6);line-height:1.8;margin-bottom:12px;max-width:620px;">Sporting clubs are buried under complex, overlapping child safe requirements, with no clear guide on how to become compliant.</p>
-        <p style="font-size:17px;color:rgba(255,255,255,0.6);line-height:1.8;margin-bottom:36px;max-width:620px;">The OneSide assessment report measures what your club already does against national and sport-specific requirements, tells you exactly where the gaps are, and gives you realistic and achievable options to become a child safe club.</p>
-        <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:36px;">
+        <p style="font-size:17px;color:rgba(255,255,255,0.6);line-height:1.8;margin-bottom:12px;">Sporting clubs are buried under complex, overlapping child safe requirements, with no clear guide on how to become compliant.</p>
+        <p style="font-size:17px;color:rgba(255,255,255,0.6);line-height:1.8;margin-bottom:36px;">The OneSide assessment report measures what your club already does against national and sport-specific requirements, tells you exactly where the gaps are, and gives you realistic and achievable options to become a child safe club.</p>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;">
           <a href="https://buy.stripe.com/eVqdR9deSaiIePq7mo4c800" class="btn-primary" target="_blank">Start your assessment ↗</a>
           <a href="https://calendly.com/onesideaustralia-info/30min" target="_blank" class="btn-secondary">Book a discovery call</a>
         </div>
-        <div style="display:flex;align-items:center;gap:28px;flex-wrap:wrap;">
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,0.4);"><span style="width:4px;height:4px;border-radius:50%;background:var(--coral);display:inline-block;"></span>All states and territories</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,0.4);"><span style="width:4px;height:4px;border-radius:50%;background:var(--coral);display:inline-block;"></span>National Principles for Child Safe Organisations</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,0.4);"><span style="width:4px;height:4px;border-radius:50%;background:var(--coral);display:inline-block;"></span>9 sports covered</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,0.4);"><span style="width:4px;height:4px;border-radius:50%;background:var(--coral);display:inline-block;"></span>Always current</div>
-        </div>
       </div>
     </div>
-  </section>
+
+    <!-- RIGHT PANEL -->
+    <div style="background:var(--coral);position:relative;overflow:hidden;display:flex;flex-direction:column;">
+      <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:0.1;" viewBox="0 0 360 600" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <pattern id="pg" width="30" height="30" patternUnits="userSpaceOnUse">
+            <path d="M 30 0 L 0 0 0 30" fill="none" stroke="white" stroke-width="0.5"/>
+          </pattern>
+        </defs>
+        <rect width="360" height="600" fill="url(#pg)"/>
+        <circle cx="300" cy="100" r="140" fill="none" stroke="white" stroke-width="1"/>
+        <circle cx="300" cy="100" r="82" fill="none" stroke="white" stroke-width="0.75"/>
+        <circle cx="300" cy="100" r="28" fill="white" opacity="0.15"/>
+      </svg>
+      <div style="position:relative;z-index:2;padding:36px 28px;display:flex;flex-direction:column;height:100%;">
+        <div style="margin-bottom:24px;">
+          <p style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:white;line-height:1.5;font-style:italic;margin-bottom:6px;">"Because when it comes to protecting children, there is only OneSide."</p>
+          <span style="font-size:10px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.1em;font-weight:600;">The OneSide principle</span>
+        </div>
+        <div style="height:1px;background:rgba(255,255,255,0.15);margin-bottom:20px;"></div>
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.5);margin-bottom:10px;display:flex;align-items:center;gap:6px;">What's changed <span style="flex:1;height:1px;background:rgba(255,255,255,0.15);display:block;"></span></div>
+        <div style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);border-radius:10px;padding:12px 14px;margin-bottom:8px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;"><span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding:2px 7px;border-radius:4px;background:rgba(13,31,53,0.3);color:rgba(255,255,255,0.9);">New</span><span style="font-size:10px;color:rgba(255,255,255,0.4);font-weight:500;">February 2026 · National</span></div>
+          <div style="font-size:12px;font-weight:600;color:white;line-height:1.4;margin-bottom:3px;">Child Safe Standards regulator changes in Victoria</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.55;">Governance has moved from CCYP to the Social Services Regulator. Clubs using old CCYP resources should review their references.</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);border-radius:10px;padding:12px 14px;margin-bottom:8px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;"><span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding:2px 7px;border-radius:4px;background:rgba(255,255,255,0.2);color:rgba(255,255,255,0.9);">Update</span><span style="font-size:10px;color:rgba(255,255,255,0.4);font-weight:500;">January 2026 · National</span></div>
+          <div style="font-size:12px;font-weight:600;color:white;line-height:1.4;margin-bottom:3px;">NIF Safeguarding Policy: updated guidance for community sport</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.55;">Sport Integrity Australia released updated implementation guidance for community-level sporting organisations.</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);border-radius:10px;padding:12px 14px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;"><span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding:2px 7px;border-radius:4px;background:rgba(255,255,255,0.2);color:rgba(255,255,255,0.9);">Reminder</span><span style="font-size:10px;color:rgba(255,255,255,0.4);font-weight:500;">Ongoing · National</span></div>
+          <div style="font-size:12px;font-weight:600;color:white;line-height:1.4;margin-bottom:3px;">Reportable Conduct Scheme: 3-day notification requirement</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.55;">Heads of organisations must notify the regulator within 3 business days of becoming aware of an allegation.</div>
+        </div>
+        <div style="margin-top:12px;font-size:11px;color:rgba(255,255,255,0.5);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;text-align:right;"><a href="/updates" style="color:rgba(255,255,255,0.5);text-decoration:none;">See all updates →</a></div>
+      </div>
+    </div>
+
+  </div>
+</section>
 
   <!-- CSGT SUMMARY -->
   <section style="padding:88px 2rem;background:white;position:relative;overflow:hidden;">

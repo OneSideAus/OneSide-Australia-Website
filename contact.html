@@ -12,6 +12,7 @@
 <meta property="og:url" content="https://www.onesideaustralia.com.au/contact">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<script async type="text/javascript" src="https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=WmEVcL"></script>
 </head>
 <body>
 <nav>
@@ -63,13 +64,14 @@
         <div style="background:white;border:1px solid var(--muted);border-radius:16px;padding:36px;">
           <h3 style="font-family:'DM Serif Display',serif;font-size:1.3rem;color:var(--midnight);margin-bottom:8px;">Book a discovery call</h3>
           <p style="font-size:14px;color:var(--text-mid);margin-bottom:24px;">Fill in your details and we'll be in touch within 1 business day.</p>
-          <div class="ff"><label style="color:var(--text-mid);">Club name</label><input type="text" placeholder="Your club's name" style="background:var(--off-white);border-color:var(--muted);color:var(--midnight);"></div>
-          <div class="ff"><label style="color:var(--text-mid);">Your name</label><input type="text" placeholder="Your full name" style="background:var(--off-white);border-color:var(--muted);color:var(--midnight);"></div>
-          <div class="ff"><label style="color:var(--text-mid);">Email address</label><input type="email" placeholder="Your email address" style="background:var(--off-white);border-color:var(--muted);color:var(--midnight);"></div>
-          <div class="ff"><label style="color:var(--text-mid);">Sport</label><input type="text" placeholder="e.g. AFL, Netball, Cricket" style="background:var(--off-white);border-color:var(--muted);color:var(--midnight);"></div>
-          <div class="ff"><label style="color:var(--text-mid);">State</label><select style="background:var(--off-white);border-color:var(--muted);color:var(--midnight);"><option value="">Select your state</option><option>Victoria</option><option>New South Wales</option><option>Queensland</option><option>South Australia</option><option>Western Australia</option><option>Tasmania</option><option>ACT</option><option>Northern Territory</option></select></div>
-          <div class="ff"><label style="color:var(--text-mid);">Anything else we should know?</label><textarea rows="3" placeholder="Optional — tell us a bit about where your club is at" style="background:var(--off-white);border-color:var(--muted);color:var(--midnight);resize:vertical;"></textarea></div>
-          <button class="form-submit">Send enquiry ↗</button>
+          <div class="ff"><label style="color:var(--text-mid);">Club name</label><input id="cf-club" type="text" placeholder="Your club's name" style="background:var(--off-white);border-color:var(--muted);color:var(--midnight);"></div>
+          <div class="ff"><label style="color:var(--text-mid);">Your name</label><input id="cf-name" type="text" placeholder="Your full name" style="background:var(--off-white);border-color:var(--muted);color:var(--midnight);"></div>
+          <div class="ff"><label style="color:var(--text-mid);">Email address</label><input id="cf-email" type="email" placeholder="Your email address" style="background:var(--off-white);border-color:var(--muted);color:var(--midnight);"></div>
+          <div class="ff"><label style="color:var(--text-mid);">Sport</label><input id="cf-sport" type="text" placeholder="e.g. AFL, Netball, Cricket" style="background:var(--off-white);border-color:var(--muted);color:var(--midnight);"></div>
+          <div class="ff"><label style="color:var(--text-mid);">State</label><select id="cf-state" style="background:var(--off-white);border-color:var(--muted);color:var(--midnight);"><option value="">Select your state</option><option>Victoria</option><option>New South Wales</option><option>Queensland</option><option>South Australia</option><option>Western Australia</option><option>Tasmania</option><option>ACT</option><option>Northern Territory</option></select></div>
+          <div class="ff"><label style="color:var(--text-mid);">Anything else we should know?</label><textarea id="cf-message" rows="3" placeholder="Optional — tell us a bit about where your club is at" style="background:var(--off-white);border-color:var(--muted);color:var(--midnight);resize:vertical;"></textarea></div>
+          <button id="cf-btn" class="form-submit" onclick="submitContactForm()">Send enquiry ↗</button>
+          <div id="cf-result"></div>
           <div class="form-disc" style="color:var(--text-light);">We'll be in touch within 1 business day. Your details are never shared.</div>
         </div>
       </div>

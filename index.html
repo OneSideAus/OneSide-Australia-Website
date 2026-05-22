@@ -89,12 +89,19 @@
     <!-- LEFT PANEL -->
     <div style="position:relative;overflow:hidden;display:flex;align-items:center;padding:80px 52px 80px 2rem;">
       <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden;">
-        <div style="position:absolute;top:-10%;right:-5%;width:55%;height:130%;background:linear-gradient(135deg,rgba(27,94,138,0.18) 0%,transparent 70%);transform:skewX(-10deg);"></div>
-        <div style="position:absolute;top:20%;right:5%;width:35%;height:80%;background:linear-gradient(135deg,rgba(46,134,193,0.08) 0%,transparent 70%);transform:skewX(-10deg);"></div>
-        <div style="position:absolute;bottom:20%;left:-5%;width:30%;height:60%;background:linear-gradient(135deg,rgba(212,97,78,0.07) 0%,transparent 70%);transform:skewX(-10deg);"></div>
-        <div style="position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,0.03) 1px,transparent 1px);background-size:32px 32px;"></div>
-        <div style="position:absolute;inset:0;background-image:url('data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\' opacity=\'0.04\'/%3E%3C/svg%3E');background-size:200px 200px;opacity:0.5;pointer-events:none;"></div>
-        <div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--coral) 20%,var(--coral) 80%,transparent);"></div>
+        <!-- Animated glow orbs -->
+        <div style="position:absolute;top:50%;left:38%;width:560px;height:560px;background:radial-gradient(circle,rgba(46,134,193,0.18) 0%,transparent 68%);animation:heroGlow 7s ease-in-out infinite;transform-origin:center;"></div>
+        <div style="position:absolute;top:30%;left:10%;width:340px;height:340px;background:radial-gradient(circle,rgba(212,97,78,0.1) 0%,transparent 70%);animation:heroGlow2 9s ease-in-out infinite;transform-origin:center;"></div>
+        <!-- Gradient bands -->
+        <div style="position:absolute;top:-10%;right:-5%;width:55%;height:130%;background:linear-gradient(135deg,rgba(27,94,138,0.22) 0%,transparent 65%);transform:skewX(-10deg);"></div>
+        <div style="position:absolute;top:20%;right:5%;width:35%;height:80%;background:linear-gradient(135deg,rgba(46,134,193,0.1) 0%,transparent 70%);transform:skewX(-10deg);"></div>
+        <div style="position:absolute;bottom:20%;left:-5%;width:30%;height:60%;background:linear-gradient(135deg,rgba(212,97,78,0.09) 0%,transparent 70%);transform:skewX(-10deg);"></div>
+        <!-- Dot grid -->
+        <div style="position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,0.04) 1px,transparent 1px);background-size:28px 28px;"></div>
+        <!-- Noise texture -->
+        <div style="position:absolute;inset:0;background-image:url('data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\' opacity=\'0.055\'/%3E%3C/svg%3E');background-size:180px 180px;opacity:0.65;pointer-events:none;"></div>
+        <!-- Bottom line glow -->
+        <div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--coral) 20%,var(--coral) 80%,transparent);box-shadow:0 0 16px rgba(212,97,78,0.5);"></div>
       </div>
       <div style="max-width:620px;position:relative;z-index:1;">
         <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(212,97,78,0.12);border:1px solid rgba(212,97,78,0.3);color:var(--coral-light);font-size:11px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;padding:6px 14px;border-radius:100px;margin-bottom:24px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--coral);display:inline-block;"></span>Child Safety in Sport, Australia</div>
@@ -104,6 +111,43 @@
         <div style="display:flex;gap:14px;flex-wrap:wrap;">
           <a href="https://buy.stripe.com/eVqdR9deSaiIePq7mo4c800" class="btn-primary" target="_blank">Start your assessment ↗</a>
           <a href="https://calendly.com/onesideaustralia-info/30min" target="_blank" class="btn-secondary">Book a discovery call</a>
+        </div>
+        <!-- SPORTS TICKER -->
+        <div style="margin-top:28px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.08);">
+          <div style="font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.25);margin-bottom:10px;">Sports covered</div>
+          <div class="ticker-wrap">
+            <div class="ticker-track">
+              <span class="ticker-item">AFL <span class="ticker-dot"></span></span>
+              <span class="ticker-item">Netball <span class="ticker-dot"></span></span>
+              <span class="ticker-item">Cricket <span class="ticker-dot"></span></span>
+              <span class="ticker-item">Soccer <span class="ticker-dot"></span></span>
+              <span class="ticker-item">Rugby League <span class="ticker-dot"></span></span>
+              <span class="ticker-item">Rugby Union <span class="ticker-dot"></span></span>
+              <span class="ticker-item">Basketball <span class="ticker-dot"></span></span>
+              <span class="ticker-item">Tennis <span class="ticker-dot"></span></span>
+              <span class="ticker-item">Golf <span class="ticker-dot"></span></span>
+              <span class="ticker-item">Swimming <span class="ticker-dot"></span></span>
+              <span class="ticker-item">Hockey <span class="ticker-dot"></span></span>
+              <span class="ticker-item">Volleyball <span class="ticker-dot"></span></span>
+              <span class="ticker-item">Athletics <span class="ticker-dot"></span></span>
+              <span class="ticker-item">Gymnastics <span class="ticker-dot"></span></span>
+              <!-- Duplicate for seamless loop -->
+              <span class="ticker-item">AFL <span class="ticker-dot"></span></span>
+              <span class="ticker-item">Netball <span class="ticker-dot"></span></span>
+              <span class="ticker-item">Cricket <span class="ticker-dot"></span></span>
+              <span class="ticker-item">Soccer <span class="ticker-dot"></span></span>
+              <span class="ticker-item">Rugby League <span class="ticker-dot"></span></span>
+              <span class="ticker-item">Rugby Union <span class="ticker-dot"></span></span>
+              <span class="ticker-item">Basketball <span class="ticker-dot"></span></span>
+              <span class="ticker-item">Tennis <span class="ticker-dot"></span></span>
+              <span class="ticker-item">Golf <span class="ticker-dot"></span></span>
+              <span class="ticker-item">Swimming <span class="ticker-dot"></span></span>
+              <span class="ticker-item">Hockey <span class="ticker-dot"></span></span>
+              <span class="ticker-item">Volleyball <span class="ticker-dot"></span></span>
+              <span class="ticker-item">Athletics <span class="ticker-dot"></span></span>
+              <span class="ticker-item">Gymnastics <span class="ticker-dot"></span></span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -152,7 +196,7 @@
 </section>
 
   <!-- CSGT SUMMARY -->
-  <section style="padding:88px 2rem;background:white;position:relative;overflow:hidden;">
+  <section style="padding:88px 2rem;background:white;position:relative;overflow:hidden;" class="reveal">
     <div style="position:absolute;top:-10%;right:-5%;width:50%;height:120%;background:linear-gradient(135deg,rgba(212,97,78,0.06) 0%,transparent 70%);transform:skewX(-10deg);pointer-events:none;"></div>
     <div style="position:absolute;top:30%;left:-8%;width:35%;height:60%;background:linear-gradient(135deg,rgba(27,94,138,0.05) 0%,transparent 70%);transform:skewX(-10deg);pointer-events:none;"></div>
     <div class="section-inner" style="position:relative;z-index:1;">
@@ -210,7 +254,7 @@
   </div>
 
   <!-- SPORT SEARCH + PROBLEM -->
-  <section style="padding:88px 2rem;background:var(--midnight);position:relative;overflow:hidden;">
+  <section style="padding:88px 2rem;background:var(--midnight);position:relative;overflow:hidden;" class="reveal">
     <div style="position:absolute;top:-20%;right:-8%;width:55%;height:140%;background:linear-gradient(135deg,rgba(27,94,138,0.2) 0%,transparent 70%);transform:skewX(-10deg);pointer-events:none;"></div>
     <div style="position:absolute;top:10%;right:5%;width:38%;height:85%;background:linear-gradient(135deg,rgba(212,97,78,0.1) 0%,transparent 70%);transform:skewX(-10deg);pointer-events:none;"></div>
     <div style="position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,0.03) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;"></div>
@@ -246,7 +290,7 @@
   </section>
 
   <!-- UPDATES PREVIEW -->
-  <section style="padding:88px 2rem;background:white;position:relative;overflow:hidden;">
+  <section style="padding:88px 2rem;background:white;position:relative;overflow:hidden;" class="reveal">
     <div style="position:absolute;top:-15%;left:-6%;width:48%;height:130%;background:linear-gradient(135deg,rgba(27,94,138,0.07) 0%,transparent 70%);transform:skewX(-10deg);pointer-events:none;"></div>
     <div style="position:absolute;top:-10%;right:-6%;width:40%;height:120%;background:linear-gradient(135deg,rgba(212,97,78,0.05) 0%,transparent 70%);transform:skewX(-10deg);pointer-events:none;"></div>
     <div class="section-inner" style="position:relative;z-index:1;">
@@ -264,7 +308,7 @@
   </section>
 
   <!-- ABOUT TEASER -->
-  <section style="padding:88px 2rem;background:var(--off-white);position:relative;overflow:hidden;">
+  <section style="padding:88px 2rem;background:var(--off-white);position:relative;overflow:hidden;" class="reveal">
     <div style="position:absolute;top:-20%;right:-8%;width:55%;height:140%;background:linear-gradient(135deg,rgba(212,97,78,0.07) 0%,transparent 70%);transform:skewX(-10deg);pointer-events:none;"></div>
     <div style="position:absolute;bottom:0%;left:-5%;width:42%;height:120%;background:linear-gradient(135deg,rgba(27,94,138,0.06) 0%,transparent 70%);transform:skewX(-10deg);pointer-events:none;"></div>
     <div class="section-inner" style="display:grid;grid-template-columns:1fr 1.2fr;gap:60px;align-items:center;position:relative;z-index:1;">

@@ -168,6 +168,23 @@ function notifySport(btn, sport) {
   if (input) { input.disabled = true; input.style.opacity = '0.5'; }
 }
 
+/* ==============================
+   SCROLL REVEAL
+   ============================== */
+document.addEventListener('DOMContentLoaded', function() {
+  var reveals = document.querySelectorAll('.reveal');
+  if (!reveals.length) return;
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  reveals.forEach(function(el) { observer.observe(el); });
+});
+
 /* PRIVACY EXPAND/COLLAPSE */
 function togglePrivacy() {
   var content = document.getElementById('privacy-content');

@@ -109,6 +109,36 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /* ==============================
+   KLAVIYO — HERO FORM
+   ============================== */
+function submitHeroForm() {
+  var name  = document.getElementById('hf-name').value.trim();
+  var email = document.getElementById('hf-email').value.trim();
+  var club  = document.getElementById('hf-club').value.trim();
+  var result = document.getElementById('hf-result');
+  var btn   = document.getElementById('hf-btn');
+
+  if (!email || !email.includes('@')) {
+    result.innerHTML = '<p style="color:#F4977F;font-size:13px;margin-top:8px;">Please enter a valid email address.</p>';
+    return;
+  }
+
+  var parts = name.split(' ');
+  _learnq.push(['identify', {
+    '$email': email,
+    '$first_name': parts[0] || '',
+    '$last_name': parts.slice(1).join(' ') || '',
+    'Club Name': club
+  }]);
+  _learnq.push(['track', 'Hero Form Submission', { 'Contact Name': name, 'Club Name': club }]);
+
+  btn.disabled = true;
+  btn.textContent = 'Sent ✓';
+  btn.style.opacity = '0.7';
+  result.innerHTML = '<div style="background:rgba(92,221,154,0.12);border:1px solid rgba(92,221,154,0.25);border-radius:8px;padding:12px 14px;font-size:13px;color:#5CDD9A;margin-top:10px;line-height:1.5;">Thanks! Angela will be in touch within 1 business day.</div>';
+}
+
+/* ==============================
    KLAVIYO — CONTACT FORM
    ============================== */
 var _learnq = window._learnq || [];

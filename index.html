@@ -83,7 +83,7 @@
 <main>
 
   <!-- HERO -->
-<section style="background:var(--midnight);position:relative;overflow:hidden;padding-top:64px;">
+<section style="background: linear-gradient(rgba(13,31,53,0.87) 0%, rgba(13,31,53,0.93) 100%), url('/images/hero-sport.png') center/cover no-repeat; position:relative;overflow:hidden;padding-top:64px;">
   <div style="display:grid;grid-template-columns:1.15fr 0.85fr;min-height:560px;">
 
     <!-- LEFT PANEL -->
@@ -152,48 +152,67 @@
       </div>
     </div>
 
-    <!-- RIGHT PANEL -->
-<div class="hero-right-panel" style="background:var(--coral);position:relative;overflow:hidden;display:flex;flex-direction:column;">
-  
-      <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:0.1;" viewBox="0 0 360 600" preserveAspectRatio="xMidYMid slice">
-        <defs>
-          <pattern id="pg" width="30" height="30" patternUnits="userSpaceOnUse">
-            <path d="M 30 0 L 0 0 0 30" fill="none" stroke="white" stroke-width="0.5"/>
-          </pattern>
-        </defs>
-        <rect width="360" height="600" fill="url(#pg)"/>
-        <circle cx="300" cy="100" r="140" fill="none" stroke="white" stroke-width="1"/>
-        <circle cx="300" cy="100" r="82" fill="none" stroke="white" stroke-width="0.75"/>
-        <circle cx="300" cy="100" r="28" fill="white" opacity="0.15"/>
-      </svg>
-      <div style="position:relative;z-index:2;padding:36px 28px;display:flex;flex-direction:column;height:100%;">
-        <div style="margin-bottom:24px;">
-          <p style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:white;line-height:1.5;font-style:italic;margin-bottom:6px;">"Because when it comes to protecting children, there is only OneSide."</p>
-          <span style="font-size:10px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.1em;font-weight:600;">The OneSide principle</span>
+    <!-- RIGHT PANEL — CONTACT FORM -->
+    <div class="hero-right-panel" style="background:rgba(9,19,34,0.75);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-left:1px solid rgba(255,255,255,0.07);position:relative;overflow:hidden;display:flex;flex-direction:column;">
+      <div style="position:relative;z-index:2;padding:36px 32px;display:flex;flex-direction:column;height:100%;justify-content:center;">
+        <!-- Angela intro -->
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+          <img src="/images/ang.jpg" alt="Angela Marcon, founder of OneSide Australia" style="width:52px;height:52px;border-radius:50%;object-fit:cover;object-position:center 15%;border:2px solid rgba(212,97,78,0.5);flex-shrink:0;">
+          <div>
+            <div style="font-size:14px;font-weight:600;color:white;line-height:1.3;">Angela Marcon</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:0.04em;">Founder, OneSide Australia</div>
+          </div>
         </div>
-        <div style="height:1px;background:rgba(255,255,255,0.15);margin-bottom:20px;"></div>
-        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.5);margin-bottom:10px;display:flex;align-items:center;gap:6px;">What's changed <span style="flex:1;height:1px;background:rgba(255,255,255,0.15);display:block;"></span></div>
-        <div style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);border-radius:10px;padding:12px 14px;margin-bottom:8px;">
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;"><span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding:2px 7px;border-radius:4px;background:rgba(13,31,53,0.3);color:rgba(255,255,255,0.9);">New</span><span style="font-size:10px;color:rgba(255,255,255,0.4);font-weight:500;">February 2026 · National</span></div>
-          <div style="font-size:12px;font-weight:600;color:white;line-height:1.4;margin-bottom:3px;">Child Safe Standards regulator changes in Victoria</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.55;">Governance has moved from CCYP to the Social Services Regulator. Clubs using old CCYP resources should review their references.</div>
+        <p style="font-family:'DM Serif Display',serif;font-size:1rem;color:rgba(255,255,255,0.9);line-height:1.55;font-style:italic;margin-bottom:20px;">"Have questions before you start? I'd love to talk through what your club needs."</p>
+        <div style="height:1px;background:rgba(255,255,255,0.08);margin-bottom:20px;"></div>
+        <!-- Form fields -->
+        <div style="margin-bottom:10px;">
+          <input type="text" id="hf-name" placeholder="Your name" autocomplete="name" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:white;outline:none;transition:border-color 0.15s;" onfocus="this.style.borderColor='rgba(212,97,78,0.6)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'" placeholder="Your name">
         </div>
-        <div style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);border-radius:10px;padding:12px 14px;margin-bottom:8px;">
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;"><span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding:2px 7px;border-radius:4px;background:rgba(255,255,255,0.2);color:rgba(255,255,255,0.9);">Update</span><span style="font-size:10px;color:rgba(255,255,255,0.4);font-weight:500;">January 2026 · National</span></div>
-          <div style="font-size:12px;font-weight:600;color:white;line-height:1.4;margin-bottom:3px;">NIF Safeguarding Policy: updated guidance for community sport</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.55;">Sport Integrity Australia released updated implementation guidance for community-level sporting organisations.</div>
+        <div style="margin-bottom:10px;">
+          <input type="email" id="hf-email" autocomplete="email" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:white;outline:none;transition:border-color 0.15s;" onfocus="this.style.borderColor='rgba(212,97,78,0.6)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'" placeholder="your@email.com.au">
         </div>
-        <div style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);border-radius:10px;padding:12px 14px;">
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;"><span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding:2px 7px;border-radius:4px;background:rgba(255,255,255,0.2);color:rgba(255,255,255,0.9);">Reminder</span><span style="font-size:10px;color:rgba(255,255,255,0.4);font-weight:500;">Ongoing · National</span></div>
-          <div style="font-size:12px;font-weight:600;color:white;line-height:1.4;margin-bottom:3px;">Reportable Conduct Scheme: 3-day notification requirement</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.55;">Heads of organisations must notify the regulator within 3 business days of becoming aware of an allegation.</div>
+        <div style="margin-bottom:16px;">
+          <input type="text" id="hf-club" autocomplete="organization" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:white;outline:none;transition:border-color 0.15s;" onfocus="this.style.borderColor='rgba(212,97,78,0.6)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'" placeholder="Club name">
         </div>
-        <div style="margin-top:12px;font-size:11px;color:rgba(255,255,255,0.5);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;text-align:right;"><a href="/updates" style="color:rgba(255,255,255,0.5);text-decoration:none;">See all updates →</a></div>
+        <div id="hf-result"></div>
+        <button id="hf-btn" onclick="submitHeroForm()" class="btn-primary" style="width:100%;justify-content:center;margin-top:4px;">Book a discovery call →</button>
+        <p style="font-size:11px;color:rgba(255,255,255,0.25);text-align:center;margin-top:10px;">Free · No commitment · Reply within 1 business day</p>
       </div>
     </div>
 
   </div>
 </section>
+
+  <!-- FEATURE CARDS -->
+  <section style="padding:48px 2rem 56px;background:var(--off-white);">
+    <div class="section-inner">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <a href="/assessment" class="feature-card">
+          <div class="fc-image"><img src="/images/docs.png" alt="Child safety assessment documents"></div>
+          <div class="fc-body">
+            <div class="eyebrow">The assessment</div>
+            <h3>Your Child Safety Gap Assessment</h3>
+            <p>Tell us what your club does. We measure it against national and sport-specific requirements and give you a clear gap report with practical next steps.</p>
+            <span class="fc-link">Learn about the assessment →</span>
+          </div>
+        </a>
+        <a href="/prepare" class="feature-card fc-dark">
+          <div class="fc-body" style="padding:36px 32px 32px;">
+            <div class="eyebrow" style="color:var(--coral-light);">Before you start</div>
+            <h3>Prepare your club.</h3>
+            <p>Most clubs have more than they realise. Gather your documents, know who to involve, and get the most out of your assessment.</p>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+              <div style="display:flex;align-items:center;gap:10px;"><div style="width:5px;height:5px;border-radius:50%;background:var(--coral);flex-shrink:0;"></div><span style="font-size:13px;color:rgba(255,255,255,0.55);">Child safe and member protection policies</span></div>
+              <div style="display:flex;align-items:center;gap:10px;"><div style="width:5px;height:5px;border-radius:50%;background:var(--coral);flex-shrink:0;"></div><span style="font-size:13px;color:rgba(255,255,255,0.55);">Working With Children Check register</span></div>
+              <div style="display:flex;align-items:center;gap:10px;"><div style="width:5px;height:5px;border-radius:50%;background:var(--coral);flex-shrink:0;"></div><span style="font-size:13px;color:rgba(255,255,255,0.55);">Code of conduct and complaints procedure</span></div>
+            </div>
+            <span class="fc-link">See the full checklist →</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
 
   <!-- CSGT SUMMARY -->
   <section style="padding:88px 2rem;background:white;position:relative;overflow:hidden;" class="reveal">

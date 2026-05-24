@@ -61,15 +61,32 @@ function matchSport(val) {
   return null;
 }
 
+function notifyFormHtml(sportLabel) {
+  var fi = 'width:100%;box-sizing:border-box;background:white;border:1px solid #FAC775;border-radius:8px;padding:8px 12px;font-family:\'DM Sans\',sans-serif;font-size:13px;color:#0D1F35;outline:none;margin-bottom:0;';
+  var stateOpts = '<option value="">State</option><option>Victoria</option><option>New South Wales</option><option>Queensland</option><option>South Australia</option><option>Western Australia</option><option>Tasmania</option><option>ACT</option><option>Northern Territory</option>';
+  return '<div class="notify-form" style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">'
+    + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+    + '<input type="text" class="nf-name" placeholder="Your name" style="flex:1;min-width:130px;' + fi + '">'
+    + '<input type="text" class="nf-club" placeholder="Club name" style="flex:1;min-width:130px;' + fi + '">'
+    + '</div>'
+    + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+    + '<select class="nf-state" style="flex:1;min-width:130px;' + fi + '">' + stateOpts + '</select>'
+    + '<input type="email" class="nf-email" placeholder="your@email.com.au" style="flex:1;min-width:130px;' + fi + '">'
+    + '</div>'
+    + '<div id="nf-msg-' + sportLabel.replace(/\s/g,'-') + '" style="font-size:12px;color:#854F0B;display:none;"></div>'
+    + '<button onclick="notifySport(this,\'' + sportLabel + '\')" style="background:#D4614E;color:white;border:none;border-radius:8px;padding:8px 18px;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:600;cursor:pointer;align-self:flex-start;">Notify me ↗</button>'
+    + '</div>';
+}
+
 function renderSportResult(match, resultEl) {
   if(!match) { resultEl.style.display='none'; return; }
   resultEl.style.display='block';
   if(match.status === 'covered') {
     resultEl.innerHTML = '<div style="display:flex;align-items:center;gap:12px;background:#EAF3DE;border:1px solid #C0DD97;border-radius:10px;padding:14px 18px;"><div style="width:24px;height:24px;background:#3B6D11;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><div><div style="font-size:14px;font-weight:600;color:#3B6D11;">' + match.label + ' is covered.</div><div style="font-size:13px;color:#3B6D11;opacity:0.85;">The Child Safety Gap Assessment is available for your sport.</div></div></div>';
   } else if(match.status === 'soon') {
-    resultEl.innerHTML = '<div style="background:#FAEEDA;border:1px solid #FAC775;border-radius:10px;padding:16px 18px;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;"><div style="width:24px;height:24px;background:#854F0B;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div><div style="font-size:14px;font-weight:600;color:#854F0B;">' + match.label + ' is coming soon.</div></div><div style="font-size:13px;color:#854F0B;opacity:0.85;margin-bottom:12px;">Sign up to be the first to know when ' + match.label + ' is available.</div><div style="display:flex;gap:8px;flex-wrap:wrap;"><input type="email" placeholder="your@email.com.au" style="flex:1;min-width:180px;background:white;border:1px solid #FAC775;border-radius:8px;padding:8px 12px;font-family:\'DM Sans\',sans-serif;font-size:13px;color:#0D1F35;outline:none;"><button onclick="notifySport(this,\'' + match.label + '\')" style="background:#D4614E;color:white;border:none;border-radius:8px;padding:8px 16px;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">Notify me ↗</button></div></div>';
+    resultEl.innerHTML = '<div style="background:#FAEEDA;border:1px solid #FAC775;border-radius:10px;padding:16px 18px;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;"><div style="width:24px;height:24px;background:#854F0B;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div><div style="font-size:14px;font-weight:600;color:#854F0B;">' + match.label + ' is coming soon.</div></div><div style="font-size:13px;color:#854F0B;opacity:0.85;margin-bottom:4px;">Sign up to be the first to know when ' + match.label + ' is available.</div>' + notifyFormHtml(match.label) + '</div>';
   } else {
-    resultEl.innerHTML = '<div style="background:#FAEEDA;border:1px solid #FAC775;border-radius:10px;padding:16px 18px;"><div style="font-size:14px;font-weight:600;color:#854F0B;margin-bottom:6px;">We\'re working on more sports.</div><div style="font-size:13px;color:#854F0B;opacity:0.85;margin-bottom:12px;">Sign up and we\'ll let you know when your sport is available.</div><div style="display:flex;gap:8px;flex-wrap:wrap;"><input type="email" placeholder="your@email.com.au" style="flex:1;min-width:180px;background:white;border:1px solid #FAC775;border-radius:8px;padding:8px 12px;font-family:\'DM Sans\',sans-serif;font-size:13px;color:#0D1F35;outline:none;"><button onclick="notifySport(this,\'Other\')" style="background:#D4614E;color:white;border:none;border-radius:8px;padding:8px 16px;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">Notify me ↗</button></div></div>';
+    resultEl.innerHTML = '<div style="background:#FAEEDA;border:1px solid #FAC775;border-radius:10px;padding:16px 18px;"><div style="font-size:14px;font-weight:600;color:#854F0B;margin-bottom:6px;">We\'re working on more sports.</div><div style="font-size:13px;color:#854F0B;opacity:0.85;margin-bottom:4px;">Sign up and we\'ll let you know when your sport is available.</div>' + notifyFormHtml('Other') + '</div>';
   }
 }
 
@@ -109,9 +126,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /* ==============================
-   KLAVIYO — HERO FORM
+   HERO FORM
    ============================== */
-function submitHeroForm() {
+async function submitHeroForm() {
   var name  = document.getElementById('hf-name').value.trim();
   var email = document.getElementById('hf-email').value.trim();
   var club  = document.getElementById('hf-club').value.trim();
@@ -123,27 +140,37 @@ function submitHeroForm() {
     return;
   }
 
-  var parts = name.split(' ');
-  _learnq.push(['identify', {
-    '$email': email,
-    '$first_name': parts[0] || '',
-    '$last_name': parts.slice(1).join(' ') || '',
-    'Club Name': club
-  }]);
-  _learnq.push(['track', 'Hero Form Submission', { 'Contact Name': name, 'Club Name': club }]);
-
   btn.disabled = true;
-  btn.textContent = 'Sent ✓';
+  btn.textContent = 'Sending...';
   btn.style.opacity = '0.7';
-  result.innerHTML = '<div style="background:rgba(92,221,154,0.12);border:1px solid rgba(92,221,154,0.25);border-radius:8px;padding:12px 14px;font-size:13px;color:#5CDD9A;margin-top:10px;line-height:1.5;">Thanks! Angela will be in touch within 1 business day.</div>';
+
+  try {
+    var res = await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ formType: 'hero', name: name, club: club, email: email })
+    });
+    if (res.ok) {
+      btn.textContent = 'Sent ✓';
+      result.innerHTML = '<div style="background:rgba(92,221,154,0.12);border:1px solid rgba(92,221,154,0.25);border-radius:8px;padding:12px 14px;font-size:13px;color:#5CDD9A;margin-top:10px;line-height:1.5;">Thanks! Angela will be in touch within 1 business day.</div>';
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'Book a discovery call →';
+      btn.style.opacity = '1';
+      result.innerHTML = '<p style="color:#F4977F;font-size:13px;margin-top:8px;">Something went wrong — please try again or email <a href="mailto:info@onesideaustralia.com.au" style="color:#F4977F;">info@onesideaustralia.com.au</a>.</p>';
+    }
+  } catch(err) {
+    btn.disabled = false;
+    btn.textContent = 'Book a discovery call →';
+    btn.style.opacity = '1';
+    result.innerHTML = '<p style="color:#F4977F;font-size:13px;margin-top:8px;">Something went wrong — please try again or email <a href="mailto:info@onesideaustralia.com.au" style="color:#F4977F;">info@onesideaustralia.com.au</a>.</p>';
+  }
 }
 
 /* ==============================
-   KLAVIYO — CONTACT FORM
+   CONTACT FORM
    ============================== */
-var _learnq = window._learnq || [];
-
-function submitContactForm() {
+async function submitContactForm() {
   var email = document.getElementById('cf-email').value.trim();
   var name  = document.getElementById('cf-name').value.trim();
   var club  = document.getElementById('cf-club').value.trim();
@@ -158,44 +185,73 @@ function submitContactForm() {
     return;
   }
 
-  var parts = name.split(' ');
-  _learnq.push(['identify', {
-    '$email': email,
-    '$first_name': parts[0] || '',
-    '$last_name': parts.slice(1).join(' ') || '',
-    'Club Name': club,
-    'Sport': sport,
-    'State': state
-  }]);
-  _learnq.push(['track', 'Discovery Call Requested', {
-    'Club Name': club,
-    'Contact Name': name,
-    'Sport': sport,
-    'State': state,
-    'Message': msg
-  }]);
-
   btn.disabled = true;
-  btn.textContent = 'Sent ✓';
-  btn.style.background = '#3B6D11';
-  result.innerHTML = '<div style="background:#EAF3DE;border:1px solid #C0DD97;border-radius:8px;padding:14px 16px;font-size:14px;color:#3B6D11;margin-top:12px;">Thanks! Angela will be in touch within 1 business day.</div>';
+  btn.textContent = 'Sending...';
+
+  try {
+    var res = await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ formType: 'contact', name: name, club: club, email: email, sport: sport, state: state, message: msg })
+    });
+    if (res.ok) {
+      btn.textContent = 'Sent ✓';
+      btn.style.background = '#3B6D11';
+      result.innerHTML = '<div style="background:#EAF3DE;border:1px solid #C0DD97;border-radius:8px;padding:14px 16px;font-size:14px;color:#3B6D11;margin-top:12px;">Thanks! Angela will be in touch within 1 business day.</div>';
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'Send enquiry ↗';
+      result.innerHTML = '<p style="color:#B84A39;font-size:13px;margin-top:8px;">Something went wrong — please try again or email <a href="mailto:info@onesideaustralia.com.au" style="color:#B84A39;">info@onesideaustralia.com.au</a>.</p>';
+    }
+  } catch(err) {
+    btn.disabled = false;
+    btn.textContent = 'Send enquiry ↗';
+    result.innerHTML = '<p style="color:#B84A39;font-size:13px;margin-top:8px;">Something went wrong — please try again or email <a href="mailto:info@onesideaustralia.com.au" style="color:#B84A39;">info@onesideaustralia.com.au</a>.</p>';
+  }
 }
 
 /* ==============================
-   KLAVIYO — SPORT WAITLIST
+   SPORT WAITLIST
    ============================== */
-function notifySport(btn, sport) {
-  var input = btn.previousElementSibling;
-  var email = input ? input.value.trim() : '';
+async function notifySport(btn, sport) {
+  var form    = btn.closest('.notify-form');
+  var nameEl  = form ? form.querySelector('.nf-name')  : null;
+  var clubEl  = form ? form.querySelector('.nf-club')  : null;
+  var stateEl = form ? form.querySelector('.nf-state') : null;
+  var emailEl = form ? form.querySelector('.nf-email') : null;
+
+  var name  = nameEl  ? nameEl.value.trim()  : '';
+  var club  = clubEl  ? clubEl.value.trim()  : '';
+  var state = stateEl ? stateEl.value        : '';
+  var email = emailEl ? emailEl.value.trim() : '';
+
   if (!email || !email.includes('@')) {
-    if (input) input.style.borderColor = '#D4614E';
+    if (emailEl) emailEl.style.borderColor = '#D4614E';
     return;
   }
-  _learnq.push(['identify', { '$email': email }]);
-  _learnq.push(['track', 'Sport Waitlist Signup', { 'Sport': sport }]);
-  btn.textContent = 'Noted ✓';
+
   btn.disabled = true;
-  if (input) { input.disabled = true; input.style.opacity = '0.5'; }
+  btn.textContent = 'Sending...';
+
+  try {
+    var res = await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ formType: 'waitlist', name: name, club: club, email: email, sport: sport, state: state })
+    });
+    if (res.ok) {
+      btn.textContent = 'Noted ✓';
+      if (form) form.querySelectorAll('input, select').forEach(function(el) {
+        el.disabled = true; el.style.opacity = '0.5';
+      });
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'Notify me ↗';
+    }
+  } catch(err) {
+    btn.disabled = false;
+    btn.textContent = 'Notify me ↗';
+  }
 }
 
 /* ==============================

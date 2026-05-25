@@ -11,6 +11,7 @@ const SOURCES = [
   { name: 'Australian Human Rights Commission', url: 'https://humanrights.gov.au/about/news/media-releases', category: 'national' },
   { name: 'National Principles for Child Safe Organisations', url: 'https://www.dss.gov.au/our-responsibilities/families-and-children/programs-services/child-protection/national-principles-for-child-safe-organisations', category: 'national' },
   { name: 'National Redress Scheme', url: 'https://www.nationalredress.gov.au/news', category: 'national' },
+  { name: 'Play by the Rules', url: 'https://www.playbytherules.net.au/latest-news', category: 'national' },
 
   // State & Territory Regulators
   { name: 'VIC — Social Services Regulator', url: 'https://www.ssr.vic.gov.au/news', category: 'vic' },
@@ -23,22 +24,103 @@ const SOURCES = [
   { name: 'ACT — Working with Vulnerable People', url: 'https://www.accesscanberra.act.gov.au/working-with-vulnerable-people', category: 'act' },
   { name: 'NT — Office of the Children\'s Commissioner', url: 'https://childcomm.nt.gov.au/news', category: 'nt' },
 
-  // Sporting Bodies
+  // Peak State Sport Bodies
+  { name: 'Vicsport', url: 'https://vicsport.com.au/news', category: 'vic' },
+  { name: 'Sport NSW', url: 'https://www.sportnsw.com.au/news', category: 'nsw' },
+  { name: 'Sport Queensland', url: 'https://www.sport.qld.gov.au/news', category: 'qld' },
+  { name: 'Sport SA', url: 'https://www.sportssa.com.au/news', category: 'sa' },
+  { name: 'Sport and Recreation WA', url: 'https://www.dlgsc.wa.gov.au/sport-and-recreation', category: 'wa' },
+  { name: 'Sport Tasmania', url: 'https://www.sport.tas.gov.au', category: 'tas' },
+  { name: 'Sport ACT', url: 'https://sport.act.gov.au', category: 'act' },
+
+  // AFL — National + All States
   { name: 'AFL — Play AFL Safeguarding', url: 'https://play.afl/safeguarding', category: 'afl' },
   { name: 'AFL Victoria', url: 'https://www.aflvic.com.au/news', category: 'afl' },
+  { name: 'AFL NSW/ACT', url: 'https://www.aflnswact.com.au/news', category: 'afl' },
+  { name: 'AFL Queensland', url: 'https://www.aflq.com.au/news', category: 'afl' },
+  { name: 'SANFL (South Australia)', url: 'https://www.sanfl.com.au/news', category: 'afl' },
+  { name: 'AFL WA', url: 'https://www.aflwa.com.au/news', category: 'afl' },
+  { name: 'AFL Tasmania', url: 'https://www.afltasmania.com.au/news', category: 'afl' },
+  { name: 'AFL NT', url: 'https://www.aflnt.com.au/news', category: 'afl' },
+
+  // Netball — National + All States
   { name: 'Netball Australia', url: 'https://netball.com.au/integrity', category: 'netball' },
   { name: 'Netball Victoria', url: 'https://vic.netball.com.au/child-safeguarding-resource-hub', category: 'netball' },
+  { name: 'Netball NSW', url: 'https://www.netballnsw.com/news', category: 'netball' },
+  { name: 'Netball Queensland', url: 'https://netballq.com.au/news', category: 'netball' },
+  { name: 'Netball SA', url: 'https://netballsa.com.au/news', category: 'netball' },
+  { name: 'Netball WA', url: 'https://www.netballwa.com.au/news', category: 'netball' },
+  { name: 'Netball Tasmania', url: 'https://www.netballtasmania.com.au/news', category: 'netball' },
+  { name: 'Netball NT', url: 'https://www.netballnt.com.au', category: 'netball' },
+  { name: 'Netball ACT', url: 'https://www.netballact.com.au', category: 'netball' },
+
+  // Cricket — National + All States
   { name: 'Cricket Australia', url: 'https://www.cricket.com.au/news', category: 'cricket' },
   { name: 'Cricket Victoria', url: 'https://www.cricketvictoria.com.au/news', category: 'cricket' },
+  { name: 'Cricket NSW', url: 'https://www.cricketnsw.com.au/news', category: 'cricket' },
+  { name: 'Cricket Queensland', url: 'https://www.cricketqueensland.com.au/news', category: 'cricket' },
+  { name: 'Cricket SA', url: 'https://www.cricketsa.com.au/news', category: 'cricket' },
+  { name: 'Cricket WA', url: 'https://www.cricketwa.com.au/news', category: 'cricket' },
+  { name: 'Cricket Tasmania', url: 'https://www.crickettas.com.au/news', category: 'cricket' },
+  { name: 'Cricket ACT', url: 'https://www.cricketact.com.au/news', category: 'cricket' },
+  { name: 'NT Cricket', url: 'https://www.ntcricket.com.au/news', category: 'cricket' },
+
+  // Football/Soccer — National + All States
   { name: 'Football Australia', url: 'https://www.footballaustralia.com.au/news', category: 'soccer' },
   { name: 'Football Victoria', url: 'https://www.footballvictoria.com.au/news', category: 'soccer' },
+  { name: 'Football NSW', url: 'https://www.footballnsw.com.au/news', category: 'soccer' },
+  { name: 'Football Queensland', url: 'https://www.footballqueensland.com.au/news', category: 'soccer' },
+  { name: 'Football SA', url: 'https://www.ffsa.com.au/news', category: 'soccer' },
+  { name: 'Football West (WA)', url: 'https://www.footballwest.com.au/news', category: 'soccer' },
+  { name: 'Football Federation Tasmania', url: 'https://www.footballtasmania.org.au/news', category: 'soccer' },
+  { name: 'Capital Football (ACT)', url: 'https://www.capitalfootball.com.au/news', category: 'soccer' },
+  { name: 'Football NT', url: 'https://www.footballnt.com.au/news', category: 'soccer' },
+
+  // Rugby League — National + Key States
   { name: 'NRL', url: 'https://www.nrl.com/news', category: 'rugby-league' },
+  { name: 'NSWRL', url: 'https://www.nswrl.com.au/news', category: 'rugby-league' },
+  { name: 'Queensland Rugby League', url: 'https://www.qrl.com.au/news', category: 'rugby-league' },
+  { name: 'SA Rugby League', url: 'https://www.sarl.com.au/news', category: 'rugby-league' },
+  { name: 'Rugby League WA', url: 'https://www.rugbyleaguewa.com.au/news', category: 'rugby-league' },
+
+  // Rugby Union — National + All States
   { name: 'Rugby Australia', url: 'https://australia.rugby/news', category: 'rugby-union' },
+  { name: 'NSW Rugby', url: 'https://www.nswrugby.com.au/news', category: 'rugby-union' },
+  { name: 'Rugby Queensland', url: 'https://www.rugbyqld.com.au/news', category: 'rugby-union' },
+  { name: 'Rugby Victoria', url: 'https://www.rugbyvictoria.com.au/news', category: 'rugby-union' },
+  { name: 'Rugby WA', url: 'https://www.warugby.com.au/news', category: 'rugby-union' },
+  { name: 'Rugby SA', url: 'https://www.rugbysa.com.au/news', category: 'rugby-union' },
+  { name: 'Rugby Tasmania', url: 'https://www.rugbytas.com.au/news', category: 'rugby-union' },
+  { name: 'Rugby ACT', url: 'https://www.rugbyact.com.au/news', category: 'rugby-union' },
+
+  // Basketball — National + All States
   { name: 'Basketball Australia', url: 'https://basketball.com.au/news', category: 'basketball' },
+  { name: 'Basketball Victoria', url: 'https://www.bv.basketball/news', category: 'basketball' },
+  { name: 'Basketball NSW', url: 'https://www.bnsw.basketball/news', category: 'basketball' },
+  { name: 'Basketball Queensland', url: 'https://www.bq.basketball/news', category: 'basketball' },
+  { name: 'Basketball SA', url: 'https://www.bsa.basketball/news', category: 'basketball' },
+  { name: 'Basketball WA', url: 'https://www.bwa.basketball/news', category: 'basketball' },
+  { name: 'Basketball Tasmania', url: 'https://www.bt.basketball/news', category: 'basketball' },
+  { name: 'Basketball ACT', url: 'https://www.bact.basketball/news', category: 'basketball' },
+  { name: 'Basketball NT', url: 'https://www.bnt.basketball/news', category: 'basketball' },
+
+  // Tennis — National + All States
   { name: 'Tennis Australia', url: 'https://tennis.com.au/news', category: 'tennis' },
+  { name: 'Tennis Victoria', url: 'https://www.tennisvictoria.com.au/news', category: 'tennis' },
+  { name: 'Tennis NSW', url: 'https://www.tennisnsw.com.au/news', category: 'tennis' },
+  { name: 'Tennis Queensland', url: 'https://www.tennisqueensland.com.au/news', category: 'tennis' },
+  { name: 'Tennis SA', url: 'https://www.tennissa.com.au/news', category: 'tennis' },
+  { name: 'Tennis West (WA)', url: 'https://www.tenniswest.com.au/news', category: 'tennis' },
+  { name: 'Tennis Tasmania', url: 'https://www.tennistas.com.au/news', category: 'tennis' },
+
+  // Golf — National + All States
   { name: 'Golf Australia', url: 'https://golf.org.au/news', category: 'golf' },
-  { name: 'Vicsport', url: 'https://vicsport.com.au/news', category: 'national' },
-  { name: 'Play by the Rules', url: 'https://www.playbytherules.net.au/latest-news', category: 'national' },
+  { name: 'Golf Victoria', url: 'https://www.golfvic.org.au/news', category: 'golf' },
+  { name: 'Golf NSW', url: 'https://www.golfnsw.org.au/news', category: 'golf' },
+  { name: 'Golf Queensland', url: 'https://www.golfqld.org.au/news', category: 'golf' },
+  { name: 'Golf SA', url: 'https://www.golfsouthaustralia.com.au/news', category: 'golf' },
+  { name: 'Golf WA', url: 'https://www.golfwa.org.au/news', category: 'golf' },
+  { name: 'Golf Tasmania', url: 'https://www.golftas.org.au/news', category: 'golf' },
 ];
 
 async function fetchSourceContent(source) {
@@ -182,19 +264,23 @@ if (!isCron && secret !== process.env.SCAN_SECRET) {
 
   const allUpdates = [];
 
-  // Scan each source
-  for (const source of SOURCES) {
-    console.log(`Scanning: ${source.name}`);
-    const content = await fetchSourceContent(source);
-    if (!content) continue;
-
-    const result = await analyseSourceWithClaude(source, content);
-    if (result?.updates) {
-      allUpdates.push(...result.updates);
+  // Scan sources in parallel batches to stay within 300s limit
+  const BATCH_SIZE = 10;
+  for (let i = 0; i < SOURCES.length; i += BATCH_SIZE) {
+    const batch = SOURCES.slice(i, i + BATCH_SIZE);
+    console.log(`Scanning batch ${Math.floor(i / BATCH_SIZE) + 1}: ${batch.map(s => s.name).join(', ')}`);
+    const batchResults = await Promise.allSettled(
+      batch.map(async (source) => {
+        const content = await fetchSourceContent(source);
+        if (!content) return null;
+        return analyseSourceWithClaude(source, content);
+      })
+    );
+    for (const result of batchResults) {
+      if (result.status === 'fulfilled' && result.value?.updates) {
+        allUpdates.push(...result.value.updates);
+      }
     }
-
-    // Small delay to avoid rate limiting
-    await new Promise(r => setTimeout(r, 500));
   }
 
   if (allUpdates.length === 0) {

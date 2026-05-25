@@ -2,6 +2,8 @@
 // OneSide Australia — Updates Agent
 // Scans child safety sources weekly, drafts updates, emails digest to Angela for approval
 
+export const config = { maxDuration: 300 };
+
 const SOURCES = [
   // Federal / National
   { name: 'Australian Institute of Family Studies', url: 'https://aifs.gov.au/news', category: 'national' },

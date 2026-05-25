@@ -4,7 +4,7 @@
   "crons": [
     {
       "path": "/api/scan",
-      "schedule": "0 5 * * 5"
+      "schedule": "0 20 * * 0,2"
     }
   ],
   "rewrites": [

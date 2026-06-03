@@ -43,6 +43,10 @@ const SEARCH_QUERIES = [
   // State — Tasmania, ACT, NT
   { query: 'child safe sport Tasmania ACT Northern Territory update', label: 'TAS/ACT/NT' },
 
+  // eSafety Commissioner
+  { query: 'site:esafety.gov.au sport online safety update', label: 'eSafety Commissioner' },
+  { query: 'eSafety Commissioner sport community clubs online safety', label: 'eSafety — Sport' },
+
   // Sport-specific
   { query: 'AFL child safeguarding safe sport update', label: 'AFL' },
   { query: 'Football Australia soccer child safeguarding update', label: 'Soccer' },

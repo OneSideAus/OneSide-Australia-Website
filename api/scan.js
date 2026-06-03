@@ -7,15 +7,51 @@ export const config = { maxDuration: 300 };
 // ─── Search queries ───────────────────────────────────────────────────────────
 
 const SEARCH_QUERIES = [
-  { query: 'child safe standards Australia sport', label: 'Child Safe Standards' },
-  { query: 'Working With Children Check Australia 2026', label: 'WWCC' },
-  { query: 'child safety sport Australia regulation', label: 'Regulation' },
-  { query: 'mandatory child safety training Australia sport', label: 'Training' },
-  { query: 'safeguarding children sport Australia', label: 'Safeguarding' },
-  { query: 'child safe sport Victoria NSW Queensland', label: 'State Updates' },
-  { query: 'Sport Integrity Australia child safety', label: 'Sport Integrity Australia' },
-  { query: 'child protection sport Australia inquiry', label: 'Inquiries & News' },
-  { query: 'child safety resources toolkit sport Australia', label: 'Resources' },
+  // National regulatory & standards
+  { query: 'child safe standards Australia sport compliance', label: 'National — Standards' },
+  { query: 'Working With Children Check Australia changes', label: 'National — WWCC' },
+  { query: 'mandatory child safety training Australia sport volunteers', label: 'National — Training' },
+  { query: 'Sport Integrity Australia safeguarding child safety update', label: 'National — Sport Integrity' },
+  { query: 'child safety legislation Australia sport new policy', label: 'National — Legislation' },
+  { query: 'child safety resources toolkit sport Australia', label: 'National — Resources' },
+  { query: 'child protection sport Australia inquiry review tribunal', label: 'National — News & Inquiries' },
+
+  // State — Victoria
+  { query: 'child safe sport Victoria child safety update', label: 'VIC' },
+  { query: 'Working With Children Check Victoria changes', label: 'VIC — WWCC' },
+  { query: 'Social Services Regulator Victoria child safety sport', label: 'VIC — Regulator' },
+
+  // State — New South Wales
+  { query: 'child safe sport NSW child safety update', label: 'NSW' },
+  { query: 'Working With Children Check NSW changes', label: 'NSW — WWCC' },
+  { query: 'Office of the Children\'s Guardian NSW sport', label: 'NSW — Regulator' },
+
+  // State — Queensland
+  { query: 'child safe sport Queensland child safety update', label: 'QLD' },
+  { query: 'Working With Children Check Queensland Blue Card changes', label: 'QLD — WWCC' },
+  { query: 'Queensland child safe standards sport compliance deadline', label: 'QLD — Standards' },
+  { query: 'Reportable Conduct Scheme Queensland sport', label: 'QLD — Reportable Conduct' },
+
+  // State — South Australia
+  { query: 'child safe sport South Australia update', label: 'SA' },
+  { query: 'Working With Children Check South Australia changes', label: 'SA — WWCC' },
+
+  // State — Western Australia
+  { query: 'child safe sport Western Australia update', label: 'WA' },
+  { query: 'Working With Children Check Western Australia changes', label: 'WA — WWCC' },
+
+  // State — Tasmania, ACT, NT
+  { query: 'child safe sport Tasmania ACT Northern Territory update', label: 'TAS/ACT/NT' },
+
+  // Sport-specific
+  { query: 'AFL child safeguarding safe sport update', label: 'AFL' },
+  { query: 'Football Australia soccer child safeguarding update', label: 'Soccer' },
+  { query: 'Rugby Australia child safeguarding safe sport update', label: 'Rugby' },
+  { query: 'Cricket Australia child safeguarding safe sport update', label: 'Cricket' },
+  { query: 'Basketball Australia child safeguarding safe sport update', label: 'Basketball' },
+  { query: 'Netball Australia child safeguarding safe sport update', label: 'Netball' },
+  { query: 'Tennis Australia child safeguarding safe sport update', label: 'Tennis' },
+  { query: 'Golf Australia child safeguarding safe sport update', label: 'Golf' },
 ];
 
 // ─── Fetch Google News RSS for a query ───────────────────────────────────────

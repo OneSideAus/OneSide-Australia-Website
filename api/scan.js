@@ -1,63 +1,123 @@
 // api/scan.js
 // OneSide Australia — Updates Agent
-// Uses Claude web search to find child safety updates relevant to Australian sporting clubs
+// Searches Google News RSS for child safety updates relevant to Australian sporting clubs
 
 export const config = { maxDuration: 300 };
 
 // ─── Search queries ───────────────────────────────────────────────────────────
-// Each query targets a specific topic area. Claude will web-search each one
-// and return any relevant updates it finds.
 
 const SEARCH_QUERIES = [
-  // Regulatory & standards
-  { query: 'child safe standards Australia sport compliance 2026', label: 'Child Safe Standards' },
-  { query: 'mandatory child safety training Australia sport volunteers 2026', label: 'Mandatory Training' },
-  { query: 'Working With Children Check Australia changes updates 2026', label: 'WWCC' },
-  { query: 'child safety legislation Australia sport 2026', label: 'Legislation' },
-
-  // Government & regulators
-  { query: 'site:vic.gov.au OR site:ccyp.vic.gov.au child safety sport 2026', label: 'VIC Government' },
-  { query: 'site:ocg.nsw.gov.au OR site:sport.nsw.gov.au child safety sport 2026', label: 'NSW Government' },
-  { query: 'site:sport.qld.gov.au OR site:bluecard.qld.gov.au child safety sport 2026', label: 'QLD Government' },
-  { query: 'site:sportintegrity.gov.au safeguarding sport 2026', label: 'Sport Integrity Australia' },
-  { query: 'site:playbytherules.net.au child safety update 2026', label: 'Play by the Rules' },
-  { query: 'site:aifs.gov.au child safety sport 2026', label: 'AIFS' },
-  { query: 'site:education.gov.au child safety sport 2026', label: 'Dept of Education' },
-  { query: 'site:acecqa.gov.au child safety changes 2026', label: 'ACECQA' },
-
-  // Resources & tools
-  { query: 'child safe sport toolkit resources Australia 2026 new', label: 'Resources & Tools' },
-  { query: 'child safeguarding policy template sport Australia 2026', label: 'Policy Templates' },
-
-  // News & incidents
-  { query: 'child safety sport Australia inquiry review tribunal 2026', label: 'News & Inquiries' },
-  { query: 'safeguarding children Australian sport news 2026', label: 'Safeguarding News' },
+  { query: 'child safe standards Australia sport', label: 'Child Safe Standards' },
+  { query: 'Working With Children Check Australia 2026', label: 'WWCC' },
+  { query: 'child safety sport Australia regulation', label: 'Regulation' },
+  { query: 'mandatory child safety training Australia sport', label: 'Training' },
+  { query: 'safeguarding children sport Australia', label: 'Safeguarding' },
+  { query: 'child safe sport Victoria NSW Queensland', label: 'State Updates' },
+  { query: 'Sport Integrity Australia child safety', label: 'Sport Integrity Australia' },
+  { query: 'child protection sport Australia inquiry', label: 'Inquiries & News' },
+  { query: 'child safety resources toolkit sport Australia', label: 'Resources' },
 ];
 
-// ─── Run a single search query via Claude with web search tool ────────────────
+// ─── Fetch Google News RSS for a query ───────────────────────────────────────
 
-async function searchWithClaude(queryObj, sinceDate) {
+async function fetchGoogleNewsRSS(query, sinceDate) {
+  // Build query — add date filter if sinceDate provided
+  const dateFilter = sinceDate ? ` after:${sinceDate}` : '';
+  const encodedQuery = encodeURIComponent(query + dateFilter);
+  const url = `https://news.google.com/rss/search?q=${encodedQuery}&hl=en-AU&gl=AU&ceid=AU:en`;
+
+  try {
+    const res = await fetch(url, {
+      headers: { 'User-Agent': 'OneSide Australia Updates Agent/1.0' },
+      signal: AbortSignal.timeout(10000)
+    });
+    if (!res.ok) return [];
+    const xml = await res.text();
+    return parseRSSItems(xml);
+  } catch (err) {
+    console.error(`RSS fetch failed for "${query}":`, err.message);
+    return [];
+  }
+}
+
+// ─── Parse RSS XML into article objects ──────────────────────────────────────
+
+function parseRSSItems(xml) {
+  const items = [];
+  const itemRegex = /<item>([\s\S]*?)<\/item>/g;
+  let match;
+
+  while ((match = itemRegex.exec(xml)) !== null) {
+    const itemXml = match[1];
+
+    const title   = decodeXml(itemXml.match(/<title>([\s\S]*?)<\/title>/)?.[1] || '');
+    const link    = itemXml.match(/<link>([\s\S]*?)<\/link>/)?.[1]?.trim() ||
+                    itemXml.match(/<link\s+href="([^"]+)"/)?.[1] || '';
+    const pubDate = itemXml.match(/<pubDate>([\s\S]*?)<\/pubDate>/)?.[1] || '';
+    const source  = decodeXml(itemXml.match(/<source[^>]*>([\s\S]*?)<\/source>/)?.[1] || '');
+    const desc    = decodeXml(stripHtml(itemXml.match(/<description>([\s\S]*?)<\/description>/)?.[1] || ''));
+
+    if (title && link) {
+      items.push({ title, link, pubDate, source, desc });
+    }
+  }
+
+  return items;
+}
+
+function decodeXml(str) {
+  return str
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function stripHtml(html) {
+  return html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+// ─── Have Claude assess and write up the articles ────────────────────────────
+
+async function assessArticlesWithClaude(articles, sinceDate) {
+  if (articles.length === 0) return null;
+
   const today = new Date().toISOString().split('T')[0];
   const since = sinceDate || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
+  // Format articles for Claude
+  const articleList = articles.slice(0, 30).map((a, i) =>
+    `[${i + 1}] ${a.title}\nSource: ${a.source || 'Unknown'}\nDate: ${a.pubDate}\nURL: ${a.link}\nSummary: ${a.desc}`
+  ).join('\n\n');
+
   const prompt = `You are the updates agent for OneSide Australia, a child safety consultancy for Australian sporting clubs.
 
-Today is ${today}. Search for: "${queryObj.query}"
+Today is ${today}. You have been given a list of news articles found since ${since}.
 
-Find any content published since ${since} that is relevant to child safety in Australian sport. This includes:
-- Child safe standards, regulatory changes, compliance requirements
-- Working With Children Check updates, fee changes, process changes
-- New resources, toolkits, training modules, or guidance for sporting clubs
-- Notable safeguarding incidents, inquiries, reviews, or tribunal outcomes in sport
+Articles:
+${articleList}
 
-For each relevant item you find:
-- Write a 2-3 sentence update in OneSide Australia's voice: plain Australian English, factual, helpful, no em dashes, no AI writing patterns
-- Assign a category: National, VIC, NSW, QLD, SA, WA, TAS, ACT, NT, AFL, Netball, Cricket, Soccer, Rugby League, Rugby Union, Basketball, Tennis, Golf
-- Assign a type: New, Update, Reminder, Resource, News
+Your task:
+1. Identify which articles are genuinely relevant to child safety in Australian sport. Include:
+   - Child safe standards, regulatory changes, compliance deadlines
+   - Working With Children Check changes
+   - New resources, toolkits, training, or guidance for sporting clubs
+   - Notable safeguarding incidents, inquiries, or reviews in an Australian sport context
 
-Only include items published since ${since}. If nothing relevant was published since then, respond with exactly: NO_NEW_CONTENT
+2. Exclude anything not relevant to Australian sporting clubs (e.g. school education, international news with no Australian relevance, unrelated child welfare topics).
 
-If you find relevant items, respond in this exact JSON format only — no other text:
+3. For each relevant article, write a 2-3 sentence update in OneSide Australia's voice: plain Australian English, factual, helpful tone, no em dashes, no AI writing patterns.
+
+4. Assign:
+   - category: National, VIC, NSW, QLD, SA, WA, TAS, ACT, NT, AFL, Netball, Cricket, Soccer, Rugby League, Rugby Union, Basketball, Tennis, Golf
+   - type: New, Update, Reminder, Resource, News
+
+If NONE of the articles are relevant, respond with exactly: NO_NEW_CONTENT
+
+If there are relevant articles, respond in this exact JSON format only — no other text:
 {
   "updates": [
     {
@@ -77,47 +137,36 @@ If you find relevant items, respond in this exact JSON format only — no other 
     headers: {
       'Content-Type': 'application/json',
       'x-api-key': process.env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
-      'anthropic-beta': 'web-search-2025-03-05'
+      'anthropic-version': '2023-06-01'
     },
     body: JSON.stringify({
       model: 'claude-sonnet-4-5',
       max_tokens: 2000,
-      tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 3 }],
       messages: [{ role: 'user', content: prompt }]
     })
   });
 
-  if (!response.ok) {
-    console.error(`Claude search failed for "${queryObj.label}":`, response.status);
-    return null;
-  }
-
+  if (!response.ok) return null;
   const data = await response.json();
-
-  // Extract the final text response (may come after tool_use blocks)
-  const textBlock = data.content?.findLast(b => b.type === 'text');
-  const text = textBlock?.text?.trim() || '';
+  const text = data.content?.[0]?.text?.trim() || '';
 
   if (!text || text === 'NO_NEW_CONTENT') return null;
 
   try {
     const clean = text.replace(/```json|```/g, '').trim();
-    // Handle case where response starts with NO_NEW_CONTENT in some wrapper
     if (clean.startsWith('NO_NEW_CONTENT')) return null;
     return JSON.parse(clean);
   } catch {
-    console.error(`JSON parse failed for "${queryObj.label}":`, text.substring(0, 200));
+    console.error('JSON parse failed:', text.substring(0, 200));
     return null;
   }
 }
 
-// ─── Deduplicate updates by title similarity ──────────────────────────────────
+// ─── Deduplicate by title ─────────────────────────────────────────────────────
 
 function deduplicateUpdates(updates) {
   const seen = new Set();
   return updates.filter(u => {
-    // Normalise title to catch near-duplicates
     const key = u.title.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 40);
     if (seen.has(key)) return false;
     seen.add(key);
@@ -182,44 +231,70 @@ export default async function handler(req, res) {
   }
 
   const sinceDate = req.query.since || null;
-  console.log(`OneSide Updates Agent starting web search scan... ${sinceDate ? `(since ${sinceDate})` : '(last 7 days)'}`);
+  console.log(`OneSide Updates Agent starting Google News scan... ${sinceDate ? `(since ${sinceDate})` : '(last 7 days)'}`);
 
-  const allUpdates = [];
+  // Fetch all RSS feeds in parallel
+  const rssResults = await Promise.allSettled(
+    SEARCH_QUERIES.map(q => fetchGoogleNewsRSS(q.query, sinceDate))
+  );
 
-  // Run search queries in small parallel batches
-  const BATCH_SIZE = 4;
-  for (let i = 0; i < SEARCH_QUERIES.length; i += BATCH_SIZE) {
-    const batch = SEARCH_QUERIES.slice(i, i + BATCH_SIZE);
-    console.log(`Searching batch ${Math.floor(i / BATCH_SIZE) + 1}: ${batch.map(q => q.label).join(', ')}`);
-    const results = await Promise.allSettled(
-      batch.map(q => searchWithClaude(q, sinceDate))
-    );
-    for (const result of results) {
-      if (result.status === 'fulfilled' && result.value?.updates) {
-        allUpdates.push(...result.value.updates);
+  // Collect and deduplicate articles by URL before sending to Claude
+  const seenUrls = new Set();
+  const allArticles = [];
+  for (const result of rssResults) {
+    if (result.status === 'fulfilled') {
+      for (const article of result.value) {
+        if (!seenUrls.has(article.link)) {
+          seenUrls.add(article.link);
+          allArticles.push(article);
+        }
       }
     }
   }
 
-  const dedupedUpdates = deduplicateUpdates(allUpdates);
-  console.log(`Found ${allUpdates.length} updates, ${dedupedUpdates.length} after deduplication.`);
+  console.log(`Collected ${allArticles.length} unique articles from Google News.`);
 
-  if (dedupedUpdates.length === 0) {
-    console.log('No new updates found.');
+  if (allArticles.length === 0) {
+    console.log('No articles found from Google News.');
     await fetch('https://api.resend.com/emails', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`
-      },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.RESEND_API_KEY}` },
+      body: JSON.stringify({
+        from: 'OneSide Updates Agent <updates@onesideaustralia.com.au>',
+        to: ['info@onesideaustralia.com.au'],
+        subject: 'OneSide Weekly Digest — No articles found',
+        html: `<p style="font-family:Arial,sans-serif;">The Google News scan returned no articles this week. This may be a temporary issue — the agent will run again next week.</p>`
+      })
+    });
+    return res.status(200).json({ message: 'No articles found', count: 0 });
+  }
+
+  // Send articles to Claude in batches of 30 for assessment
+  const allUpdates = [];
+  const BATCH_SIZE = 30;
+  for (let i = 0; i < allArticles.length; i += BATCH_SIZE) {
+    const batch = allArticles.slice(i, i + BATCH_SIZE);
+    const result = await assessArticlesWithClaude(batch, sinceDate);
+    if (result?.updates) allUpdates.push(...result.updates);
+  }
+
+  const dedupedUpdates = deduplicateUpdates(allUpdates);
+  console.log(`Found ${dedupedUpdates.length} relevant updates after Claude assessment.`);
+
+  const date = new Date().toLocaleDateString('en-AU', { weekday:'long',day:'numeric',month:'long',year:'numeric' });
+
+  if (dedupedUpdates.length === 0) {
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.RESEND_API_KEY}` },
       body: JSON.stringify({
         from: 'OneSide Updates Agent <updates@onesideaustralia.com.au>',
         to: ['info@onesideaustralia.com.au'],
         subject: 'OneSide Weekly Digest — No changes this week',
-        html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:32px;background:#f8fafc;"><div style="background:#0D1F35;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;"><h1 style="color:white;font-size:1.3rem;margin:0;">OneSide Weekly Digest</h1><p style="color:rgba(255,255,255,0.5);font-size:13px;margin:6px 0 0;">${new Date().toLocaleDateString('en-AU', { weekday:'long',day:'numeric',month:'long',year:'numeric' })}</p></div><div style="background:white;border-radius:12px;padding:24px;"><p style="font-size:15px;color:#0D1F35;font-weight:600;margin:0 0 8px;">No changes detected this week</p><p style="font-size:14px;color:#4A6580;line-height:1.6;margin:0;">The agent searched all sources and found nothing new relevant to child safety in sport. No action needed.</p></div><p style="font-size:12px;color:#aaa;text-align:center;margin-top:20px;">Next scan: Sunday/Tuesday · <a href="https://onesideaustralia.com.au/updates" style="color:#D4614E;">View Updates page</a></p></div>`
+        html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:32px;background:#f8fafc;"><div style="background:#0D1F35;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;"><h1 style="color:white;font-size:1.3rem;margin:0;">OneSide Weekly Digest</h1><p style="color:rgba(255,255,255,0.5);font-size:13px;margin:6px 0 0;">${date}</p></div><div style="background:white;border-radius:12px;padding:24px;"><p style="font-size:15px;color:#0D1F35;font-weight:600;margin:0 0 8px;">No changes detected this week</p><p style="font-size:14px;color:#4A6580;line-height:1.6;margin:0;">The agent scanned Google News across all sources and found nothing new relevant to child safety in sport. No action needed.</p></div><p style="font-size:12px;color:#aaa;text-align:center;margin-top:20px;">Next scan: Sunday/Tuesday · <a href="https://onesideaustralia.com.au/updates" style="color:#D4614E;">View Updates page</a></p></div>`
       })
     });
-    return res.status(200).json({ message: 'No new updates found', count: 0 });
+    return res.status(200).json({ message: 'No relevant updates found', count: 0 });
   }
 
   const approveBaseUrl = process.env.SITE_URL || 'https://onesideaustralia.com.au';
@@ -227,10 +302,7 @@ export default async function handler(req, res) {
 
   const emailResponse = await fetch('https://api.resend.com/emails', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${process.env.RESEND_API_KEY}`
-    },
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.RESEND_API_KEY}` },
     body: JSON.stringify({
       from: 'OneSide Updates Agent <updates@onesideaustralia.com.au>',
       to: ['info@onesideaustralia.com.au'],

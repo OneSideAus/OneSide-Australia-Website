@@ -115,6 +115,8 @@ Your task:
    - category: National, VIC, NSW, QLD, SA, WA, TAS, ACT, NT, AFL, Netball, Cricket, Soccer, Rugby League, Rugby Union, Basketball, Tennis, Golf
    - type: New, Update, Reminder, Resource, News
 
+5. For sourceUrl, always use the official primary source — the government website, regulator, or sporting body's own page — NOT a media article or news coverage of the item. If you only have a media article URL, find the official source it refers to and use that instead.
+
 If NONE of the articles are relevant, respond with exactly: NO_NEW_CONTENT
 
 If there are relevant articles, respond in this exact JSON format only — no other text:

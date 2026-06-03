@@ -156,13 +156,17 @@ Page content:
 ${content}
 
 Your task:
-1. Identify any NEW content published ${periodLabel} that is relevant to child safety in sport, child safe standards, Working With Children Checks, mandatory reporting, safeguarding, or related regulatory changes.
+1. Identify any NEW content published ${periodLabel} that falls into ANY of these four categories:
+   a) Child safety in sport — child safe standards, mandatory reporting, safeguarding regulations, policy changes
+   b) Working With Children Checks — renewal deadlines, fee changes, process updates, state-by-state alerts
+   c) Safeguarding news from sport — notable incidents, tribunal outcomes, parliamentary inquiries, published reviews or investigations relating to child safety in a sporting context
+   d) Resources and tools — new toolkits, templates, policy guides, training modules, or practical resources released by peak bodies, government agencies, or sporting organisations that clubs could use
 2. If you find relevant new content, draft a short update in OneSide Australia's voice — plain Australian English, factual, helpful tone, no em dashes, no AI writing patterns.
 3. Each update should be 2-3 sentences maximum.
 4. Assign a category tag from: National, VIC, NSW, QLD, SA, WA, TAS, ACT, NT, AFL, Netball, Cricket, Soccer, Rugby League, Rugby Union, Basketball, Tennis, Golf.
-5. Assign a type tag from: New, Update, Reminder.
+5. Assign a type tag from: New, Update, Reminder, Resource, News.
 
-If there is NO new relevant content in the last 7 days, respond with exactly: NO_NEW_CONTENT
+If there is NO new relevant content in the period, respond with exactly: NO_NEW_CONTENT
 
 If there IS new content, respond in this exact JSON format:
 {

@@ -1,174 +1,63 @@
 // api/scan.js
 // OneSide Australia — Updates Agent
-// Scans child safety sources weekly, drafts updates, emails digest to Angela for approval
+// Uses Claude web search to find child safety updates relevant to Australian sporting clubs
 
 export const config = { maxDuration: 300 };
 
-const SOURCES = [
-  // Federal / National
-  { name: 'Australian Institute of Family Studies', url: 'https://aifs.gov.au/news', category: 'national' },
-  { name: 'Sport Integrity Australia', url: 'https://www.sportintegrity.gov.au/news-media', category: 'national' },
-  { name: 'Australian Human Rights Commission', url: 'https://humanrights.gov.au/about/news/media-releases', category: 'national' },
-  { name: 'National Principles for Child Safe Organisations', url: 'https://www.dss.gov.au/our-responsibilities/families-and-children/programs-services/child-protection/national-principles-for-child-safe-organisations', category: 'national' },
-  { name: 'National Redress Scheme', url: 'https://www.nationalredress.gov.au/news', category: 'national' },
-  { name: 'Play by the Rules', url: 'https://www.playbytherules.net.au/latest-news', category: 'national' },
+// ─── Search queries ───────────────────────────────────────────────────────────
+// Each query targets a specific topic area. Claude will web-search each one
+// and return any relevant updates it finds.
 
-  // State & Territory Regulators
-  { name: 'VIC — Social Services Regulator', url: 'https://www.ssr.vic.gov.au/news', category: 'vic' },
-  { name: 'VIC — Commission for Children and Young People', url: 'https://ccyp.vic.gov.au/news', category: 'vic' },
-  { name: 'NSW — Office of the Children\'s Guardian', url: 'https://www.ocg.nsw.gov.au/news-and-media/news', category: 'nsw' },
-  { name: 'QLD — Blue Card Services', url: 'https://www.bluecard.qld.gov.au/news', category: 'qld' },
-  { name: 'SA — Department for Child Protection', url: 'https://www.childprotection.sa.gov.au/news', category: 'sa' },
-  { name: 'WA — Working with Children Check', url: 'https://workingwithchildren.wa.gov.au/news', category: 'wa' },
-  { name: 'TAS — Office of the Children\'s Commissioner', url: 'https://www.childcomm.tas.gov.au/news', category: 'tas' },
-  { name: 'ACT — Working with Vulnerable People', url: 'https://www.accesscanberra.act.gov.au/working-with-vulnerable-people', category: 'act' },
-  { name: 'NT — Office of the Children\'s Commissioner', url: 'https://childcomm.nt.gov.au/news', category: 'nt' },
+const SEARCH_QUERIES = [
+  // Regulatory & standards
+  { query: 'child safe standards Australia sport compliance 2026', label: 'Child Safe Standards' },
+  { query: 'mandatory child safety training Australia sport volunteers 2026', label: 'Mandatory Training' },
+  { query: 'Working With Children Check Australia changes updates 2026', label: 'WWCC' },
+  { query: 'child safety legislation Australia sport 2026', label: 'Legislation' },
 
-  // Peak State Sport Bodies
-  { name: 'Vicsport', url: 'https://vicsport.com.au/news', category: 'vic' },
-  { name: 'Sport NSW', url: 'https://www.sportnsw.com.au/news', category: 'nsw' },
-  { name: 'Sport Queensland', url: 'https://www.sport.qld.gov.au/news', category: 'qld' },
-  { name: 'Sport SA', url: 'https://www.sportssa.com.au/news', category: 'sa' },
-  { name: 'Sport and Recreation WA', url: 'https://www.dlgsc.wa.gov.au/sport-and-recreation', category: 'wa' },
-  { name: 'Sport Tasmania', url: 'https://www.sport.tas.gov.au', category: 'tas' },
-  { name: 'Sport ACT', url: 'https://sport.act.gov.au', category: 'act' },
+  // Government & regulators
+  { query: 'site:vic.gov.au OR site:ccyp.vic.gov.au child safety sport 2026', label: 'VIC Government' },
+  { query: 'site:ocg.nsw.gov.au OR site:sport.nsw.gov.au child safety sport 2026', label: 'NSW Government' },
+  { query: 'site:sport.qld.gov.au OR site:bluecard.qld.gov.au child safety sport 2026', label: 'QLD Government' },
+  { query: 'site:sportintegrity.gov.au safeguarding sport 2026', label: 'Sport Integrity Australia' },
+  { query: 'site:playbytherules.net.au child safety update 2026', label: 'Play by the Rules' },
+  { query: 'site:aifs.gov.au child safety sport 2026', label: 'AIFS' },
+  { query: 'site:education.gov.au child safety sport 2026', label: 'Dept of Education' },
+  { query: 'site:acecqa.gov.au child safety changes 2026', label: 'ACECQA' },
 
-  // AFL — National + All States
-  { name: 'AFL — Play AFL Safeguarding', url: 'https://play.afl/safeguarding', category: 'afl' },
-  { name: 'AFL Victoria', url: 'https://www.aflvic.com.au/news', category: 'afl' },
-  { name: 'AFL NSW/ACT', url: 'https://www.aflnswact.com.au/news', category: 'afl' },
-  { name: 'AFL Queensland', url: 'https://www.aflq.com.au/news', category: 'afl' },
-  { name: 'SANFL (South Australia)', url: 'https://www.sanfl.com.au/news', category: 'afl' },
-  { name: 'AFL WA', url: 'https://www.aflwa.com.au/news', category: 'afl' },
-  { name: 'AFL Tasmania', url: 'https://www.afltasmania.com.au/news', category: 'afl' },
-  { name: 'AFL NT', url: 'https://www.aflnt.com.au/news', category: 'afl' },
+  // Resources & tools
+  { query: 'child safe sport toolkit resources Australia 2026 new', label: 'Resources & Tools' },
+  { query: 'child safeguarding policy template sport Australia 2026', label: 'Policy Templates' },
 
-  // Netball — National + All States
-  { name: 'Netball Australia', url: 'https://netball.com.au/integrity', category: 'netball' },
-  { name: 'Netball Victoria', url: 'https://vic.netball.com.au/child-safeguarding-resource-hub', category: 'netball' },
-  { name: 'Netball NSW', url: 'https://www.netballnsw.com/news', category: 'netball' },
-  { name: 'Netball Queensland', url: 'https://netballq.com.au/news', category: 'netball' },
-  { name: 'Netball SA', url: 'https://netballsa.com.au/news', category: 'netball' },
-  { name: 'Netball WA', url: 'https://www.netballwa.com.au/news', category: 'netball' },
-  { name: 'Netball Tasmania', url: 'https://www.netballtasmania.com.au/news', category: 'netball' },
-  { name: 'Netball NT', url: 'https://www.netballnt.com.au', category: 'netball' },
-  { name: 'Netball ACT', url: 'https://www.netballact.com.au', category: 'netball' },
-
-  // Cricket — National + All States
-  { name: 'Cricket Australia', url: 'https://www.cricket.com.au/news', category: 'cricket' },
-  { name: 'Cricket Victoria', url: 'https://www.cricketvictoria.com.au/news', category: 'cricket' },
-  { name: 'Cricket NSW', url: 'https://www.cricketnsw.com.au/news', category: 'cricket' },
-  { name: 'Cricket Queensland', url: 'https://www.cricketqueensland.com.au/news', category: 'cricket' },
-  { name: 'Cricket SA', url: 'https://www.cricketsa.com.au/news', category: 'cricket' },
-  { name: 'Cricket WA', url: 'https://www.cricketwa.com.au/news', category: 'cricket' },
-  { name: 'Cricket Tasmania', url: 'https://www.crickettas.com.au/news', category: 'cricket' },
-  { name: 'Cricket ACT', url: 'https://www.cricketact.com.au/news', category: 'cricket' },
-  { name: 'NT Cricket', url: 'https://www.ntcricket.com.au/news', category: 'cricket' },
-
-  // Football/Soccer — National + All States
-  { name: 'Football Australia', url: 'https://www.footballaustralia.com.au/news', category: 'soccer' },
-  { name: 'Football Victoria', url: 'https://www.footballvictoria.com.au/news', category: 'soccer' },
-  { name: 'Football NSW', url: 'https://www.footballnsw.com.au/news', category: 'soccer' },
-  { name: 'Football Queensland', url: 'https://www.footballqueensland.com.au/news', category: 'soccer' },
-  { name: 'Football SA', url: 'https://www.ffsa.com.au/news', category: 'soccer' },
-  { name: 'Football West (WA)', url: 'https://www.footballwest.com.au/news', category: 'soccer' },
-  { name: 'Football Federation Tasmania', url: 'https://www.footballtasmania.org.au/news', category: 'soccer' },
-  { name: 'Capital Football (ACT)', url: 'https://www.capitalfootball.com.au/news', category: 'soccer' },
-  { name: 'Football NT', url: 'https://www.footballnt.com.au/news', category: 'soccer' },
-
-  // Rugby League — National + Key States
-  { name: 'NRL', url: 'https://www.nrl.com/news', category: 'rugby-league' },
-  { name: 'NSWRL', url: 'https://www.nswrl.com.au/news', category: 'rugby-league' },
-  { name: 'Queensland Rugby League', url: 'https://www.qrl.com.au/news', category: 'rugby-league' },
-  { name: 'SA Rugby League', url: 'https://www.sarl.com.au/news', category: 'rugby-league' },
-  { name: 'Rugby League WA', url: 'https://www.rugbyleaguewa.com.au/news', category: 'rugby-league' },
-
-  // Rugby Union — National + All States
-  { name: 'Rugby Australia', url: 'https://australia.rugby/news', category: 'rugby-union' },
-  { name: 'NSW Rugby', url: 'https://www.nswrugby.com.au/news', category: 'rugby-union' },
-  { name: 'Rugby Queensland', url: 'https://www.rugbyqld.com.au/news', category: 'rugby-union' },
-  { name: 'Rugby Victoria', url: 'https://www.rugbyvictoria.com.au/news', category: 'rugby-union' },
-  { name: 'Rugby WA', url: 'https://www.warugby.com.au/news', category: 'rugby-union' },
-  { name: 'Rugby SA', url: 'https://www.rugbysa.com.au/news', category: 'rugby-union' },
-  { name: 'Rugby Tasmania', url: 'https://www.rugbytas.com.au/news', category: 'rugby-union' },
-  { name: 'Rugby ACT', url: 'https://www.rugbyact.com.au/news', category: 'rugby-union' },
-
-  // Basketball — National + All States
-  { name: 'Basketball Australia', url: 'https://basketball.com.au/news', category: 'basketball' },
-  { name: 'Basketball Victoria', url: 'https://www.bv.basketball/news', category: 'basketball' },
-  { name: 'Basketball NSW', url: 'https://www.bnsw.basketball/news', category: 'basketball' },
-  { name: 'Basketball Queensland', url: 'https://www.bq.basketball/news', category: 'basketball' },
-  { name: 'Basketball SA', url: 'https://www.bsa.basketball/news', category: 'basketball' },
-  { name: 'Basketball WA', url: 'https://www.bwa.basketball/news', category: 'basketball' },
-  { name: 'Basketball Tasmania', url: 'https://www.bt.basketball/news', category: 'basketball' },
-  { name: 'Basketball ACT', url: 'https://www.bact.basketball/news', category: 'basketball' },
-  { name: 'Basketball NT', url: 'https://www.bnt.basketball/news', category: 'basketball' },
-
-  // Tennis — National + All States
-  { name: 'Tennis Australia', url: 'https://tennis.com.au/news', category: 'tennis' },
-  { name: 'Tennis Victoria', url: 'https://www.tennisvictoria.com.au/news', category: 'tennis' },
-  { name: 'Tennis NSW', url: 'https://www.tennisnsw.com.au/news', category: 'tennis' },
-  { name: 'Tennis Queensland', url: 'https://www.tennisqueensland.com.au/news', category: 'tennis' },
-  { name: 'Tennis SA', url: 'https://www.tennissa.com.au/news', category: 'tennis' },
-  { name: 'Tennis West (WA)', url: 'https://www.tenniswest.com.au/news', category: 'tennis' },
-  { name: 'Tennis Tasmania', url: 'https://www.tennistas.com.au/news', category: 'tennis' },
-
-  // Golf — National + All States
-  { name: 'Golf Australia', url: 'https://golf.org.au/news', category: 'golf' },
-  { name: 'Golf Victoria', url: 'https://www.golfvic.org.au/news', category: 'golf' },
-  { name: 'Golf NSW', url: 'https://www.golfnsw.org.au/news', category: 'golf' },
-  { name: 'Golf Queensland', url: 'https://www.golfqld.org.au/news', category: 'golf' },
-  { name: 'Golf SA', url: 'https://www.golfsouthaustralia.com.au/news', category: 'golf' },
-  { name: 'Golf WA', url: 'https://www.golfwa.org.au/news', category: 'golf' },
-  { name: 'Golf Tasmania', url: 'https://www.golftas.org.au/news', category: 'golf' },
+  // News & incidents
+  { query: 'child safety sport Australia inquiry review tribunal 2026', label: 'News & Inquiries' },
+  { query: 'safeguarding children Australian sport news 2026', label: 'Safeguarding News' },
 ];
 
-async function fetchSourceContent(source) {
-  try {
-    const response = await fetch(source.url, {
-      headers: { 'User-Agent': 'OneSide Australia Updates Agent/1.0' },
-      signal: AbortSignal.timeout(10000)
-    });
-    if (!response.ok) return null;
-    const text = await response.text();
-    // Return first 3000 chars to keep prompt manageable
-    return text.substring(0, 3000);
-  } catch (err) {
-    console.error(`Failed to fetch ${source.name}:`, err.message);
-    return null;
-  }
-}
+// ─── Run a single search query via Claude with web search tool ────────────────
 
-async function analyseSourceWithClaude(source, content, sinceDate = null) {
+async function searchWithClaude(queryObj, sinceDate) {
   const today = new Date().toISOString().split('T')[0];
   const since = sinceDate || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-  const periodLabel = sinceDate ? `since ${since}` : `in the last 7 days (since ${since})`;
 
-  const prompt = `You are monitoring child safety regulatory sources for OneSide Australia, a child safety consultancy for Australian sporting clubs.
+  const prompt = `You are the updates agent for OneSide Australia, a child safety consultancy for Australian sporting clubs.
 
-Today is ${today}. You are looking for content published ${periodLabel}.
+Today is ${today}. Search for: "${queryObj.query}"
 
-Source: ${source.name}
-URL: ${source.url}
-Category: ${source.category}
+Find any content published since ${since} that is relevant to child safety in Australian sport. This includes:
+- Child safe standards, regulatory changes, compliance requirements
+- Working With Children Check updates, fee changes, process changes
+- New resources, toolkits, training modules, or guidance for sporting clubs
+- Notable safeguarding incidents, inquiries, reviews, or tribunal outcomes in sport
 
-Page content:
-${content}
+For each relevant item you find:
+- Write a 2-3 sentence update in OneSide Australia's voice: plain Australian English, factual, helpful, no em dashes, no AI writing patterns
+- Assign a category: National, VIC, NSW, QLD, SA, WA, TAS, ACT, NT, AFL, Netball, Cricket, Soccer, Rugby League, Rugby Union, Basketball, Tennis, Golf
+- Assign a type: New, Update, Reminder, Resource, News
 
-Your task:
-1. Identify any NEW content published ${periodLabel} that falls into ANY of these four categories:
-   a) Child safety in sport — child safe standards, mandatory reporting, safeguarding regulations, policy changes
-   b) Working With Children Checks — renewal deadlines, fee changes, process updates, state-by-state alerts
-   c) Safeguarding news from sport — notable incidents, tribunal outcomes, parliamentary inquiries, published reviews or investigations relating to child safety in a sporting context
-   d) Resources and tools — new toolkits, templates, policy guides, training modules, or practical resources released by peak bodies, government agencies, or sporting organisations that clubs could use
-2. If you find relevant new content, draft a short update in OneSide Australia's voice — plain Australian English, factual, helpful tone, no em dashes, no AI writing patterns.
-3. Each update should be 2-3 sentences maximum.
-4. Assign a category tag from: National, VIC, NSW, QLD, SA, WA, TAS, ACT, NT, AFL, Netball, Cricket, Soccer, Rugby League, Rugby Union, Basketball, Tennis, Golf.
-5. Assign a type tag from: New, Update, Reminder, Resource, News.
+Only include items published since ${since}. If nothing relevant was published since then, respond with exactly: NO_NEW_CONTENT
 
-If there is NO new relevant content in the period, respond with exactly: NO_NEW_CONTENT
-
-If there IS new content, respond in this exact JSON format:
+If you find relevant items, respond in this exact JSON format only — no other text:
 {
   "updates": [
     {
@@ -176,8 +65,8 @@ If there IS new content, respond in this exact JSON format:
       "body": "2-3 sentence summary in OneSide voice",
       "category": "National",
       "type": "New",
-      "source": "${source.name}",
-      "sourceUrl": "${source.url}",
+      "source": "Source organisation name",
+      "sourceUrl": "https://...",
       "date": "Month Year"
     }
   ]
@@ -188,33 +77,60 @@ If there IS new content, respond in this exact JSON format:
     headers: {
       'Content-Type': 'application/json',
       'x-api-key': process.env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01'
+      'anthropic-version': '2023-06-01',
+      'anthropic-beta': 'web-search-2025-03-05'
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1000,
+      model: 'claude-sonnet-4-5',
+      max_tokens: 2000,
+      tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 3 }],
       messages: [{ role: 'user', content: prompt }]
     })
   });
 
-  if (!response.ok) return null;
-  const data = await response.json();
-  const text = data.content?.[0]?.text || '';
+  if (!response.ok) {
+    console.error(`Claude search failed for "${queryObj.label}":`, response.status);
+    return null;
+  }
 
-  if (text.trim() === 'NO_NEW_CONTENT') return null;
+  const data = await response.json();
+
+  // Extract the final text response (may come after tool_use blocks)
+  const textBlock = data.content?.findLast(b => b.type === 'text');
+  const text = textBlock?.text?.trim() || '';
+
+  if (!text || text === 'NO_NEW_CONTENT') return null;
 
   try {
     const clean = text.replace(/```json|```/g, '').trim();
+    // Handle case where response starts with NO_NEW_CONTENT in some wrapper
+    if (clean.startsWith('NO_NEW_CONTENT')) return null;
     return JSON.parse(clean);
   } catch {
+    console.error(`JSON parse failed for "${queryObj.label}":`, text.substring(0, 200));
     return null;
   }
 }
 
+// ─── Deduplicate updates by title similarity ──────────────────────────────────
+
+function deduplicateUpdates(updates) {
+  const seen = new Set();
+  return updates.filter(u => {
+    // Normalise title to catch near-duplicates
+    const key = u.title.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 40);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+// ─── Build email HTML ─────────────────────────────────────────────────────────
+
 function buildEmailHtml(allUpdates, approveBaseUrl) {
   const date = new Date().toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
-  const updateCards = allUpdates.map((update, i) => {
+  const updateCards = allUpdates.map((update) => {
     const approveUrl = `${approveBaseUrl}/api/approve?id=${encodeURIComponent(update.title)}&title=${encodeURIComponent(update.title)}&body=${encodeURIComponent(update.body)}&category=${encodeURIComponent(update.category)}&type=${encodeURIComponent(update.type)}&date=${encodeURIComponent(update.date)}&source=${encodeURIComponent(update.source)}&sourceUrl=${encodeURIComponent(update.sourceUrl)}`;
 
     return `
@@ -252,45 +168,44 @@ function buildEmailHtml(allUpdates, approveBaseUrl) {
 </html>`;
 }
 
+// ─── Handler ──────────────────────────────────────────────────────────────────
+
 export default async function handler(req, res) {
-  // Allow GET for manual trigger, POST for scheduled
   if (req.method !== 'GET' && req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Simple auth check
-const secret = req.headers['x-scan-secret'] || req.query.secret;
-const isCron = req.headers['x-vercel-cron'] === '1';
-if (!isCron && secret !== process.env.SCAN_SECRET) {
+  const secret = req.headers['x-scan-secret'] || req.query.secret;
+  const isCron = req.headers['x-vercel-cron'] === '1';
+  if (!isCron && secret !== process.env.SCAN_SECRET) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  const sinceDate = req.query.since || null; // e.g. ?since=2026-02-01
-  console.log(`OneSide Updates Agent starting scan... ${sinceDate ? `(since ${sinceDate})` : '(last 7 days)'}`);
+  const sinceDate = req.query.since || null;
+  console.log(`OneSide Updates Agent starting web search scan... ${sinceDate ? `(since ${sinceDate})` : '(last 7 days)'}`);
 
   const allUpdates = [];
 
-  // Scan sources in parallel batches to stay within 300s limit
-  const BATCH_SIZE = 10;
-  for (let i = 0; i < SOURCES.length; i += BATCH_SIZE) {
-    const batch = SOURCES.slice(i, i + BATCH_SIZE);
-    console.log(`Scanning batch ${Math.floor(i / BATCH_SIZE) + 1}: ${batch.map(s => s.name).join(', ')}`);
-    const batchResults = await Promise.allSettled(
-      batch.map(async (source) => {
-        const content = await fetchSourceContent(source);
-        if (!content) return null;
-        return analyseSourceWithClaude(source, content, sinceDate);
-      })
+  // Run search queries in small parallel batches
+  const BATCH_SIZE = 4;
+  for (let i = 0; i < SEARCH_QUERIES.length; i += BATCH_SIZE) {
+    const batch = SEARCH_QUERIES.slice(i, i + BATCH_SIZE);
+    console.log(`Searching batch ${Math.floor(i / BATCH_SIZE) + 1}: ${batch.map(q => q.label).join(', ')}`);
+    const results = await Promise.allSettled(
+      batch.map(q => searchWithClaude(q, sinceDate))
     );
-    for (const result of batchResults) {
+    for (const result of results) {
       if (result.status === 'fulfilled' && result.value?.updates) {
         allUpdates.push(...result.value.updates);
       }
     }
   }
 
-  if (allUpdates.length === 0) {
-    console.log('No new updates found this week.');
+  const dedupedUpdates = deduplicateUpdates(allUpdates);
+  console.log(`Found ${allUpdates.length} updates, ${dedupedUpdates.length} after deduplication.`);
+
+  if (dedupedUpdates.length === 0) {
+    console.log('No new updates found.');
     await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -301,15 +216,14 @@ if (!isCron && secret !== process.env.SCAN_SECRET) {
         from: 'OneSide Updates Agent <updates@onesideaustralia.com.au>',
         to: ['info@onesideaustralia.com.au'],
         subject: 'OneSide Weekly Digest — No changes this week',
-        html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:32px;background:#f8fafc;"><div style="background:#0D1F35;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;"><h1 style="color:white;font-size:1.3rem;margin:0;">OneSide Weekly Digest</h1><p style="color:rgba(255,255,255,0.5);font-size:13px;margin:6px 0 0;">${new Date().toLocaleDateString('en-AU', { weekday:'long',day:'numeric',month:'long',year:'numeric' })}</p></div><div style="background:white;border-radius:12px;padding:24px;"><p style="font-size:15px;color:#0D1F35;font-weight:600;margin:0 0 8px;">No changes detected this week</p><p style="font-size:14px;color:#4A6580;line-height:1.6;margin:0;">The agent scanned all sources and found nothing new relevant to child safety in sport. No action needed.</p></div><p style="font-size:12px;color:#aaa;text-align:center;margin-top:20px;">Next scan: Monday · <a href="https://onesideaustralia.com.au/updates" style="color:#D4614E;">View Updates page</a></p></div>`
+        html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:32px;background:#f8fafc;"><div style="background:#0D1F35;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;"><h1 style="color:white;font-size:1.3rem;margin:0;">OneSide Weekly Digest</h1><p style="color:rgba(255,255,255,0.5);font-size:13px;margin:6px 0 0;">${new Date().toLocaleDateString('en-AU', { weekday:'long',day:'numeric',month:'long',year:'numeric' })}</p></div><div style="background:white;border-radius:12px;padding:24px;"><p style="font-size:15px;color:#0D1F35;font-weight:600;margin:0 0 8px;">No changes detected this week</p><p style="font-size:14px;color:#4A6580;line-height:1.6;margin:0;">The agent searched all sources and found nothing new relevant to child safety in sport. No action needed.</p></div><p style="font-size:12px;color:#aaa;text-align:center;margin-top:20px;">Next scan: Sunday/Tuesday · <a href="https://onesideaustralia.com.au/updates" style="color:#D4614E;">View Updates page</a></p></div>`
       })
     });
     return res.status(200).json({ message: 'No new updates found', count: 0 });
   }
 
-  // Send email digest
   const approveBaseUrl = process.env.SITE_URL || 'https://onesideaustralia.com.au';
-  const emailHtml = buildEmailHtml(allUpdates, approveBaseUrl);
+  const emailHtml = buildEmailHtml(dedupedUpdates, approveBaseUrl);
 
   const emailResponse = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -320,7 +234,7 @@ if (!isCron && secret !== process.env.SCAN_SECRET) {
     body: JSON.stringify({
       from: 'OneSide Updates Agent <updates@onesideaustralia.com.au>',
       to: ['info@onesideaustralia.com.au'],
-      subject: `OneSide Updates Digest${sinceDate ? ` (since ${sinceDate})` : ''} — ${allUpdates.length} update${allUpdates.length !== 1 ? 's' : ''} found`,
+      subject: `OneSide Updates Digest${sinceDate ? ` (since ${sinceDate})` : ''} — ${dedupedUpdates.length} update${dedupedUpdates.length !== 1 ? 's' : ''} found`,
       html: emailHtml
     })
   });
@@ -331,6 +245,6 @@ if (!isCron && secret !== process.env.SCAN_SECRET) {
     return res.status(500).json({ error: 'Failed to send email', details: err });
   }
 
-  console.log(`Digest sent with ${allUpdates.length} updates.`);
-  return res.status(200).json({ message: 'Digest sent', count: allUpdates.length });
+  console.log(`Digest sent with ${dedupedUpdates.length} updates.`);
+  return res.status(200).json({ message: 'Digest sent', count: dedupedUpdates.length });
 }

@@ -139,13 +139,14 @@ async function fetchSourceContent(source) {
   }
 }
 
-async function analyseSourceWithClaude(source, content) {
+async function analyseSourceWithClaude(source, content, sinceDate = null) {
   const today = new Date().toISOString().split('T')[0];
-  const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const since = sinceDate || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const periodLabel = sinceDate ? `since ${since}` : `in the last 7 days (since ${since})`;
 
   const prompt = `You are monitoring child safety regulatory sources for OneSide Australia, a child safety consultancy for Australian sporting clubs.
 
-Today is ${today}. You are looking for content published in the last 7 days (since ${oneWeekAgo}).
+Today is ${today}. You are looking for content published ${periodLabel}.
 
 Source: ${source.name}
 URL: ${source.url}
@@ -155,7 +156,7 @@ Page content:
 ${content}
 
 Your task:
-1. Identify any NEW content published in the last 7 days that is relevant to child safety in sport, child safe standards, Working With Children Checks, mandatory reporting, safeguarding, or related regulatory changes.
+1. Identify any NEW content published ${periodLabel} that is relevant to child safety in sport, child safe standards, Working With Children Checks, mandatory reporting, safeguarding, or related regulatory changes.
 2. If you find relevant new content, draft a short update in OneSide Australia's voice — plain Australian English, factual, helpful tone, no em dashes, no AI writing patterns.
 3. Each update should be 2-3 sentences maximum.
 4. Assign a category tag from: National, VIC, NSW, QLD, SA, WA, TAS, ACT, NT, AFL, Netball, Cricket, Soccer, Rugby League, Rugby Union, Basketball, Tennis, Golf.
@@ -260,7 +261,8 @@ if (!isCron && secret !== process.env.SCAN_SECRET) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  console.log('OneSide Updates Agent starting scan...');
+  const sinceDate = req.query.since || null; // e.g. ?since=2026-02-01
+  console.log(`OneSide Updates Agent starting scan... ${sinceDate ? `(since ${sinceDate})` : '(last 7 days)'}`);
 
   const allUpdates = [];
 
@@ -273,7 +275,7 @@ if (!isCron && secret !== process.env.SCAN_SECRET) {
       batch.map(async (source) => {
         const content = await fetchSourceContent(source);
         if (!content) return null;
-        return analyseSourceWithClaude(source, content);
+        return analyseSourceWithClaude(source, content, sinceDate);
       })
     );
     for (const result of batchResults) {
@@ -314,7 +316,7 @@ if (!isCron && secret !== process.env.SCAN_SECRET) {
     body: JSON.stringify({
       from: 'OneSide Updates Agent <updates@onesideaustralia.com.au>',
       to: ['info@onesideaustralia.com.au'],
-      subject: `OneSide Weekly Updates Digest — ${allUpdates.length} update${allUpdates.length !== 1 ? 's' : ''} found`,
+      subject: `OneSide Updates Digest${sinceDate ? ` (since ${sinceDate})` : ''} — ${allUpdates.length} update${allUpdates.length !== 1 ? 's' : ''} found`,
       html: emailHtml
     })
   });

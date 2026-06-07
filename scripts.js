@@ -1,6 +1,45 @@
 /* OneSide Australia — shared scripts */
 
 /* ==============================
+   NEWSLETTER SUBSCRIBE
+   ============================== */
+
+async function submitSubscribe(e) {
+  e.preventDefault();
+  const email = document.getElementById('subscribe-email').value.trim();
+  const btn   = document.getElementById('subscribe-btn');
+  const msg   = document.getElementById('subscribe-msg');
+
+  btn.disabled = true;
+  btn.textContent = 'Subscribing...';
+  msg.style.color = '#7A95AA';
+  msg.textContent = '';
+
+  try {
+    const res = await fetch('/api/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+
+    if (res.ok) {
+      btn.textContent = 'Subscribed ✓';
+      btn.style.background = '#1A7A4A';
+      msg.style.color = '#1A7A4A';
+      msg.textContent = 'You\'re on the list. We\'ll be in touch monthly.';
+      document.getElementById('subscribe-email').value = '';
+    } else {
+      throw new Error('Server error');
+    }
+  } catch {
+    btn.disabled = false;
+    btn.textContent = 'Subscribe →';
+    msg.style.color = '#D4614E';
+    msg.textContent = 'Something went wrong. Please try again.';
+  }
+}
+
+/* ==============================
    UPDATES FILTER
    ============================== */
 var activeRegion = 'all';

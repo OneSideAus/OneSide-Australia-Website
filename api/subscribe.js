@@ -24,7 +24,7 @@ async function getGraphToken() {
 
 async function addSubscriberToSheet(email, token) {
   const userEmail  = 'info@onesideaustralia.com.au';
-  const filePath   = 'Documents/OneSide Subscribers/Subscribers.xlsx';
+  const filePath   = 'OneSide Subscribers/Subscribers.xlsx';
   const tableName  = 'SubscriberTable';
   const date       = new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
 

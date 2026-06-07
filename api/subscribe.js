@@ -26,7 +26,8 @@ async function addSubscriberToSheet(email, token) {
   const userEmail  = 'info@onesideaustralia.com.au';
   const filePath   = 'OneSide Subscribers/Subscribers.xlsx';
   const tableName  = 'SubscriberTable';
-  const date       = new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
+  const now        = new Date();
+  const date       = `${now.getDate()} ${now.toLocaleString('en-AU', { month: 'long' })} ${now.getFullYear()}`;
 
   const url = `https://graph.microsoft.com/v1.0/users/${userEmail}/drive/root:/${filePath}:/workbook/tables/${tableName}/rows/add`;
 

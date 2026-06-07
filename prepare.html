@@ -12,7 +12,6 @@
 <meta property="og:url" content="https://www.onesideaustralia.com.au/prepare">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
-<script async type="text/javascript" src="https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=WmEVcL"></script>
 </head>
 <body>
 <nav>
@@ -122,5 +121,42 @@
   <div class="ft-bottom"><div class="ft-copy">© 2026 OneSide Australia. Child Safety in Sport, across Australia.</div><ul class="ft-links"><li><a href="/privacy">Privacy</a></li><li><a href="/terms">Terms</a></li><li><a href="/contact">Contact</a></li></ul></div>
 </footer>
 <script src="scripts.js"></script>
+
+<!-- NEWSLETTER MODAL -->
+<div id="newsletter-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(13,31,53,0.85);backdrop-filter:blur(3px);align-items:center;justify-content:center;padding:1rem;">
+  <div style="background:#F8FAFC;border-radius:16px;max-width:540px;width:100%;position:relative;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,0.4);">
+    <div style="background:#0D1F35;padding:24px 28px 20px;">
+      <p style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#D4614E;margin:0 0 6px;">OneSide Australia</p>
+      <h2 style="font-family:'DM Serif Display',serif;font-size:1.4rem;color:white;margin:0 0 4px;line-height:1.2;">Stay across child safety in sport</h2>
+      <p style="font-size:13px;color:rgba(255,255,255,0.55);margin:0;">Monthly updates, in plain language. For clubs, not lawyers.</p>
+    </div>
+    <button onclick="closeNewsletterModal()" aria-label="Close" style="position:absolute;top:12px;right:12px;background:#D4614E;border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:white;font-size:15px;line-height:1;font-family:sans-serif;">✕</button>
+    <div>
+      <iframe width="100%" height="420px" src="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=ibpHGDz5DEGVeTWC6ACtIobrMkTTAB1BntfkJhThUZtUNlNROUc1U0tLTUk1MjdFS1JSQjFFWEVKRS4u&embed=true" frameborder="0" marginwidth="0" marginheight="0" style="border:none;width:100%;display:block;" allowfullscreen webkitallowfullscreen mozallowfullscreen msallowfullscreen></iframe>
+    </div>
+    <div style="padding:10px 24px;border-top:1px solid #E2EAF0;text-align:center;">
+      <p style="font-size:11px;color:#7A95AA;margin:0;">No spam. Unsubscribe any time. <a href="/privacy" style="color:#1B5E8A;text-decoration:none;">Privacy policy</a></p>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  if(sessionStorage.getItem('osModalShown'))return;
+  function subVisible(){
+    var el=document.querySelector('.klaviyo-form-VsKmkV,[data-subscribe],#subscribe');
+    if(!el)return false;
+    var r=el.getBoundingClientRect();
+    return r.top<window.innerHeight&&r.bottom>0;
+  }
+  var t=setTimeout(function(){
+    if(!subVisible()){
+      document.getElementById('newsletter-modal').style.display='flex';
+      sessionStorage.setItem('osModalShown','1');
+    }
+  },40000);
+  window.addEventListener('scroll',function(){if(subVisible())clearTimeout(t);},{passive:true});
+})();
+function closeNewsletterModal(){document.getElementById('newsletter-modal').style.display='none';}
+</script>
 </body>
 </html>

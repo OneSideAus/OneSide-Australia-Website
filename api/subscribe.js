@@ -22,6 +22,25 @@ async function getGraphToken() {
   return data.access_token;
 }
 
+async function isAlreadySubscribed(email, token) {
+  const userEmail = 'info@onesideaustralia.com.au';
+  const filePath  = 'OneSide Subscribers/Subscribers.xlsx';
+  const tableName = 'SubscriberTable';
+
+  const url = `https://graph.microsoft.com/v1.0/users/${userEmail}/drive/root:/${filePath}:/workbook/tables/${tableName}/rows`;
+  const res = await fetch(url, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+
+  if (!res.ok) return false; // if check fails, allow the add to proceed
+  const data = await res.json();
+  const rows = data.value || [];
+  return rows.some(row => {
+    const cellEmail = (row.values?.[0]?.[0] || '').toString().trim().toLowerCase();
+    return cellEmail === email;
+  });
+}
+
 async function addSubscriberToSheet(email, token) {
   const userEmail  = 'info@onesideaustralia.com.au';
   const filePath   = 'OneSide Subscribers/Subscribers.xlsx';
@@ -63,11 +82,17 @@ export default async function handler(req, res) {
   const sanitised = email.trim().toLowerCase();
 
   try {
-    // 1. Write to spreadsheet via Graph API
+    // 1. Check for duplicate
     const token = await getGraphToken();
+    const duplicate = await isAlreadySubscribed(sanitised, token);
+    if (duplicate) {
+      return res.status(200).json({ ok: true, duplicate: true });
+    }
+
+    // 2. Write to spreadsheet via Graph API
     await addSubscriberToSheet(sanitised, token);
 
-    // 2. Send notification email
+    // 3. Send notification email
     if (process.env.RESEND_API_KEY) {
       await fetch('https://api.resend.com/emails', {
         method: 'POST',

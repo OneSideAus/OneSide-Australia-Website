@@ -465,6 +465,18 @@ function toggleFaq(btn) {
 var chatHistory = [];
 var chatOpen = false;
 var chatStreaming = false;
+var chatQuestionCount = 0;
+var BOOKING_URL = 'https://outlook.office.com/book/OneSideAustralia30minDiscoveryCall@onesideaustralia.com.au/?ismsaljsauthenabled';
+
+function addChatBookingNudge() {
+  var msgs = document.getElementById('chat-messages');
+  if (!msgs) return;
+  var div = document.createElement('div');
+  div.className = 'chat-msg booking-nudge';
+  div.innerHTML = '📞 Want to talk it through with Ang? <a href="' + BOOKING_URL + '" target="_blank">Book a free 30-min call →</a>';
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
 
 function toggleChat() {
   chatOpen = !chatOpen;
@@ -536,6 +548,8 @@ async function sendChat() {
     }
 
     chatHistory.push({ role: 'assistant', content: accumulated });
+    chatQuestionCount++;
+    if (chatQuestionCount % 2 === 0) addChatBookingNudge();
   } catch (err) {
     assistantDiv.textContent = 'Sorry, something went wrong. Please try again.';
   }

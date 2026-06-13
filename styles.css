@@ -382,6 +382,8 @@ nav.scrolled { background: rgba(13,31,53,0.98); box-shadow: 0 6px 24px rgba(8,15
 .chat-msg { max-width: 88%; font-size: 13.5px; line-height: 1.55; padding: 10px 14px; border-radius: 12px; word-wrap: break-word; }
 .chat-msg.user { background: var(--coral); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
 .chat-msg.assistant { background: var(--off-white); color: var(--midnight); border: 1px solid var(--muted); align-self: flex-start; border-bottom-left-radius: 4px; }
+.chat-msg.booking-nudge { background: rgba(212,97,78,0.08); border: 1px solid rgba(212,97,78,0.3); color: var(--midnight); align-self: stretch; text-align: center; border-radius: 10px; font-size: 12.5px; }
+.chat-msg.booking-nudge a { color: var(--coral); font-weight: 600; text-decoration: underline; }
 
 .chat-input-row { display: flex; gap: 8px; padding: 12px 14px; border-top: 1px solid var(--muted); flex-shrink: 0; background: white; }
 .chat-input { flex: 1; background: var(--off-white); border: 1px solid var(--muted); border-radius: 8px; padding: 9px 12px; font-size: 13px; color: var(--midnight); font-family: 'DM Sans', sans-serif; outline: none; resize: none; max-height: 80px; min-height: 38px; line-height: 1.45; transition: border-color 0.15s; }
@@ -399,6 +401,8 @@ nav.scrolled { background: rgba(13,31,53,0.98); box-shadow: 0 6px 24px rgba(8,15
 /* Hero-embedded chat — dark theme overrides */
 .hero-chat-wrap .chat-msg.assistant { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.88); border: 1px solid rgba(255,255,255,0.1); }
 .hero-chat-wrap .chat-msg.user { background: var(--coral); color: white; }
+.hero-chat-wrap .chat-msg.booking-nudge { background: rgba(212,97,78,0.15); border: 1px solid rgba(212,97,78,0.4); color: rgba(255,255,255,0.85); }
+.hero-chat-wrap .chat-msg.booking-nudge a { color: var(--coral-light); }
 .hero-chat-wrap::-webkit-scrollbar { width: 4px; }
 .hero-chat-wrap::-webkit-scrollbar-track { background: transparent; }
 .hero-chat-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }

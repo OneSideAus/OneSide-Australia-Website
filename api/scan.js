@@ -298,16 +298,18 @@ export default async function handler(req, res) {
 
   if (allArticles.length === 0) {
     console.log('No articles found from Google News.');
-    await fetch('https://api.resend.com/emails', {
+    const r1 = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.RESEND_API_KEY}` },
       body: JSON.stringify({
         from: 'OneSide Updates Agent <updates@onesideaustralia.com.au>',
-        to: ['info@onesideaustralia.com.au'],
+        to: ['info@onesideaustralia.com.au', 'Angela_Marcon@hotmail.com'],
         subject: 'OneSide Weekly Digest — No articles found',
         html: `<p style="font-family:Arial,sans-serif;">The Google News scan returned no articles this week. This may be a temporary issue — the agent will run again next week.</p>`
       })
     });
+    if (!r1.ok) console.error('Resend error (no articles):', await r1.text());
+    else console.log('No-articles email sent OK');
     return res.status(200).json({ message: 'No articles found', count: 0 });
   }
 
@@ -326,16 +328,18 @@ export default async function handler(req, res) {
   const date = new Date().toLocaleDateString('en-AU', { weekday:'long',day:'numeric',month:'long',year:'numeric' });
 
   if (dedupedUpdates.length === 0) {
-    await fetch('https://api.resend.com/emails', {
+    const r2 = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.RESEND_API_KEY}` },
       body: JSON.stringify({
         from: 'OneSide Updates Agent <updates@onesideaustralia.com.au>',
-        to: ['info@onesideaustralia.com.au'],
+        to: ['info@onesideaustralia.com.au', 'Angela_Marcon@hotmail.com'],
         subject: 'OneSide Weekly Digest — No changes this week',
         html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:32px;background:#f8fafc;"><div style="background:#0D1F35;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;"><h1 style="color:white;font-size:1.3rem;margin:0;">OneSide Weekly Digest</h1><p style="color:rgba(255,255,255,0.5);font-size:13px;margin:6px 0 0;">${date}</p></div><div style="background:white;border-radius:12px;padding:24px;"><p style="font-size:15px;color:#0D1F35;font-weight:600;margin:0 0 8px;">No changes detected this week</p><p style="font-size:14px;color:#4A6580;line-height:1.6;margin:0;">The agent scanned Google News across all sources and found nothing new relevant to child safety in sport. No action needed.</p></div><p style="font-size:12px;color:#aaa;text-align:center;margin-top:20px;">Next scan: Sunday/Tuesday · <a href="https://onesideaustralia.com.au/updates" style="color:#D4614E;">View Updates page</a></p></div>`
       })
     });
+    if (!r2.ok) console.error('Resend error (no updates):', await r2.text());
+    else console.log('No-updates email sent OK');
     return res.status(200).json({ message: 'No relevant updates found', count: 0 });
   }
 
@@ -347,7 +351,7 @@ export default async function handler(req, res) {
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.RESEND_API_KEY}` },
     body: JSON.stringify({
       from: 'OneSide Updates Agent <updates@onesideaustralia.com.au>',
-      to: ['info@onesideaustralia.com.au'],
+      to: ['info@onesideaustralia.com.au', 'Angela_Marcon@hotmail.com'],
       subject: `OneSide Updates Digest${sinceDate ? ` (since ${sinceDate})` : ''} — ${dedupedUpdates.length} update${dedupedUpdates.length !== 1 ? 's' : ''} found`,
       html: emailHtml
     })

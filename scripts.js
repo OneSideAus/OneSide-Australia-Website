@@ -551,3 +551,10 @@ function chatKeydown(e) {
     sendChat();
   }
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+  // Auto-init greeting for hero-embedded chat (no toggle button)
+  if (document.getElementById('chat-messages') && !document.getElementById('chat-bubble')) {
+    addChatMessage('assistant', 'Hi! How can I help you and your club with child safety today?');
+  }
+});

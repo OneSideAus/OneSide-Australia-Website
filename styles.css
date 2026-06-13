@@ -395,6 +395,13 @@ nav.scrolled { background: rgba(13,31,53,0.98); box-shadow: 0 6px 24px rgba(8,15
   .chat-panel { width: calc(100vw - 32px); right: 16px; bottom: 80px; }
   .chat-bubble { bottom: 20px; right: 16px; }
 }
+
+/* Hero-embedded chat — dark theme overrides */
+.hero-chat-wrap .chat-msg.assistant { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.88); border: 1px solid rgba(255,255,255,0.1); }
+.hero-chat-wrap .chat-msg.user { background: var(--coral); color: white; }
+.hero-chat-wrap::-webkit-scrollbar { width: 4px; }
+.hero-chat-wrap::-webkit-scrollbar-track { background: transparent; }
+.hero-chat-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }
 .faq-chevron { font-size: 15px; color: var(--text-light); transition: transform 0.25s ease, color 0.2s; flex-shrink: 0; line-height: 1; }
 .faq-item.open .faq-chevron { transform: rotate(180deg); color: var(--coral); }
 .faq-a { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }

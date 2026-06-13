@@ -476,7 +476,7 @@ function toggleChat() {
     bubble.querySelector('.cb-open').style.display = 'none';
     bubble.querySelector('.cb-close').style.display = 'block';
     if (chatHistory.length === 0) {
-      addChatMessage('assistant', "Hi! I'm the OneSide assistant. Ask me anything about the Child Safety Gap Assessment, pricing, or how it works.");
+      addChatMessage('assistant', "Hi! How can I help you and your club with child safety today?");
     }
     var inp = document.getElementById('chat-input');
     if (inp) inp.focus();

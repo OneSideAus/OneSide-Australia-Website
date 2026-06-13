@@ -112,12 +112,15 @@
     </div>
 
     <!-- Chat widget -->
-    <div style="flex:0 0 340px;min-width:280px;background:rgba(9,19,34,0.82);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:14px;border:1px solid rgba(255,255,255,0.12);overflow:hidden;">
-      <div style="padding:14px 20px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.07);">
-        <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:4px;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(212,97,78,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
-          <p style="font-family:'DM Serif Display',serif;font-size:1rem;color:rgba(255,255,255,0.92);margin:0;">Have a question?</p>
-        </div>
+    <div style="flex:0 0 340px;min-width:280px;position:relative;padding-top:34px;">
+      <!-- Popout headphone bubble -->
+      <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:60px;height:60px;border-radius:50%;background:var(--coral);border:3px solid rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(212,97,78,0.45);z-index:2;">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+      </div>
+      <!-- Chat box -->
+      <div style="background:rgba(9,19,34,0.82);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:14px;border:1px solid rgba(255,255,255,0.12);overflow:hidden;">
+      <div style="padding:22px 20px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.07);">
+        <p style="font-family:'DM Serif Display',serif;font-size:1rem;color:rgba(255,255,255,0.92);margin-bottom:2px;">Have a question?</p>
         <p style="font-size:11px;color:rgba(255,255,255,0.4);">Ask our assistant about child safety or the assessment.</p>
       </div>
       <div id="chat-messages" class="hero-chat-wrap" style="max-height:200px;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:8px;"></div>
@@ -127,7 +130,8 @@
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         </button>
       </div>
-    </div>
+      </div><!-- /chat box -->
+    </div><!-- /chat widget -->
 
   </div>
 

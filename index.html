@@ -82,7 +82,7 @@
 <main>
 
   <!-- HERO -->
-<section style="background: linear-gradient(rgba(13,31,53,0.87) 0%, rgba(13,31,53,0.93) 100%), url('/images/hero-sport.png') center/cover no-repeat; position:relative;overflow:hidden;padding-top:64px;max-width:100vw;">
+<section class="hero-parallax" style="background: linear-gradient(rgba(13,31,53,0.87) 0%, rgba(13,31,53,0.93) 100%), url('/images/hero-sport.png') center/cover no-repeat; position:relative;overflow:hidden;padding-top:64px;max-width:100vw;">
   <div style="display:grid;grid-template-columns:1.15fr 0.85fr;min-height:560px;">
 
     <!-- LEFT PANEL -->
@@ -168,15 +168,16 @@
 </section>
 
   <!-- FEATURE CARDS -->
-  <section style="padding:48px 2rem 56px;background:var(--off-white);">
+  <section style="padding:72px 2rem 80px;background:var(--off-white);" class="reveal">
     <div class="section-inner">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;" class="reveal-stagger">
         <a href="/assessment" class="feature-card">
           <div class="fc-image"><img src="/images/docs.png" alt="Child safety assessment documents"></div>
           <div class="fc-body">
             <div class="eyebrow">The assessment</div>
             <h3>Your Child Safety Gap Assessment</h3>
-            <p>Tell us what your club does. We measure it against national and sport-specific requirements and give you a clear gap report with practical next steps.</p>
+            <div class="fc-hook">Do your child safety processes cover the adults who help out occasionally — scorers, canteen helpers, parents stepping in at training?</div>
+            <p>Most clubs can't say yes with confidence. Tell us what your club does. We measure it against national and sport-specific requirements and give you a clear gap report with practical next steps.</p>
             <span class="fc-link">Learn about the assessment →</span>
           </div>
         </a>
@@ -194,11 +195,11 @@
   </section>
 
   <!-- CSGT SUMMARY -->
-  <section style="padding:88px 2rem;background:white;position:relative;overflow:hidden;" class="reveal">
+  <section style="padding:110px 2rem;background:white;position:relative;overflow:hidden;" class="reveal">
     <div style="position:absolute;top:-10%;right:-5%;width:50%;height:120%;background:linear-gradient(135deg,rgba(212,97,78,0.06) 0%,transparent 70%);transform:skewX(-10deg);pointer-events:none;"></div>
     <div style="position:absolute;top:30%;left:-8%;width:35%;height:60%;background:linear-gradient(135deg,rgba(27,94,138,0.05) 0%,transparent 70%);transform:skewX(-10deg);pointer-events:none;"></div>
     <div class="section-inner" style="position:relative;z-index:1;">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;margin-bottom:48px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;margin-bottom:64px;">
         <div>
           <div class="eyebrow">The OneSide assessment</div>
           <h2 class="section-title">You're the expert on your club.<br><em style="font-style:italic;color:var(--coral);font-family:'DM Serif Display',serif;">We're the experts on what's required.</em></h2>
@@ -209,16 +210,16 @@
             <a href="/prepare" class="btn-outline">How to prepare →</a>
           </div>
         </div>
-        <div style="display:flex;flex-direction:column;gap:16px;">
-          <div style="background:var(--off-white);border:1px solid var(--muted);border-radius:12px;padding:20px 24px;display:flex;align-items:flex-start;gap:16px;">
+        <div style="display:flex;flex-direction:column;gap:16px;" class="reveal-stagger">
+          <div style="background:var(--off-white);border:1px solid var(--muted);border-radius:12px;padding:20px 24px;display:flex;align-items:flex-start;gap:16px;" class="hover-card">
             <div style="width:36px;height:36px;background:rgba(212,97,78,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--coral)" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
             <div><div style="font-size:14px;font-weight:500;color:var(--midnight);margin-bottom:3px;">You tell us what you do and how you do it</div><div style="font-size:13px;color:var(--text-mid);">Policies, processes, and how your club actually operates, written and unwritten</div></div>
           </div>
-          <div style="background:var(--off-white);border:1px solid var(--muted);border-radius:12px;padding:20px 24px;display:flex;align-items:flex-start;gap:16px;">
+          <div style="background:var(--off-white);border:1px solid var(--muted);border-radius:12px;padding:20px 24px;display:flex;align-items:flex-start;gap:16px;" class="hover-card">
             <div style="width:36px;height:36px;background:rgba(212,97,78,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--coral)" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
             <div><div style="font-size:14px;font-weight:500;color:var(--midnight);margin-bottom:3px;">OneSide measures against national requirements</div><div style="font-size:13px;color:var(--text-mid);">National Principles, National Integrity Framework and sport-specific policies</div></div>
           </div>
-          <div style="background:var(--off-white);border:1px solid var(--muted);border-radius:12px;padding:20px 24px;display:flex;align-items:flex-start;gap:16px;">
+          <div style="background:var(--off-white);border:1px solid var(--muted);border-radius:12px;padding:20px 24px;display:flex;align-items:flex-start;gap:16px;" class="hover-card">
             <div style="width:36px;height:36px;background:rgba(212,97,78,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--coral)" stroke-width="2" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
             <div><div style="font-size:14px;font-weight:500;color:var(--midnight);margin-bottom:3px;">You get a gap report with practical next steps</div><div style="font-size:13px;color:var(--text-mid);">Specific to your club, your sport, your state, with options to act on, not just gaps to worry about</div></div>
           </div>
@@ -242,7 +243,7 @@
   </section>
 
   <!-- TRUST BAR -->
-  <div class="trust-bar">
+  <div class="trust-bar reveal">
     <div class="trust-inner">
       <div class="trust-item"><span class="trust-dot"></span>All states and territories</div>
       <div class="trust-item"><span class="trust-dot"></span>National Principles for Child Safe Organisations</div>
@@ -252,7 +253,7 @@
   </div>
 
   <!-- SPORT SEARCH + PROBLEM -->
-  <section style="padding:88px 2rem;background:var(--midnight);position:relative;overflow:hidden;" class="reveal">
+  <section style="padding:110px 2rem;background:var(--midnight);position:relative;overflow:hidden;" class="reveal">
     <div style="position:absolute;top:-20%;right:-8%;width:55%;height:140%;background:linear-gradient(135deg,rgba(27,94,138,0.2) 0%,transparent 70%);transform:skewX(-10deg);pointer-events:none;"></div>
     <div style="position:absolute;top:10%;right:5%;width:38%;height:85%;background:linear-gradient(135deg,rgba(212,97,78,0.1) 0%,transparent 70%);transform:skewX(-10deg);pointer-events:none;"></div>
     <div style="position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,0.03) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;"></div>
@@ -278,17 +279,28 @@
           <p class="lead" style="color:rgba(255,255,255,0.55);margin-bottom:24px;">Clubs are required to navigate a wide and complex set of child safe requirements. National frameworks, sport-specific policies, and state obligations that shift and overlap. Most clubs know they need to act. Very few know where to start.</p>
           <a href="/assessment" class="btn-primary">See how OneSide helps →</a>
         </div>
-        <div>
-          <div style="display:flex;align-items:flex-start;gap:14px;padding:18px 20px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-left:3px solid var(--coral);border-radius:0 10px 10px 0;margin-bottom:14px;"><div><strong style="display:block;font-size:15px;color:white;margin-bottom:3px;font-weight:500;">Broad, layered, constantly evolving requirements</strong><p style="font-size:14px;color:rgba(255,255,255,0.5);line-height:1.65;">The National Principles, the National Integrity Framework Safeguarding Children and Young People Policy, and peak sporting bodies each have their own requirements, often overlapping, always changing.</p></div></div>
-          <div style="display:flex;align-items:flex-start;gap:14px;padding:18px 20px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-left:3px solid var(--coral);border-radius:0 10px 10px 0;margin-bottom:14px;"><div><strong style="display:block;font-size:15px;color:white;margin-bottom:3px;font-weight:500;">Generic guidance that doesn't fit your club</strong><p style="font-size:14px;color:rgba(255,255,255,0.5);line-height:1.65;">Frameworks, fact sheets, and templates exist, but none tell your committee exactly what your club needs to do.</p></div></div>
-          <div style="display:flex;align-items:flex-start;gap:14px;padding:18px 20px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-left:3px solid var(--coral);border-radius:0 10px 10px 0;"><div><strong style="display:block;font-size:15px;color:white;margin-bottom:3px;font-weight:500;">The requirements apply to everyone</strong><p style="font-size:14px;color:rgba(255,255,255,0.5);line-height:1.65;">Committee members, coaches, volunteers, contractors, students on placement, not just the people on the field.</p></div></div>
+        <div class="reveal-stagger">
+          <div style="display:flex;align-items:flex-start;gap:14px;padding:18px 20px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-left:3px solid var(--coral);border-radius:0 10px 10px 0;margin-bottom:14px;" class="hover-card-dark"><div><strong style="display:block;font-size:15px;color:white;margin-bottom:3px;font-weight:500;">Broad, layered, constantly evolving requirements</strong><p style="font-size:14px;color:rgba(255,255,255,0.5);line-height:1.65;">The National Principles, the National Integrity Framework Safeguarding Children and Young People Policy, and peak sporting bodies each have their own requirements, often overlapping, always changing.</p></div></div>
+          <div style="display:flex;align-items:flex-start;gap:14px;padding:18px 20px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-left:3px solid var(--coral);border-radius:0 10px 10px 0;margin-bottom:14px;" class="hover-card-dark"><div><strong style="display:block;font-size:15px;color:white;margin-bottom:3px;font-weight:500;">Generic guidance that doesn't fit your club</strong><p style="font-size:14px;color:rgba(255,255,255,0.5);line-height:1.65;">Frameworks, fact sheets, and templates exist, but none tell your committee exactly what your club needs to do.</p></div></div>
+          <div style="display:flex;align-items:flex-start;gap:14px;padding:18px 20px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-left:3px solid var(--coral);border-radius:0 10px 10px 0;" class="hover-card-dark"><div><strong style="display:block;font-size:15px;color:white;margin-bottom:3px;font-weight:500;">The requirements apply to everyone</strong><p style="font-size:14px;color:rgba(255,255,255,0.5);line-height:1.65;">Committee members, coaches, volunteers, contractors, students on placement, not just the people on the field.</p></div></div>
         </div>
       </div>
     </div>
   </section>
 
+  <!-- READINESS QUICK CHECK — TEASER -->
+  <section style="padding:110px 2rem;background:var(--off-white);" class="reveal" id="readiness-check">
+    <div class="section-inner" style="max-width:680px;text-align:center;">
+      <div class="eyebrow">Quick check</div>
+      <h2 class="section-title">How ready is your club?</h2>
+      <p class="lead" style="margin:0 auto 32px;">Six quick yes/no questions, including the ones most clubs get caught out on. Nothing is stored and no email is needed.</p>
+      <button class="btn-primary" onclick="openQuiz()" style="font-size:15px;padding:16px 32px;">Take the 60-second check →</button>
+      <p style="font-size:12px;color:var(--text-light);margin-top:16px;">Free · Anonymous · 6 questions</p>
+    </div>
+  </section>
+
   <!-- UPDATES PREVIEW -->
-  <section style="padding:88px 2rem;background:white;position:relative;overflow:hidden;" class="reveal">
+  <section style="padding:110px 2rem;background:white;position:relative;overflow:hidden;" class="reveal">
     <div style="position:absolute;top:-15%;left:-6%;width:48%;height:130%;background:linear-gradient(135deg,rgba(27,94,138,0.07) 0%,transparent 70%);transform:skewX(-10deg);pointer-events:none;"></div>
     <div style="position:absolute;top:-10%;right:-6%;width:40%;height:120%;background:linear-gradient(135deg,rgba(212,97,78,0.05) 0%,transparent 70%);transform:skewX(-10deg);pointer-events:none;"></div>
     <div class="section-inner" style="position:relative;z-index:1;">
@@ -303,47 +315,42 @@
       <div class="update-card" data-region="national" data-sport="all" data-sortdate="2025-12"><div class="uc-head" onclick="toggleUpdate(this.closest('.update-card'))"><div class="uc-head-inner"><div class="uc-meta"><span class="uc-tag t-new">National · New</span><span class="uc-date">December 2025</span></div><h5>Social Media Age Restrictions Now in Effect</h5></div><span class="uc-chevron">▾</span></div><div class="uc-body"><p>From 10 December 2025, social media platforms are required to prevent users under 16 from creating accounts, a change that directly affects how clubs manage their online presence and communicate with junior members. Clubs should review their social media policies to ensure they are not engaging with or publishing content directed at under-16s on platforms where those users should no longer have accounts. The eSafety Commissioner has free resources and a 45-minute webinar specifically for community sport clubs to help navigate these changes.</p><a href="https://www.esafety.gov.au/communities/sport" class="uc-source-link" target="_blank" rel="noopener">Read more at eSafety Commissioner ↗</a></div></div>
             <div class="update-card" data-region="qld" data-sport="all" data-sortdate="2026-04"><div class="uc-head" onclick="toggleUpdate(this.closest('.update-card'))"><div class="uc-head-inner"><div class="uc-meta"><span class="uc-tag t-reminder">QLD · Reminder</span><span class="uc-date">April 2026</span></div><h5>QLD: Child Safe Standards Compliance Deadline Has Passed</h5></div><span class="uc-chevron">▾</span></div><div class="uc-body"><p>From 1 April 2026, all sport and recreation organisations in Queensland that work with children must be able to demonstrate compliance with the Child Safe Standards. If your club operates in QLD and has not completed a compliance review, this should be a priority. Contact Sport Queensland for guidance.</p><a href="https://www.sport.qld.gov.au/news/latest/2025/new-child-safe-standards-for-sport" class="uc-source-link" target="_blank" rel="noopener">Read more at Sport Queensland ↗</a></div></div>
             <div class="update-card" data-region="vic" data-sport="all" data-sortdate="2026-03"><div class="uc-head" onclick="toggleUpdate(this.closest('.update-card'))"><div class="uc-head-inner"><div class="uc-meta"><span class="uc-tag t-new">VIC · New</span><span class="uc-date">March 2026</span></div><h5>Victoria: New Child Safety Laws Take Effect</h5></div><span class="uc-chevron">▾</span></div><div class="uc-body"><p>New laws strengthening child safety safeguards came into effect in Victoria in March 2026. Victorian sporting clubs should review the changes via the Victorian Government website to confirm their current policies and procedures remain compliant.</p><a href="https://www.vic.gov.au/early-childhood-update-march-2026/child-safety-reforms-new-laws-take-effect-strengthen-safeguards" class="uc-source-link" target="_blank" rel="noopener">Read more at vic.gov.au ↗</a></div></div>
-            <div class="update-card" data-region="vic" data-sport="afl" data-sortdate="2026-03"><div class="uc-head" onclick="toggleUpdate(this.closest('.update-card'))"><div class="uc-head-inner"><div class="uc-meta"><span class="uc-tag t-update">VIC · AFL · Update</span><span class="uc-date">March 2026</span></div><h5>AFL Victoria: Updated Child Safe Requirements for Community Clubs</h5></div><span class="uc-chevron">▾</span></div><div class="uc-body"><p>AFL Victoria has issued updated guidance for community clubs on their child safe obligations, including new requirements for overnight travel and social media policies.</p><a href="https://www.aflvic.com.au" class="uc-source-link" target="_blank" rel="noopener">Read more at AFL Victoria ↗</a></div></div>
-            <div class="update-card" data-region="national" data-sport="all" data-sortdate="2026-02"><div class="uc-head" onclick="toggleUpdate(this.closest('.update-card'))"><div class="uc-head-inner"><div class="uc-meta"><span class="uc-tag t-new">National · New</span><span class="uc-date">February 2026</span></div><h5>Mandatory Child Safety Training Now Required</h5></div><span class="uc-chevron">▾</span></div><div class="uc-body"><p>From 27 February 2026, all staff and volunteers working with children must complete mandatory child safety and child protection training under new national legislation. A six-month transition period runs until 27 August 2026, giving clubs time to get their people trained. After that date, new staff must complete the training before starting work.</p><a href="https://www.education.gov.au/newsroom/articles/landmark-national-legislation-passed-strengthen-child-safety-early-education" class="uc-source-link" target="_blank" rel="noopener">Read more at education.gov.au ↗</a></div></div>
-            <div class="update-card" data-region="national" data-sport="all" data-sortdate="2026-02"><div class="uc-head" onclick="toggleUpdate(this.closest('.update-card'))"><div class="uc-head-inner"><div class="uc-meta"><span class="uc-tag t-new">National · New</span><span class="uc-date">February 2026</span></div><h5>New WWCC Notification Rule for Clubs</h5></div><span class="uc-chevron">▾</span></div><div class="uc-body"><p>From 27 February 2026, any staff member or volunteer who receives a negative Working With Children Check notice must inform their organisation in writing within 72 hours. This is a new legal obligation that many clubs are not yet aware of. Make sure your policies and induction processes reflect it.</p><a href="https://www.acecqa.gov.au/sites/default/files/2026-02/Changes%20to%20the%20NQF%20-%20Strengthened%20NQF%20child%20safety%20and%20protections%20(Omnibus).pdf" class="uc-source-link" target="_blank" rel="noopener">Read more at ACECQA ↗</a></div></div>
-            <div class="update-card" data-region="national" data-sport="all" data-sortdate="2026-02"><div class="uc-head" onclick="toggleUpdate(this.closest('.update-card'))"><div class="uc-head-inner"><div class="uc-meta"><span class="uc-tag t-new">National · New</span><span class="uc-date">February 2026</span></div><h5>Child Safe Standards Regulator Changes in Victoria</h5></div><span class="uc-chevron">▾</span></div><div class="uc-body"><p>Governance has moved from the Commission for Children and Young People (CCYP) to the Social Services Regulator. Clubs using old CCYP resources should review their references and ensure their policies name the correct regulator.</p><a href="https://www.ssr.vic.gov.au" class="uc-source-link" target="_blank" rel="noopener">Read more at Social Services Regulator ↗</a></div></div>
-            <div class="update-card" data-region="national" data-sport="all" data-sortdate="2026-02"><div class="uc-head" onclick="toggleUpdate(this.closest('.update-card'))"><div class="uc-head-inner"><div class="uc-meta"><span class="uc-tag t-new">National · New</span><span class="uc-date">February 2026</span></div><h5>National Early Childhood Worker Register Now Live</h5></div><span class="uc-chevron">▾</span></div><div class="uc-body"><p>A National Early Childhood Worker Register launched on 27 February 2026, requiring approved service providers to record and maintain workforce information accessible to regulators. While primarily aimed at early childhood services, this signals the direction of travel for broader child-facing organisations including sport.</p><a href="https://www.education.gov.au/newsroom/articles/landmark-national-legislation-passed-strengthen-child-safety-early-education" class="uc-source-link" target="_blank" rel="noopener">Read more at education.gov.au ↗</a></div></div>
-            <div class="update-card" data-region="nsw" data-sport="cricket" data-sortdate="2026-02"><div class="uc-head" onclick="toggleUpdate(this.closest('.update-card'))"><div class="uc-head-inner"><div class="uc-meta"><span class="uc-tag t-new">NSW · Cricket · New</span><span class="uc-date">February 2026</span></div><h5>Cricket NSW: New Child Safeguarding Policy for Community Clubs</h5></div><span class="uc-chevron">▾</span></div><div class="uc-body"><p>Cricket NSW has released a new child safeguarding policy that all affiliated community clubs are required to adopt by July 2026.</p><a href="https://www.cricketnsw.com.au" class="uc-source-link" target="_blank" rel="noopener">Read more at Cricket NSW ↗</a></div></div>
-            <div class="update-card" data-region="national" data-sport="all" data-sortdate="2026-01"><div class="uc-head" onclick="toggleUpdate(this.closest('.update-card'))"><div class="uc-head-inner"><div class="uc-meta"><span class="uc-tag t-update">National · Update</span><span class="uc-date">January 2026</span></div><h5>National Integrity Framework: Updated Guidance for Community Sport</h5></div><span class="uc-chevron">▾</span></div><div class="uc-body"><p>Sport Integrity Australia has released updated implementation guidance with specific notes for community-level sporting organisations. Key changes affect reporting requirements and the definition of a person of concern.</p><a href="https://www.sportintegrity.gov.au/what-we-do/safeguarding-sport" class="uc-source-link" target="_blank" rel="noopener">Read more at Sport Integrity Australia ↗</a></div></div>
-            <div class="update-card" data-region="national" data-sport="all" data-sortdate="2025-01"><div class="uc-head" onclick="toggleUpdate(this.closest('.update-card'))"><div class="uc-head-inner"><div class="uc-meta"><span class="uc-tag t-reminder">National · Reminder</span><span class="uc-date">Ongoing</span></div><h5>Reportable Conduct Scheme: 3-Day Notification Requirement</h5></div><span class="uc-chevron">▾</span></div><div class="uc-body"><p>Heads of organisations must notify the regulator within 3 business days of becoming aware of an allegation of reportable conduct. Failure to report is an offence under law.</p><a href="https://www.playbytherules.net.au/got-an-issue/community-child-safe-sport" class="uc-source-link" target="_blank" rel="noopener">Read more at Play by the Rules ↗</a></div></div>
-            <div class="update-card" data-region="national" data-sport="all" data-sortdate="2025-01"><div class="uc-head" onclick="toggleUpdate(this.closest('.update-card'))"><div class="uc-head-inner"><div class="uc-meta"><span class="uc-tag t-reminder">National · Reminder</span><span class="uc-date">Ongoing</span></div><h5>National Redress Scheme Applies to Sporting Organisations</h5></div><span class="uc-chevron">▾</span></div><div class="uc-body"><p>The National Redress Scheme covers abuse that occurred during a sporting competition or activity. Institutions named in an application must join within six months or face penalties.</p><a href="https://www.nationalredress.gov.au" class="uc-source-link" target="_blank" rel="noopener">Read more at nationalredress.gov.au ↗</a></div></div>
           </div>
     
     </div>
   </section>
 
-  <!-- ABOUT TEASER -->
-  <section style="padding:88px 2rem;background:var(--off-white);position:relative;overflow:hidden;" class="reveal">
+  <!-- WHY ONESIDE -->
+  <section style="padding:110px 2rem;background:var(--off-white);position:relative;overflow:hidden;" class="reveal">
     <div style="position:absolute;top:-20%;right:-8%;width:55%;height:140%;background:linear-gradient(135deg,rgba(212,97,78,0.07) 0%,transparent 70%);transform:skewX(-10deg);pointer-events:none;"></div>
     <div style="position:absolute;bottom:0%;left:-5%;width:42%;height:120%;background:linear-gradient(135deg,rgba(27,94,138,0.06) 0%,transparent 70%);transform:skewX(-10deg);pointer-events:none;"></div>
-    <div class="section-inner" style="display:grid;grid-template-columns:1fr 1.2fr;gap:60px;align-items:center;position:relative;z-index:1;">
-      <div style="background:white;border:1px solid var(--muted);border-radius:16px;padding:36px;">
-        <div style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--coral);margin-bottom:20px;">What qualifies us</div>
-        <div style="display:flex;flex-direction:column;gap:14px;">
-          <div style="display:flex;align-items:flex-start;gap:12px;"><div style="width:6px;height:6px;border-radius:50%;background:var(--coral);flex-shrink:0;margin-top:6px;"></div><div style="font-size:14px;color:var(--text-mid);line-height:1.65;">Over two decades of experience in public safety and child protection</div></div>
-          <div style="display:flex;align-items:flex-start;gap:12px;"><div style="width:6px;height:6px;border-radius:50%;background:var(--coral);flex-shrink:0;margin-top:6px;"></div><div style="font-size:14px;color:var(--text-mid);line-height:1.65;">Active experience working inside junior sporting clubs, not advising from the outside</div></div>
-        </div>
-        <div style="margin-top:24px;"><a href="/about" class="btn-outline">Our story →</a></div>
-      </div>
+    <div class="section-inner" style="display:grid;grid-template-columns:1fr 1.1fr;gap:60px;align-items:center;position:relative;z-index:1;">
       <div>
         <div class="eyebrow">Why OneSide</div>
         <h2 style="font-family:'DM Serif Display',serif;font-size:clamp(1.6rem,2.5vw,2.2rem);color:var(--midnight);margin-bottom:18px;line-height:1.2;">Built from experience. Built for clubs.</h2>
         <p style="font-size:15px;color:var(--text-mid);line-height:1.8;margin-bottom:14px;">There was a gap. Sporting clubs were required to meet complex child safe requirements, but the practical support to help them do it simply didn't exist.</p>
         <p style="font-size:15px;color:var(--text-mid);line-height:1.8;margin-bottom:14px;">OneSide was built to fill that gap, by someone who had seen it firsthand, from inside sporting clubs, and who had the expertise to do something about it.</p>
-        <p style="font-size:15px;color:var(--text-mid);line-height:1.8;">Because when it comes to protecting children, there is only OneSide.</p>
+        <p style="font-size:15px;color:var(--text-mid);line-height:1.8;margin-bottom:28px;">Because when it comes to protecting children, there is only OneSide.</p>
+        <a href="/about" class="btn-outline">Our story →</a>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;" class="reveal-stagger">
+        <div style="background:white;border:1px solid var(--muted);border-radius:12px;padding:20px 24px;display:flex;align-items:flex-start;gap:12px;" class="hover-card">
+          <div style="width:6px;height:6px;border-radius:50%;background:var(--coral);flex-shrink:0;margin-top:8px;"></div>
+          <div style="font-size:14px;color:var(--text-mid);line-height:1.65;">Over two decades of experience in public safety and child protection</div>
+        </div>
+        <div style="background:white;border:1px solid var(--muted);border-radius:12px;padding:20px 24px;display:flex;align-items:flex-start;gap:12px;" class="hover-card">
+          <div style="width:6px;height:6px;border-radius:50%;background:var(--coral);flex-shrink:0;margin-top:8px;"></div>
+          <div style="font-size:14px;color:var(--text-mid);line-height:1.65;">Active experience working inside junior sporting clubs, not advising from the outside</div>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- FINAL CTA -->
-  <section class="final-cta">
+  <section class="final-cta reveal">
     <h2>Ready to know exactly where your club stands?</h2>
     <p>Start your Child Safety Gap Assessment, or book a free discovery call to talk it through first.</p>
+    <p style="font-size:13px;opacity:0.6;margin-top:-8px;">Have questions? <a href="/faq" style="color:inherit;text-decoration:underline;text-underline-offset:3px;">Read our FAQ →</a></p>
     <div class="fca">
       <a href="https://buy.stripe.com/eVqdR9deSaiIePq7mo4c800" class="btn-primary" style="font-size:16px;padding:16px 32px;" target="_blank">Start your assessment ↗</a>
       <a href="https://outlook.office.com/book/OneSideAustralia30minDiscoveryCall@onesideaustralia.com.au/?ismsaljsauthenabled" target="_blank" class="btn-secondary" style="font-size:16px;padding:16px 32px;">Book a discovery call</a>
@@ -365,11 +372,78 @@
   </div>
   <div class="ft-bottom">
     <div class="ft-copy">© 2026 OneSide Australia. Child Safety in Sport, across Australia.</div>
-    <ul class="ft-links"><li><a href="/privacy">Privacy</a></li><li><a href="/terms">Terms</a></li><li><a href="/contact">Contact</a></li></ul>
+    <ul class="ft-links"><li><a href="/privacy">Privacy</a></li><li><a href="/terms">Terms</a></li><li><a href="/faq">FAQ</a></li><li><a href="/contact">Contact</a></li></ul>
   </div>
 </footer>
 
 <script src="scripts.js"></script>
+
+<!-- READINESS CHECK MODAL -->
+<div id="quiz-modal" class="quiz-modal" onclick="if(event.target===this)closeQuiz()">
+  <div class="quiz-modal-panel">
+    <div class="quiz-modal-head">
+      <p style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--coral-light);margin:0 0 6px;">Quick check</p>
+      <h2 style="font-family:'DM Serif Display',serif;font-size:1.4rem;color:white;margin:0 0 4px;line-height:1.2;">How ready is your club?</h2>
+      <p style="font-size:13px;color:rgba(255,255,255,0.55);margin:0;">Answer honestly — nothing is stored, and nobody sees your answers.</p>
+    </div>
+    <button onclick="closeQuiz()" aria-label="Close" class="quiz-modal-close">✕</button>
+    <div style="padding:10px 28px 24px;">
+      <div class="quiz-q" data-q="1">
+        <div class="quiz-q-text">Does your club have a written child safe policy that the committee has reviewed in the last 12 months?</div>
+        <div class="quiz-opts">
+          <button class="quiz-btn" onclick="quizAnswer(this,'yes')">Yes</button>
+          <button class="quiz-btn" onclick="quizAnswer(this,'no')">No / not sure</button>
+        </div>
+      </div>
+      <div class="quiz-q" data-q="2">
+        <div class="quiz-q-text">Do all committee members, coaches and regular volunteers hold a current Working With Children Check (or your state's equivalent)?</div>
+        <div class="quiz-opts">
+          <button class="quiz-btn" onclick="quizAnswer(this,'yes')">Yes</button>
+          <button class="quiz-btn" onclick="quizAnswer(this,'no')">No / not sure</button>
+        </div>
+      </div>
+      <div class="quiz-q" data-q="3">
+        <div class="quiz-q-text">Would every junior player at your club know who to talk to if they had a concern?</div>
+        <div class="quiz-opts">
+          <button class="quiz-btn" onclick="quizAnswer(this,'yes')">Yes</button>
+          <button class="quiz-btn" onclick="quizAnswer(this,'no')">No / not sure</button>
+        </div>
+      </div>
+      <div class="quiz-q" data-q="4">
+        <div class="quiz-q-text">Do your child safety processes cover the adults who help out occasionally — scorers, canteen helpers, parents stepping in at training?</div>
+        <div class="quiz-opts">
+          <button class="quiz-btn" onclick="quizAnswer(this,'yes')">Yes</button>
+          <button class="quiz-btn" onclick="quizAnswer(this,'no')">No / not sure</button>
+        </div>
+      </div>
+      <div class="quiz-q" data-q="5">
+        <div class="quiz-q-text">Has anyone at your club completed formal child safety training in the past year?</div>
+        <div class="quiz-opts">
+          <button class="quiz-btn" onclick="quizAnswer(this,'yes')">Yes</button>
+          <button class="quiz-btn" onclick="quizAnswer(this,'no')">No / not sure</button>
+        </div>
+      </div>
+      <div class="quiz-q" data-q="6">
+        <div class="quiz-q-text">Does your club have a documented complaints process designed with children in mind?</div>
+        <div class="quiz-opts">
+          <button class="quiz-btn" onclick="quizAnswer(this,'yes')">Yes</button>
+          <button class="quiz-btn" onclick="quizAnswer(this,'no')">No / not sure</button>
+        </div>
+      </div>
+      <div class="quiz-progress" id="quiz-progress"></div>
+      <div class="quiz-result" id="quiz-result">
+        <div class="quiz-result-inner">
+          <h3 id="quiz-result-title"></h3>
+          <p id="quiz-result-text"></p>
+          <div class="fca">
+            <a href="https://buy.stripe.com/eVqdR9deSaiIePq7mo4c800" class="btn-primary" target="_blank">Take the full assessment ↗</a>
+            <a href="/assessment" class="btn-outline" style="border-color:rgba(255,255,255,0.25);color:rgba(255,255,255,0.85);">How it works →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- NEWSLETTER MODAL -->
 <div id="newsletter-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(13,31,53,0.85);backdrop-filter:blur(3px);align-items:center;justify-content:center;padding:1rem;">

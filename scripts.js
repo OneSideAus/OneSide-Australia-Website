@@ -323,3 +323,140 @@ function togglePrivacy() {
     arrow.textContent = '+';
   }
 }
+
+/* ==============================
+   ANIMATION & INTERACTION LAYER
+   ============================== */
+
+var osReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* NAV — add shadow + full opacity once the page scrolls */
+document.addEventListener('DOMContentLoaded', function () {
+  var nav = document.querySelector('nav');
+  if (!nav) return;
+  function onNavScroll() { nav.classList.toggle('scrolled', window.scrollY > 10); }
+  window.addEventListener('scroll', onNavScroll, { passive: true });
+  onNavScroll();
+});
+
+/* HERO PARALLAX — subtle background drift, skipped for reduced motion */
+document.addEventListener('DOMContentLoaded', function () {
+  var hero = document.querySelector('.hero-parallax');
+  if (!hero || osReducedMotion) return;
+  var ticking = false;
+  window.addEventListener('scroll', function () {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function () {
+      var y = window.scrollY;
+      if (y < window.innerHeight * 1.3) {
+        hero.style.backgroundPositionY = 'calc(50% + ' + (y * 0.18).toFixed(1) + 'px)';
+      }
+      ticking = false;
+    });
+  }, { passive: true });
+});
+
+/* ANIMATED COUNTERS — any element with data-counter="N" counts up on scroll
+   into view. Optional: data-counter-suffix="+" data-counter-delay="200" */
+document.addEventListener('DOMContentLoaded', function () {
+  var counters = document.querySelectorAll('[data-counter]');
+  if (!counters.length || !('IntersectionObserver' in window)) return;
+  var obs = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      obs.unobserve(entry.target);
+      var el = entry.target;
+      var target = parseFloat(el.dataset.counter) || 0;
+      var suffix = el.dataset.counterSuffix || '';
+      if (osReducedMotion) { el.textContent = target + suffix; return; }
+      var delay = parseInt(el.dataset.counterDelay || '0', 10);
+      setTimeout(function () {
+        var start = null, dur = 1400;
+        function step(ts) {
+          if (!start) start = ts;
+          var p = Math.min((ts - start) / dur, 1);
+          var eased = 1 - Math.pow(1 - p, 3);
+          el.textContent = Math.round(target * eased) + suffix;
+          if (p < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+      }, delay);
+    });
+  }, { threshold: 0.4 });
+  counters.forEach(function (el) { obs.observe(el); });
+});
+
+/* READINESS QUICK CHECK */
+var quizAnswers = {};
+
+function openQuiz() {
+  var m = document.getElementById('quiz-modal');
+  if (!m) return;
+  m.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeQuiz() {
+  var m = document.getElementById('quiz-modal');
+  if (!m) return;
+  m.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') closeQuiz();
+});
+
+function quizAnswer(btn, val) {
+  var q = btn.closest('.quiz-q');
+  if (!q) return;
+  quizAnswers[q.dataset.q] = val;
+  q.querySelectorAll('.quiz-btn').forEach(function (b) { b.classList.remove('sel-yes', 'sel-no'); });
+  btn.classList.add(val === 'yes' ? 'sel-yes' : 'sel-no');
+
+  var total = document.querySelectorAll('.quiz-q').length;
+  var answered = Object.keys(quizAnswers).length;
+  var prog = document.getElementById('quiz-progress');
+  if (prog) prog.textContent = answered < total ? answered + ' of ' + total + ' answered' : '';
+  if (answered === total) showQuizResult();
+}
+
+function showQuizResult() {
+  var noCount = 0;
+  for (var k in quizAnswers) { if (quizAnswers[k] === 'no') noCount++; }
+
+  var title, body;
+  if (noCount === 0) {
+    title = 'Strong foundations.';
+    body = 'Your club looks to be in good shape. The full assessment will confirm it against the national and sport-specific requirements, and catch anything that’s hard to see from the inside.';
+  } else if (noCount <= 2) {
+    title = 'There are likely gaps.';
+    body = 'A couple of your answers suggest gaps the full assessment would pinpoint exactly, with practical options to close each one.';
+  } else {
+    title = 'Your club may be at risk.';
+    body = 'Take the full assessment to find out exactly where your club stands, and get practical, achievable options to become a child safe club.';
+  }
+
+  var titleEl = document.getElementById('quiz-result-title');
+  var textEl = document.getElementById('quiz-result-text');
+  if (titleEl) titleEl.textContent = title;
+  if (textEl) textEl.textContent = body;
+
+  var panel = document.getElementById('quiz-result');
+  if (panel) {
+    panel.classList.add('show');
+    if (!osReducedMotion) {
+      setTimeout(function () { panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 350);
+    }
+  }
+}
+
+/* FAQ ACCORDION */
+function toggleFaq(btn) {
+  var item = btn.closest('.faq-item');
+  if (!item) return;
+  var isOpen = item.classList.contains('open');
+  item.classList.toggle('open', !isOpen);
+  btn.setAttribute('aria-expanded', String(!isOpen));
+}

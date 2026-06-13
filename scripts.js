@@ -460,3 +460,94 @@ function toggleFaq(btn) {
   item.classList.toggle('open', !isOpen);
   btn.setAttribute('aria-expanded', String(!isOpen));
 }
+
+/* ── CHAT WIDGET ────────────────────────────── */
+var chatHistory = [];
+var chatOpen = false;
+var chatStreaming = false;
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  var panel = document.getElementById('chat-panel');
+  var bubble = document.getElementById('chat-bubble');
+  if (!panel || !bubble) return;
+  if (chatOpen) {
+    panel.classList.add('open');
+    bubble.querySelector('.cb-open').style.display = 'none';
+    bubble.querySelector('.cb-close').style.display = 'block';
+    if (chatHistory.length === 0) {
+      addChatMessage('assistant', "Hi! I'm the OneSide assistant. Ask me anything about the Child Safety Gap Assessment, pricing, or how it works.");
+    }
+    var inp = document.getElementById('chat-input');
+    if (inp) inp.focus();
+  } else {
+    panel.classList.remove('open');
+    bubble.querySelector('.cb-open').style.display = 'block';
+    bubble.querySelector('.cb-close').style.display = 'none';
+  }
+}
+
+function addChatMessage(role, text) {
+  var msgs = document.getElementById('chat-messages');
+  if (!msgs) return null;
+  var div = document.createElement('div');
+  div.className = 'chat-msg ' + role;
+  div.textContent = text;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+async function sendChat() {
+  if (chatStreaming) return;
+  var input = document.getElementById('chat-input');
+  var text = input ? input.value.trim() : '';
+  if (!text) return;
+
+  input.value = '';
+  chatHistory.push({ role: 'user', content: text });
+  addChatMessage('user', text);
+
+  var sendBtn = document.getElementById('chat-send');
+  if (sendBtn) sendBtn.disabled = true;
+  chatStreaming = true;
+
+  var assistantDiv = addChatMessage('assistant', '…');
+  var accumulated = '';
+
+  try {
+    var res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: chatHistory })
+    });
+
+    var reader = res.body.getReader();
+    var decoder = new TextDecoder();
+    assistantDiv.textContent = '';
+
+    while (true) {
+      var chunk = await reader.read();
+      if (chunk.done) break;
+      accumulated += decoder.decode(chunk.value, { stream: true });
+      assistantDiv.textContent = accumulated;
+      var msgs = document.getElementById('chat-messages');
+      if (msgs) msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    chatHistory.push({ role: 'assistant', content: accumulated });
+  } catch (err) {
+    assistantDiv.textContent = 'Sorry, something went wrong. Please try again.';
+  }
+
+  chatStreaming = false;
+  if (sendBtn) sendBtn.disabled = false;
+  if (input) input.focus();
+}
+
+function chatKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendChat();
+  }
+}

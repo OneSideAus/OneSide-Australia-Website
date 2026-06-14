@@ -221,7 +221,7 @@ function deduplicateUpdates(updates) {
 
 // ─── Build email HTML ─────────────────────────────────────────────────────────
 
-function buildEmailHtml(allUpdates, approveBaseUrl) {
+function buildEmailHtml(allUpdates, approveBaseUrl, scanSecret) {
   const date = new Date().toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
   const updateCards = allUpdates.map((update) => {
@@ -256,6 +256,10 @@ function buildEmailHtml(allUpdates, approveBaseUrl) {
       <p style="font-size:13px;color:#7A95AA;margin:0;">Review each update below and click <strong>Approve and publish</strong> for any you want to add to the Updates page. Ignored updates will not be published.</p>
     </div>
     ${updateCards}
+    <div style="background:white;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;">
+      <p style="font-size:14px;color:#4A6580;margin:0 0 16px;">Happy with everything? Publish all ${allUpdates.length} updates in one click.</p>
+      <a href="${approveBaseUrl}/api/approve-all?secret=${encodeURIComponent(scanSecret || '')}" style="display:inline-block;background:#0D1F35;color:white;font-size:14px;font-weight:600;padding:14px 32px;border-radius:8px;text-decoration:none;">Approve all ${allUpdates.length} updates →</a>
+    </div>
     <p style="font-size:12px;color:#7A95AA;text-align:center;margin-top:24px;">OneSide Australia — Updates Agent · <a href="https://onesideaustralia.com.au" style="color:#D4614E;">onesideaustralia.com.au</a></p>
   </div>
 </body>
@@ -368,7 +372,33 @@ export default async function handler(req, res) {
   }
 
   const approveBaseUrl = process.env.SITE_URL || 'https://onesideaustralia.com.au';
-  const emailHtml = buildEmailHtml(dedupedUpdates, approveBaseUrl);
+
+  // Save pending updates to GitHub so approve-all can retrieve them
+  try {
+    const ghHeaders = {
+      'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json',
+      'User-Agent': 'OneSide-Updates-Agent'
+    };
+    // Check if file already exists (need sha to update)
+    const existingRes = await fetch('https://api.github.com/repos/OneSideAus/OneSide-Australia-Website/contents/_pending-updates.json', { headers: ghHeaders });
+    const existingData = existingRes.ok ? await existingRes.json() : null;
+    await fetch('https://api.github.com/repos/OneSideAus/OneSide-Australia-Website/contents/_pending-updates.json', {
+      method: 'PUT',
+      headers: ghHeaders,
+      body: JSON.stringify({
+        message: 'Save pending updates for approve-all',
+        content: Buffer.from(JSON.stringify(dedupedUpdates)).toString('base64'),
+        ...(existingData?.sha ? { sha: existingData.sha } : {})
+      })
+    });
+    console.log(`Saved ${dedupedUpdates.length} pending updates to GitHub.`);
+  } catch (e) {
+    console.warn('Could not save pending updates:', e.message);
+  }
+
+  const emailHtml = buildEmailHtml(dedupedUpdates, approveBaseUrl, process.env.SCAN_SECRET);
 
   const emailResponse = await fetch('https://api.resend.com/emails', {
     method: 'POST',

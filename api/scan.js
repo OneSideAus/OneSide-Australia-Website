@@ -122,7 +122,7 @@ function stripHtml(html) {
 
 // ─── Have Claude assess and write up the articles ────────────────────────────
 
-async function assessArticlesWithClaude(articles, sinceDate) {
+async function assessArticlesWithClaude(articles, sinceDate, publishedTitles = []) {
   if (articles.length === 0) return null;
 
   const today = new Date().toISOString().split('T')[0];
@@ -149,13 +149,16 @@ Your task:
 
 2. Exclude anything not relevant to Australian sporting clubs (e.g. school education, international news with no Australian relevance, unrelated child welfare topics).
 
-3. For each relevant article, write a 2-3 sentence update in OneSide Australia's voice: plain Australian English, factual, helpful tone, no em dashes, no AI writing patterns.
+3. Exclude any article that covers the same topic as an already-published update. The following titles have already been published — do not include updates that duplicate or substantially overlap with them:
+${publishedTitles.length > 0 ? publishedTitles.map(t => `- ${t}`).join('\n') : '(none yet)'}
 
-4. Assign:
+4. For each relevant article, write a 2-3 sentence update in OneSide Australia's voice: plain Australian English, factual, helpful tone, no em dashes, no AI writing patterns.
+
+5. Assign:
    - category: National, VIC, NSW, QLD, SA, WA, TAS, ACT, NT, AFL, Netball, Cricket, Soccer, Rugby League, Rugby Union, Basketball, Tennis, Golf
    - type: New, Update, Reminder, Resource, News
 
-5. For sourceUrl, always use the official primary source — the government website, regulator, or sporting body's own page — NOT a media article or news coverage of the item. If you only have a media article URL, find the official source it refers to and use that instead.
+6. For sourceUrl, always use the official primary source — the government website, regulator, or sporting body's own page — NOT a media article or news coverage of the item. If you only have a media article URL, find the official source it refers to and use that instead.
 
 If NONE of the articles are relevant, respond with exactly: NO_NEW_CONTENT
 
@@ -275,6 +278,27 @@ export default async function handler(req, res) {
   const sinceDate = req.query.since || null;
   console.log(`OneSide Updates Agent starting Google News scan... ${sinceDate ? `(since ${sinceDate})` : '(last 7 days)'}`);
 
+  // ── Fetch already-published update titles from updates.html ──────────────
+  let publishedTitles = [];
+  try {
+    const ghRes = await fetch(
+      'https://api.github.com/repos/OneSideAus/OneSide-Australia-Website/contents/updates.html',
+      { headers: { 'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json', 'User-Agent': 'OneSide-Updates-Agent' } }
+    );
+    if (ghRes.ok) {
+      const ghData = await ghRes.json();
+      const html = Buffer.from(ghData.content, 'base64').toString('utf-8');
+      const titleRegex = /<h5>([^<]+)<\/h5>/g;
+      let m;
+      while ((m = titleRegex.exec(html)) !== null) {
+        publishedTitles.push(m[1].replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').trim());
+      }
+      console.log(`Found ${publishedTitles.length} already-published updates to exclude.`);
+    }
+  } catch (e) {
+    console.warn('Could not fetch published titles:', e.message);
+  }
+
   // Fetch all RSS feeds in parallel
   const rssResults = await Promise.allSettled(
     SEARCH_QUERIES.map(q => fetchGoogleNewsRSS(q.query, sinceDate))
@@ -318,7 +342,7 @@ export default async function handler(req, res) {
   const BATCH_SIZE = 30;
   for (let i = 0; i < allArticles.length; i += BATCH_SIZE) {
     const batch = allArticles.slice(i, i + BATCH_SIZE);
-    const result = await assessArticlesWithClaude(batch, sinceDate);
+    const result = await assessArticlesWithClaude(batch, sinceDate, publishedTitles);
     if (result?.updates) allUpdates.push(...result.updates);
   }
 

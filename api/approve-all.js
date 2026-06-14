@@ -61,7 +61,22 @@ export default async function handler(req, res) {
 
     updatesHtml = updatesHtml.replace(insertMarker, `${insertMarker}\n${allNewCards}`);
 
-    // ── 4. Push updated updates.html ─────────────────────────────────────────
+    // ── 4. Extract all cards, sort newest-first, rewrite list ────────────────
+    const cardRegex = /<div class="update-card"[^>]*data-sortdate="([^"]*)"[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/g;
+    const allCards = [];
+    let m;
+    while ((m = cardRegex.exec(updatesHtml)) !== null) {
+      allCards.push({ sortdate: m[1], html: m[0] });
+    }
+    allCards.sort((a, b) => b.sortdate.localeCompare(a.sortdate));
+
+    const sortedListHtml = allCards.map(c => '            ' + c.html.trim()).join('\n');
+    updatesHtml = updatesHtml.replace(
+      /(<div id="updates-list">)([\s\S]*?)(\n {10}<\/div>)/,
+      `$1\n${sortedListHtml}$3`
+    );
+
+    // ── 5. Push updated updates.html ─────────────────────────────────────────
     const pushUpdates = await fetch(
       `https://api.github.com/repos/${owner}/${repo}/contents/updates.html`,
       {
@@ -76,14 +91,7 @@ export default async function handler(req, res) {
     );
     if (!pushUpdates.ok) throw new Error('Failed to push updates.html to GitHub');
 
-    // ── 5. Extract top 3 and sync index.html ─────────────────────────────────
-    const cardRegex = /<div class="update-card"[^>]*data-sortdate="([^"]*)"[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/g;
-    const allCards = [];
-    let m;
-    while ((m = cardRegex.exec(updatesHtml)) !== null) {
-      allCards.push({ sortdate: m[1], html: m[0] });
-    }
-    allCards.sort((a, b) => b.sortdate.localeCompare(a.sortdate));
+    // ── 6. Top 3 for homepage (already sorted above) ─────────────────────────
     const top3 = allCards.slice(0, 3).map(c => '      ' + c.html.trim()).join('\n');
 
     const indexRes = await fetch(

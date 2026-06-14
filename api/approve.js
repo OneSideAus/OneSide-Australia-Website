@@ -46,12 +46,26 @@ export default async function handler(req, res) {
 
     const newCard = `            <div class="update-card" data-region="${regionAttr}" data-sport="${sportAttr}" data-sortdate="${sortDate}"><div class="uc-head" onclick="toggleUpdate(this.closest('.update-card'))"><div class="uc-head-inner"><div class="uc-meta"><span class="uc-tag ${tagClass}">${escapeHtml(category)} · ${escapeHtml(type)}</span><span class="uc-date">${escapeHtml(displayDate)}</span></div><h5>${escapeHtml(title)}</h5></div><span class="uc-chevron">▾</span></div><div class="uc-body"><p>${escapeHtml(body)}</p>${sourceLink}</div></div>`;
 
-    // ── 3. Insert at top of updates-list ────────────────────────────────────
+    // ── 3. Add new card, extract all, sort newest-first, rewrite list ────────
     const insertMarker = '<div id="updates-list">';
     if (!updatesHtml.includes(insertMarker)) {
       throw new Error('Could not find updates list in updates.html');
     }
     updatesHtml = updatesHtml.replace(insertMarker, `${insertMarker}\n${newCard}`);
+
+    const cardRegex = /<div class="update-card"[^>]*data-sortdate="([^"]*)"[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/g;
+    const allCards = [];
+    let m;
+    while ((m = cardRegex.exec(updatesHtml)) !== null) {
+      allCards.push({ sortdate: m[1], html: m[0] });
+    }
+    allCards.sort((a, b) => b.sortdate.localeCompare(a.sortdate));
+
+    const sortedListHtml = allCards.map(c => '            ' + c.html.trim()).join('\n');
+    updatesHtml = updatesHtml.replace(
+      /(<div id="updates-list">)([\s\S]*?)(\n {10}<\/div>)/,
+      `$1\n${sortedListHtml}$3`
+    );
 
     // ── 4. Push updated updates.html to GitHub ───────────────────────────────
     const pushUpdates = await fetch(
@@ -68,14 +82,7 @@ export default async function handler(req, res) {
     );
     if (!pushUpdates.ok) throw new Error('Failed to push updates.html to GitHub');
 
-    // ── 5. Extract 3 newest cards from the updated updates.html ─────────────
-    const cardRegex = /<div class="update-card"[^>]*data-sortdate="([^"]*)"[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/g;
-    const allCards = [];
-    let m;
-    while ((m = cardRegex.exec(updatesHtml)) !== null) {
-      allCards.push({ sortdate: m[1], html: m[0] });
-    }
-    allCards.sort((a, b) => b.sortdate.localeCompare(a.sortdate));
+    // ── 5. Top 3 for homepage (already sorted above) ─────────────────────────
     const top3 = allCards.slice(0, 3).map(c => '      ' + c.html.trim()).join('\n');
 
     // ── 6. Fetch current index.html ──────────────────────────────────────────

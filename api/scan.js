@@ -47,6 +47,10 @@ const SEARCH_QUERIES = [
   { query: 'site:esafety.gov.au sport online safety update', label: 'eSafety Commissioner' },
   { query: 'eSafety Commissioner sport community clubs online safety', label: 'eSafety — Sport' },
 
+  // National Office for Child Safety
+  { query: 'site:childsafety.gov.au organisations update', label: 'National Office for Child Safety' },
+  { query: 'National Office for Child Safety sport organisations guidance', label: 'National Office for Child Safety — Sport' },
+
   // Sport-specific
   { query: 'AFL child safeguarding safe sport update', label: 'AFL' },
   { query: 'Football Australia soccer child safeguarding update', label: 'Soccer' },

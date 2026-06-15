@@ -14,7 +14,7 @@ OneSide Australia was founded by Ang Marcon, a child safety consultant with over
 Cost: $270 AUD (one-time fee, no subscription)
 What it is: A structured self-assessment. The club tells OneSide what they do and how they operate — policies, processes, written and unwritten. OneSide measures it against national and sport-specific requirements and produces a gap report specific to that club.
 What it covers: All 11 National Principles for Child Safe Organisations, the National Integrity Framework Safeguarding Children and Young People Policy, the club's state or territory child safe standards, and sport-specific requirements.
-How long: About 15–20 minutes to complete. The report is generated immediately and emailed to the club.
+How long: About 30–40 minutes to complete. The report is generated immediately and emailed to the club.
 The report: Findings rated as Met, Partial, or Gap with colour-coded badges for each standard. Practical, achievable options for addressing each gap — specific to the club, not just a generic checklist.
 Who should complete it: Someone who knows how the club actually runs day to day — typically the Child Safety Officer, secretary, or president. Honest answers matter more than perfect paperwork.
 

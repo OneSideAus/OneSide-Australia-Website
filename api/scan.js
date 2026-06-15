@@ -282,25 +282,60 @@ export default async function handler(req, res) {
   const sinceDate = req.query.since || null;
   console.log(`OneSide Updates Agent starting Google News scan... ${sinceDate ? `(since ${sinceDate})` : '(last 7 days)'}`);
 
-  // ── Fetch already-published update titles from updates.html ──────────────
+  // ── Fetch updates.html: extract published titles + purge cards > 6 months ─
   let publishedTitles = [];
+  const ghHeaders = { 'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json', 'User-Agent': 'OneSide-Updates-Agent' };
   try {
     const ghRes = await fetch(
       'https://api.github.com/repos/OneSideAus/OneSide-Australia-Website/contents/updates.html',
-      { headers: { 'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json', 'User-Agent': 'OneSide-Updates-Agent' } }
+      { headers: ghHeaders }
     );
     if (ghRes.ok) {
       const ghData = await ghRes.json();
-      const html = Buffer.from(ghData.content, 'base64').toString('utf-8');
-      const titleRegex = /<h5>([^<]+)<\/h5>/g;
-      let m;
-      while ((m = titleRegex.exec(html)) !== null) {
-        publishedTitles.push(m[1].replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').trim());
+      const updatesSha = ghData.sha;
+      let updatesHtml = Buffer.from(ghData.content, 'base64').toString('utf-8');
+
+      // Calculate 6-month cutoff as "YYYY-MM"
+      const cutoffDate = new Date();
+      cutoffDate.setMonth(cutoffDate.getMonth() - 6);
+      const cutoff = `${cutoffDate.getFullYear()}-${String(cutoffDate.getMonth() + 1).padStart(2, '0')}`;
+
+      // Extract all cards
+      const cardRegex = /<div class="update-card"[^>]*data-sortdate="([^"]*)"[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/g;
+      const allCards = [], expiredCards = [];
+      let mc;
+      while ((mc = cardRegex.exec(updatesHtml)) !== null) {
+        const card = { sortdate: mc[1], html: mc[0] };
+        if (mc[1] < cutoff) expiredCards.push(card);
+        else allCards.push(card);
       }
-      console.log(`Found ${publishedTitles.length} already-published updates to exclude.`);
+
+      // Collect titles of kept cards for dedup
+      const titleRegex = /<h5>([^<]+)<\/h5>/g;
+      let mt;
+      while ((mt = titleRegex.exec(updatesHtml)) !== null) {
+        publishedTitles.push(mt[1].replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').trim());
+      }
+      console.log(`Found ${publishedTitles.length} published titles. ${expiredCards.length} cards older than ${cutoff} to purge.`);
+
+      // Push purged updates.html if anything was removed
+      if (expiredCards.length > 0) {
+        allCards.sort((a, b) => b.sortdate.localeCompare(a.sortdate));
+        const sortedListHtml = allCards.map(c => '            ' + c.html.trim()).join('\n');
+        const purgedHtml = updatesHtml.replace(
+          /(<div id="updates-list">)([\s\S]*?)(\n {10}<\/div>)/,
+          `$1\n${sortedListHtml}$3`
+        );
+        const purgeRes = await fetch(
+          'https://api.github.com/repos/OneSideAus/OneSide-Australia-Website/contents/updates.html',
+          { method: 'PUT', headers: ghHeaders, body: JSON.stringify({ message: `Purge ${expiredCards.length} update(s) older than 6 months`, content: Buffer.from(purgedHtml).toString('base64'), sha: updatesSha }) }
+        );
+        if (purgeRes.ok) console.log(`Purged ${expiredCards.length} expired cards from updates.html`);
+        else console.error('Failed to push purged updates.html:', await purgeRes.text());
+      }
     }
   } catch (e) {
-    console.warn('Could not fetch published titles:', e.message);
+    console.warn('Could not fetch/purge updates.html:', e.message);
   }
 
   // Fetch all RSS feeds in parallel

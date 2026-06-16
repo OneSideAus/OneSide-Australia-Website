@@ -127,80 +127,100 @@
   </div>
 
   <!-- Bouncing ball -->
-  <div id="hero-ball" style="position:absolute;width:52px;height:52px;pointer-events:none;z-index:10;opacity:0;top:0;left:0;"></div>
+  <!-- AFL Goal Posts -->
+  <div id="hero-posts" style="position:absolute;left:8%;bottom:0;z-index:3;pointer-events:none;">
+    <svg width="150" height="175" viewBox="0 0 150 175" xmlns="http://www.w3.org/2000/svg">
+      <!-- Behind post left -->
+      <rect x="8"   y="65"  width="4" height="110" fill="white" opacity="0.45" rx="2"/>
+      <!-- Goal post left -->
+      <rect x="42"  y="0"   width="6" height="175" fill="white" opacity="0.85" rx="2.5"/>
+      <!-- Goal post right -->
+      <rect x="102" y="0"   width="6" height="175" fill="white" opacity="0.85" rx="2.5"/>
+      <!-- Behind post right -->
+      <rect x="138" y="65"  width="4" height="110" fill="white" opacity="0.45" rx="2"/>
+      <!-- Glow on center posts -->
+      <rect x="40"  y="0"   width="10" height="175" fill="rgba(255,255,255,0.06)" rx="5"/>
+      <rect x="100" y="0"   width="10" height="175" fill="rgba(255,255,255,0.06)" rx="5"/>
+    </svg>
+  </div>
+
+  <!-- GOAL! flash -->
+  <div id="goal-flash" style="position:absolute;font-family:'DM Serif Display',serif;font-size:2.2rem;font-style:italic;color:#D4614E;opacity:0;pointer-events:none;z-index:20;text-shadow:0 0 24px rgba(212,97,78,0.9),0 2px 8px rgba(0,0,0,0.5);white-space:nowrap;left:8%;bottom:185px;">GOAL!</div>
+
+  <!-- Football ball -->
+  <div id="hero-ball" style="position:absolute;width:54px;height:54px;pointer-events:none;z-index:10;opacity:0;top:0;left:0;"></div>
 </section>
 
 <script>
 (function(){
-  var basketball = '<svg viewBox="0 0 52 52" style="width:100%;height:100%;display:block;filter:drop-shadow(0 5px 10px rgba(0,0,0,0.55))" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="b1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#F8873C"/><stop offset="45%" stop-color="#D4581A"/><stop offset="100%" stop-color="#7A2400"/></radialGradient><radialGradient id="b2" cx="34%" cy="26%" r="42%"><stop offset="0%" stop-color="rgba(255,255,255,0.32)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><clipPath id="bc1"><circle cx="26" cy="26" r="25"/></clipPath></defs><circle cx="26" cy="26" r="25" fill="url(#b1)"/><g clip-path="url(#bc1)" stroke="#1e0800" stroke-width="1.5" fill="none" stroke-linecap="round"><line x1="1" y1="26" x2="51" y2="26"/><line x1="26" y1="1" x2="26" y2="51"/><path d="M26 1 C14 9 8 17 8 26 C8 35 14 43 26 51"/><path d="M26 1 C38 9 44 17 44 26 C44 35 38 43 26 51"/></g><circle cx="26" cy="26" r="25" fill="url(#b2)"/><circle cx="26" cy="26" r="25" fill="none" stroke="#1a0500" stroke-width="1.2"/></svg>';
+  var footballSVG = '<svg viewBox="0 0 54 54" style="width:100%;height:100%;display:block;" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="fg" cx="36%" cy="30%" r="65%"><stop offset="0%" stop-color="#D08828"/><stop offset="50%" stop-color="#8B4A10"/><stop offset="100%" stop-color="#3E1A04"/></radialGradient><radialGradient id="fs" cx="32%" cy="26%" r="40%"><stop offset="0%" stop-color="rgba(255,255,255,0.26)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><filter id="dshadow"><feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="rgba(0,0,0,0.6)"/></filter><clipPath id="fclip"><ellipse cx="27" cy="27" rx="25" ry="16"/></clipPath></defs><ellipse cx="27" cy="27" rx="25" ry="16" fill="url(#fg)" filter="url(#dshadow)"/><g clip-path="url(#fclip)" stroke="#1e0800" stroke-width="1.3" fill="none"><path d="M2 27 Q27 12 52 27"/><path d="M2 27 Q27 42 52 27"/></g><line x1="27" y1="14" x2="27" y2="40" stroke="rgba(255,255,255,0.45)" stroke-width="0.9"/><g stroke="white" stroke-width="1.9" stroke-linecap="round"><line x1="22" y1="19" x2="32" y2="19"/><line x1="22" y1="23" x2="32" y2="23"/><line x1="22" y1="27" x2="32" y2="27"/><line x1="22" y1="31" x2="32" y2="31"/><line x1="22" y1="35" x2="32" y2="35"/></g><ellipse cx="27" cy="27" rx="25" ry="16" fill="url(#fs)"/><ellipse cx="27" cy="27" rx="25" ry="16" fill="none" stroke="#1a0500" stroke-width="1.2"/></svg>';
 
-  var football = '<svg viewBox="0 0 52 52" style="width:100%;height:100%;display:block;filter:drop-shadow(0 5px 10px rgba(0,0,0,0.55))" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="f1" cx="36%" cy="30%" r="65%"><stop offset="0%" stop-color="#C97C22"/><stop offset="50%" stop-color="#8B4A10"/><stop offset="100%" stop-color="#3E1A04"/></radialGradient><radialGradient id="f2" cx="32%" cy="26%" r="40%"><stop offset="0%" stop-color="rgba(255,255,255,0.24)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><clipPath id="fc1"><ellipse cx="26" cy="26" rx="24" ry="15"/></clipPath></defs><ellipse cx="26" cy="26" rx="24" ry="15" fill="url(#f1)"/><g clip-path="url(#fc1)" stroke="#1e0800" stroke-width="1.3" fill="none"><path d="M2 26 Q26 11 50 26"/><path d="M2 26 Q26 41 50 26"/></g><line x1="26" y1="14" x2="26" y2="38" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/><g stroke="white" stroke-width="1.8" stroke-linecap="round"><line x1="21" y1="18" x2="31" y2="18"/><line x1="21" y1="22" x2="31" y2="22"/><line x1="21" y1="26" x2="31" y2="26"/><line x1="21" y1="30" x2="31" y2="30"/><line x1="21" y1="34" x2="31" y2="34"/></g><ellipse cx="26" cy="26" rx="24" ry="15" fill="url(#f2)"/><ellipse cx="26" cy="26" rx="24" ry="15" fill="none" stroke="#1a0500" stroke-width="1.2"/></svg>';
+  var ballEl   = document.getElementById('hero-ball');
+  var postsEl  = document.getElementById('hero-posts');
+  var flashEl  = document.getElementById('goal-flash');
+  var hero     = ballEl.closest('section');
+  var SIZE     = 54;
 
-  var netball = '<svg viewBox="0 0 52 52" style="width:100%;height:100%;display:block;filter:drop-shadow(0 5px 10px rgba(0,0,0,0.55))" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="n1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#F2F5F8"/><stop offset="55%" stop-color="#CBD6E0"/><stop offset="100%" stop-color="#7A8E9E"/></radialGradient><radialGradient id="n2" cx="34%" cy="26%" r="42%"><stop offset="0%" stop-color="rgba(255,255,255,0.6)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><clipPath id="nc1"><circle cx="26" cy="26" r="25"/></clipPath></defs><circle cx="26" cy="26" r="25" fill="url(#n1)"/><g clip-path="url(#nc1)" stroke="#0D3A5C" stroke-width="1.5" fill="none" stroke-linecap="round"><line x1="1" y1="26" x2="51" y2="26"/><line x1="26" y1="1" x2="26" y2="51"/><path d="M26 1 C14 9 8 17 8 26"/><path d="M8 26 C8 35 14 43 26 51"/><path d="M26 1 C38 9 44 17 44 26"/><path d="M44 26 C44 35 38 43 26 51"/></g><circle cx="26" cy="26" r="25" fill="url(#n2)"/><circle cx="26" cy="26" r="25" fill="none" stroke="#0D2A40" stroke-width="1.2"/></svg>';
+  function bezier(t, p0, p1, p2) {
+    var m = 1 - t; return m*m*p0 + 2*m*t*p1 + t*t*p2;
+  }
 
-  var balls = [basketball, football, netball];
-  var ballEl = document.getElementById('hero-ball');
-  var hero = ballEl.closest('section');
-  var currentIdx = 0;
-  var SIZE = 52;
-
-  function getY(bp, floor, peak, bounces) {
-    var h = (floor - peak) * Math.pow(1 - bp * 0.6, 1.3);
-    return floor - Math.abs(Math.sin(bp * bounces * Math.PI)) * h;
+  function flashGoal() {
+    flashEl.style.transition = 'opacity 0.12s ease';
+    flashEl.style.opacity = '1';
+    setTimeout(function(){
+      flashEl.style.transition = 'opacity 0.6s ease';
+      flashEl.style.opacity = '0';
+    }, 600);
   }
 
   function runBall() {
-    ballEl.innerHTML = balls[currentIdx];
-    var heroRect = hero.getBoundingClientRect();
-    var leftX  = 28;
-    var rightX = heroRect.width - SIZE - 28;
-    var floorY = heroRect.height * 0.76 - SIZE;
-    var peakY  = heroRect.height * 0.08;
-    var bounces = 3;
-    var duration = 9000;
-    var circ = Math.PI * SIZE;
-    var start = null;
+    ballEl.innerHTML = footballSVG;
+    var hr = hero.getBoundingClientRect();
+    var pr = postsEl.getBoundingClientRect();
+
+    // Center of the gap between the two goal posts
+    var goalCenterX = (pr.left - hr.left) + 75 - SIZE / 2;  // 75 = SVG center
+    var goalY       = (pr.top  - hr.top)  + 30 - SIZE / 2;  // near post tops
+
+    var startX = hr.width - 80;
+    var startY = hr.height * 0.55;
+    var ctrlX  = hr.width * 0.48;
+    var ctrlY  = hr.height * 0.08;
+
+    var duration = 3400;
+    var start    = null;
+    var goalFired = false;
 
     ballEl.style.opacity = '1';
 
     function step(ts) {
       if (!start) start = ts;
       var p = Math.min((ts - start) / duration, 1);
-      var x, y, rot, alpha = 1;
-      var span = rightX - leftX;
 
-      if (p < 0.47) {
-        var bp = p / 0.47;
-        x = leftX + span * bp;
-        y = getY(bp, floorY, peakY, bounces);
-        rot = (x - leftX) / circ * 360;
-      } else if (p < 0.94) {
-        var bp2 = (p - 0.47) / 0.47;
-        x = rightX - span * bp2;
-        y = getY(bp2, floorY, peakY, bounces);
-        rot = span / circ * 360 - (rightX - x) / circ * 360;
-      } else {
-        var fp = (p - 0.94) / 0.06;
-        x = leftX; y = floorY; rot = 0;
-        alpha = 1 - fp * fp;
-      }
+      var x   = bezier(p, startX, ctrlX, goalCenterX);
+      var y   = bezier(p, startY, ctrlY, goalY);
+      var rot = p * 1080;
+      var alpha = p > 0.78 ? 1 - (p - 0.78) / 0.22 : 1;
 
-      ballEl.style.opacity = String(alpha);
+      // Fire GOAL! when ball reaches ~80% of its journey
+      if (p >= 0.78 && !goalFired) { goalFired = true; flashGoal(); }
+
+      ballEl.style.opacity  = String(Math.max(0, alpha));
       ballEl.style.transform = 'translate(' + x + 'px,' + y + 'px) rotate(' + rot + 'deg)';
 
       if (p < 1) {
         requestAnimationFrame(step);
       } else {
         ballEl.style.opacity = '0';
-        currentIdx = (currentIdx + 1) % balls.length;
-        setTimeout(runBall, 1200);
+        setTimeout(runBall, 3500);
       }
     }
 
     requestAnimationFrame(step);
   }
 
-  setTimeout(runBall, 2000);
+  setTimeout(runBall, 1800);
 })();
 </script>
 

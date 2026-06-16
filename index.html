@@ -127,7 +127,20 @@
   </div>
 
   <!-- Bouncing ball -->
-  <div id="hero-ball" style="position:absolute;width:18px;height:18px;border-radius:50%;background:var(--coral);box-shadow:0 0 12px rgba(212,97,78,0.8),0 0 28px rgba(212,97,78,0.4);pointer-events:none;z-index:10;opacity:0;top:0;left:0;transform:translate(0,0);"></div>
+  <div id="hero-ball" style="position:absolute;width:42px;height:42px;border-radius:50%;pointer-events:none;z-index:10;opacity:0;top:0;left:0;transform:translate(0,0);box-shadow:0 6px 20px rgba(0,0,0,0.4);">
+    <svg viewBox="0 0 42 42" style="width:100%;height:100%;display:block;" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="21" cy="21" r="20" fill="#E8671B"/>
+      <circle cx="21" cy="21" r="20" fill="none" stroke="#1a0800" stroke-width="1"/>
+      <!-- seam lines clipped to circle -->
+      <clipPath id="bc"><circle cx="21" cy="21" r="20"/></clipPath>
+      <g clip-path="url(#bc)" stroke="#1a0800" stroke-width="1.6" fill="none">
+        <line x1="1" y1="21" x2="41" y2="21"/>
+        <line x1="21" y1="1" x2="21" y2="41"/>
+        <path d="M21 1 Q7 11 7 21 Q7 31 21 41"/>
+        <path d="M21 1 Q35 11 35 21 Q35 31 21 41"/>
+      </g>
+    </svg>
+  </div>
 </section>
 
 <script>
@@ -151,7 +164,7 @@
     var relEndX = endX - heroRect.left;
     var relEndY = endY - heroRect.top;
 
-    var duration = 2200;
+    var duration = 4200;
     var start = null;
     var bounces = 3;
     var floorY = heroRect.height * 0.78;
@@ -178,8 +191,9 @@
         var bounceHeight = (floorY - peakY) * Math.pow(1 - bp, 1.2);
         y = floorY - Math.abs(Math.sin(bounceP)) * bounceHeight;
         scale = 1 - bp * 0.1;
+        var rot = bp * 360;
         ball.style.opacity = '1';
-        ball.style.transform = 'translate(' + x + 'px,' + y + 'px) scale(' + scale + ')';
+        ball.style.transform = 'translate(' + x + 'px,' + y + 'px) scale(' + scale + ') rotate(' + rot + 'deg)';
       } else {
         // Fly-into-box phase
         var fp = (p - 0.75) / 0.25;

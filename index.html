@@ -127,128 +127,80 @@
   </div>
 
   <!-- Bouncing ball -->
-  <div id="hero-ball" style="position:absolute;width:48px;height:48px;border-radius:50%;pointer-events:none;z-index:10;opacity:0;top:0;left:0;transform:translate(0,0);box-shadow:0 8px 24px rgba(0,0,0,0.5),0 2px 6px rgba(0,0,0,0.3);">
-    <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <radialGradient id="ballGrad" cx="38%" cy="32%" r="65%">
-          <stop offset="0%"   stop-color="#F5813A"/>
-          <stop offset="45%"  stop-color="#D4581A"/>
-          <stop offset="100%" stop-color="#8B2E00"/>
-        </radialGradient>
-        <radialGradient id="sheen" cx="35%" cy="28%" r="40%">
-          <stop offset="0%"  stop-color="rgba(255,255,255,0.28)"/>
-          <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
-        </radialGradient>
-        <clipPath id="ballClip"><circle cx="24" cy="24" r="23"/></clipPath>
-      </defs>
-      <!-- Base sphere -->
-      <circle cx="24" cy="24" r="23" fill="url(#ballGrad)"/>
-      <!-- Seams clipped -->
-      <g clip-path="url(#ballClip)" stroke="#2a0e00" stroke-width="1.4" fill="none" stroke-linecap="round">
-        <!-- Equator -->
-        <line x1="1" y1="24" x2="47" y2="24"/>
-        <!-- Vertical -->
-        <line x1="24" y1="1" x2="24" y2="47"/>
-        <!-- Left arc pair -->
-        <path d="M24 1 C13 8 8 16 8 24 C8 32 13 40 24 47"/>
-        <!-- Right arc pair -->
-        <path d="M24 1 C35 8 40 16 40 24 C40 32 35 40 24 47"/>
-      </g>
-      <!-- Specular highlight -->
-      <circle cx="24" cy="24" r="23" fill="url(#sheen)"/>
-      <!-- Outline -->
-      <circle cx="24" cy="24" r="23" fill="none" stroke="#1a0500" stroke-width="1"/>
-    </svg>
-  </div>
+  <div id="hero-ball" style="position:absolute;width:52px;height:52px;pointer-events:none;z-index:10;opacity:0;top:0;left:0;"></div>
 </section>
 
 <script>
 (function(){
-  var ball = document.getElementById('hero-ball');
-  var hero = ball.closest('section');
-  var chatWidget = hero.querySelector('[style*="flex:0 0 340px"]');
+  var basketball = '<svg viewBox="0 0 52 52" style="width:100%;height:100%;display:block;filter:drop-shadow(0 5px 10px rgba(0,0,0,0.55))" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="b1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#F8873C"/><stop offset="45%" stop-color="#D4581A"/><stop offset="100%" stop-color="#7A2400"/></radialGradient><radialGradient id="b2" cx="34%" cy="26%" r="42%"><stop offset="0%" stop-color="rgba(255,255,255,0.32)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><clipPath id="bc1"><circle cx="26" cy="26" r="25"/></clipPath></defs><circle cx="26" cy="26" r="25" fill="url(#b1)"/><g clip-path="url(#bc1)" stroke="#1e0800" stroke-width="1.5" fill="none" stroke-linecap="round"><line x1="1" y1="26" x2="51" y2="26"/><line x1="26" y1="1" x2="26" y2="51"/><path d="M26 1 C14 9 8 17 8 26 C8 35 14 43 26 51"/><path d="M26 1 C38 9 44 17 44 26 C44 35 38 43 26 51"/></g><circle cx="26" cy="26" r="25" fill="url(#b2)"/><circle cx="26" cy="26" r="25" fill="none" stroke="#1a0500" stroke-width="1.2"/></svg>';
+
+  var football = '<svg viewBox="0 0 52 52" style="width:100%;height:100%;display:block;filter:drop-shadow(0 5px 10px rgba(0,0,0,0.55))" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="f1" cx="36%" cy="30%" r="65%"><stop offset="0%" stop-color="#C97C22"/><stop offset="50%" stop-color="#8B4A10"/><stop offset="100%" stop-color="#3E1A04"/></radialGradient><radialGradient id="f2" cx="32%" cy="26%" r="40%"><stop offset="0%" stop-color="rgba(255,255,255,0.24)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><clipPath id="fc1"><ellipse cx="26" cy="26" rx="24" ry="15"/></clipPath></defs><ellipse cx="26" cy="26" rx="24" ry="15" fill="url(#f1)"/><g clip-path="url(#fc1)" stroke="#1e0800" stroke-width="1.3" fill="none"><path d="M2 26 Q26 11 50 26"/><path d="M2 26 Q26 41 50 26"/></g><line x1="26" y1="14" x2="26" y2="38" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/><g stroke="white" stroke-width="1.8" stroke-linecap="round"><line x1="21" y1="18" x2="31" y2="18"/><line x1="21" y1="22" x2="31" y2="22"/><line x1="21" y1="26" x2="31" y2="26"/><line x1="21" y1="30" x2="31" y2="30"/><line x1="21" y1="34" x2="31" y2="34"/></g><ellipse cx="26" cy="26" rx="24" ry="15" fill="url(#f2)"/><ellipse cx="26" cy="26" rx="24" ry="15" fill="none" stroke="#1a0500" stroke-width="1.2"/></svg>';
+
+  var netball = '<svg viewBox="0 0 52 52" style="width:100%;height:100%;display:block;filter:drop-shadow(0 5px 10px rgba(0,0,0,0.55))" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="n1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#F2F5F8"/><stop offset="55%" stop-color="#CBD6E0"/><stop offset="100%" stop-color="#7A8E9E"/></radialGradient><radialGradient id="n2" cx="34%" cy="26%" r="42%"><stop offset="0%" stop-color="rgba(255,255,255,0.6)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><clipPath id="nc1"><circle cx="26" cy="26" r="25"/></clipPath></defs><circle cx="26" cy="26" r="25" fill="url(#n1)"/><g clip-path="url(#nc1)" stroke="#0D3A5C" stroke-width="1.5" fill="none" stroke-linecap="round"><line x1="1" y1="26" x2="51" y2="26"/><line x1="26" y1="1" x2="26" y2="51"/><path d="M26 1 C14 9 8 17 8 26"/><path d="M8 26 C8 35 14 43 26 51"/><path d="M26 1 C38 9 44 17 44 26"/><path d="M44 26 C44 35 38 43 26 51"/></g><circle cx="26" cy="26" r="25" fill="url(#n2)"/><circle cx="26" cy="26" r="25" fill="none" stroke="#0D2A40" stroke-width="1.2"/></svg>';
+
+  var balls = [basketball, football, netball];
+  var ballEl = document.getElementById('hero-ball');
+  var hero = ballEl.closest('section');
+  var currentIdx = 0;
+  var SIZE = 52;
+
+  function getY(bp, floor, peak, bounces) {
+    var h = (floor - peak) * Math.pow(1 - bp * 0.6, 1.3);
+    return floor - Math.abs(Math.sin(bp * bounces * Math.PI)) * h;
+  }
 
   function runBall() {
-    if (!chatWidget) return;
+    ballEl.innerHTML = balls[currentIdx];
     var heroRect = hero.getBoundingClientRect();
-    var chatRect = chatWidget.getBoundingClientRect();
-
-    var startX = heroRect.left + 24;
-    var startY = heroRect.top + heroRect.height * 0.75;
-    var endX = chatRect.left + chatRect.width / 2;
-    var endY = chatRect.top + chatRect.height / 2;
-
-    var relStartX = startX - heroRect.left;
-    var relStartY = startY - heroRect.top;
-    var relEndX = endX - heroRect.left;
-    var relEndY = endY - heroRect.top;
-
-    var duration = 4200;
-    var start = null;
+    var leftX  = 28;
+    var rightX = heroRect.width - SIZE - 28;
+    var floorY = heroRect.height * 0.76 - SIZE;
+    var peakY  = heroRect.height * 0.08;
     var bounces = 3;
-    var floorY = heroRect.height * 0.78;
-    var peakY = heroRect.height * 0.18;
+    var duration = 9000;
+    var circ = Math.PI * SIZE;
+    var start = null;
 
-    ball.style.opacity = '1';
-    ball.style.transform = 'translate(' + relStartX + 'px,' + relStartY + 'px) scale(1)';
-
-    function ease(t){ return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
+    ballEl.style.opacity = '1';
 
     function step(ts) {
       if (!start) start = ts;
-      var elapsed = ts - start;
-      var p = Math.min(elapsed / duration, 1);
+      var p = Math.min((ts - start) / duration, 1);
+      var x, y, rot, alpha = 1;
+      var span = rightX - leftX;
 
-      var x, y, scale;
-
-      if (p < 0.75) {
-        // Bounce phase: travel left→right with damped bounces
-        var bp = p / 0.75;
-        x = relStartX + (relEndX - 60 - relStartX) * bp;
-        // Simulate bounces using abs(sin)
-        var bounceP = bp * bounces * Math.PI;
-        var bounceHeight = (floorY - peakY) * Math.pow(1 - bp, 1.2);
-        y = floorY - Math.abs(Math.sin(bounceP)) * bounceHeight;
-        scale = 1 - bp * 0.1;
-        var rot = bp * 360;
-        ball.style.opacity = '1';
-        ball.style.transform = 'translate(' + x + 'px,' + y + 'px) scale(' + scale + ') rotate(' + rot + 'deg)';
+      if (p < 0.47) {
+        var bp = p / 0.47;
+        x = leftX + span * bp;
+        y = getY(bp, floorY, peakY, bounces);
+        rot = (x - leftX) / circ * 360;
+      } else if (p < 0.94) {
+        var bp2 = (p - 0.47) / 0.47;
+        x = rightX - span * bp2;
+        y = getY(bp2, floorY, peakY, bounces);
+        rot = span / circ * 360 - (rightX - x) / circ * 360;
       } else {
-        // Fly-into-box phase
-        var fp = (p - 0.75) / 0.25;
-        var efp = ease(fp);
-        var lastBounceX = relEndX - 60;
-        var lastBounceY = floorY;
-        x = lastBounceX + (relEndX - lastBounceX) * efp;
-        y = lastBounceY + (relEndY - lastBounceY) * efp;
-        scale = 1 - efp * 0.95;
-        ball.style.opacity = String(1 - efp);
-        ball.style.transform = 'translate(' + x + 'px,' + y + 'px) scale(' + scale + ')';
-
-        // Pulse the chat widget on arrival
-        if (fp >= 0.95 && !step._pulsed) {
-          step._pulsed = true;
-          chatWidget.style.transition = 'box-shadow 0.15s ease';
-          chatWidget.querySelector('div').style.boxShadow = '0 0 0 3px rgba(212,97,78,0.6)';
-          setTimeout(function(){ chatWidget.querySelector('div').style.boxShadow = ''; }, 300);
-        }
+        var fp = (p - 0.94) / 0.06;
+        x = leftX; y = floorY; rot = 0;
+        alpha = 1 - fp * fp;
       }
+
+      ballEl.style.opacity = String(alpha);
+      ballEl.style.transform = 'translate(' + x + 'px,' + y + 'px) rotate(' + rot + 'deg)';
 
       if (p < 1) {
         requestAnimationFrame(step);
       } else {
-        ball.style.opacity = '0';
-        // Repeat after a pause
-        setTimeout(runBall, 9000);
+        ballEl.style.opacity = '0';
+        currentIdx = (currentIdx + 1) % balls.length;
+        setTimeout(runBall, 1200);
       }
     }
 
-    step._pulsed = false;
     requestAnimationFrame(step);
   }
 
-  // Start after a short delay on page load
-  setTimeout(runBall, 2500);
+  setTimeout(runBall, 2000);
 })();
 </script>
 

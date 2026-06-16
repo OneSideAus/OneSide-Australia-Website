@@ -430,7 +430,7 @@ function closeNewsletterModal(){document.getElementById('newsletter-modal').styl
     var extra=(bw-sw)/chars/fs;
     sub.style.letterSpacing=extra+'em';
   }
-  document.addEventListener('DOMContentLoaded',fitSubtitle);
+  document.fonts.ready.then(fitSubtitle);
   window.addEventListener('resize',fitSubtitle);
 })();
 </script>

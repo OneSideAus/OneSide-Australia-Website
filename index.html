@@ -127,18 +127,37 @@
   </div>
 
   <!-- Bouncing ball -->
-  <div id="hero-ball" style="position:absolute;width:42px;height:42px;border-radius:50%;pointer-events:none;z-index:10;opacity:0;top:0;left:0;transform:translate(0,0);box-shadow:0 6px 20px rgba(0,0,0,0.4);">
-    <svg viewBox="0 0 42 42" style="width:100%;height:100%;display:block;" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="21" cy="21" r="20" fill="#E8671B"/>
-      <circle cx="21" cy="21" r="20" fill="none" stroke="#1a0800" stroke-width="1"/>
-      <!-- seam lines clipped to circle -->
-      <clipPath id="bc"><circle cx="21" cy="21" r="20"/></clipPath>
-      <g clip-path="url(#bc)" stroke="#1a0800" stroke-width="1.6" fill="none">
-        <line x1="1" y1="21" x2="41" y2="21"/>
-        <line x1="21" y1="1" x2="21" y2="41"/>
-        <path d="M21 1 Q7 11 7 21 Q7 31 21 41"/>
-        <path d="M21 1 Q35 11 35 21 Q35 31 21 41"/>
+  <div id="hero-ball" style="position:absolute;width:48px;height:48px;border-radius:50%;pointer-events:none;z-index:10;opacity:0;top:0;left:0;transform:translate(0,0);box-shadow:0 8px 24px rgba(0,0,0,0.5),0 2px 6px rgba(0,0,0,0.3);">
+    <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="ballGrad" cx="38%" cy="32%" r="65%">
+          <stop offset="0%"   stop-color="#F5813A"/>
+          <stop offset="45%"  stop-color="#D4581A"/>
+          <stop offset="100%" stop-color="#8B2E00"/>
+        </radialGradient>
+        <radialGradient id="sheen" cx="35%" cy="28%" r="40%">
+          <stop offset="0%"  stop-color="rgba(255,255,255,0.28)"/>
+          <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+        </radialGradient>
+        <clipPath id="ballClip"><circle cx="24" cy="24" r="23"/></clipPath>
+      </defs>
+      <!-- Base sphere -->
+      <circle cx="24" cy="24" r="23" fill="url(#ballGrad)"/>
+      <!-- Seams clipped -->
+      <g clip-path="url(#ballClip)" stroke="#2a0e00" stroke-width="1.4" fill="none" stroke-linecap="round">
+        <!-- Equator -->
+        <line x1="1" y1="24" x2="47" y2="24"/>
+        <!-- Vertical -->
+        <line x1="24" y1="1" x2="24" y2="47"/>
+        <!-- Left arc pair -->
+        <path d="M24 1 C13 8 8 16 8 24 C8 32 13 40 24 47"/>
+        <!-- Right arc pair -->
+        <path d="M24 1 C35 8 40 16 40 24 C40 32 35 40 24 47"/>
       </g>
+      <!-- Specular highlight -->
+      <circle cx="24" cy="24" r="23" fill="url(#sheen)"/>
+      <!-- Outline -->
+      <circle cx="24" cy="24" r="23" fill="none" stroke="#1a0500" stroke-width="1"/>
     </svg>
   </div>
 </section>

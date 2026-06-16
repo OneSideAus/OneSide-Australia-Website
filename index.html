@@ -422,13 +422,15 @@ function closeNewsletterModal(){document.getElementById('newsletter-modal').styl
     var brand=document.getElementById('nav-brand');
     var sub=document.getElementById('nav-sub');
     if(!brand||!sub)return;
-    sub.style.letterSpacing='0em';
-    var bw=brand.getBoundingClientRect().width;
-    var sw=sub.getBoundingClientRect().width;
-    var chars='Child Safety in Sport'.length-1;
-    var fs=parseFloat(getComputedStyle(sub).fontSize);
-    var extra=(bw-sw)/chars/fs;
-    sub.style.letterSpacing=extra+'em';
+    var targetW=brand.getBoundingClientRect().width;
+    var probe=document.createElement('span');
+    probe.style.cssText='position:absolute;visibility:hidden;white-space:nowrap;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0px;font-family:'+getComputedStyle(sub).fontFamily;
+    probe.textContent=sub.textContent;
+    document.body.appendChild(probe);
+    var naturalW=probe.getBoundingClientRect().width;
+    document.body.removeChild(probe);
+    var extra=(targetW-naturalW)/sub.textContent.length;
+    sub.style.letterSpacing=extra+'px';
   }
   document.fonts.ready.then(fitSubtitle);
   window.addEventListener('resize',fitSubtitle);

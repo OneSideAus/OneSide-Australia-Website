@@ -190,13 +190,10 @@
     </a>
   </div>
 
-  <!-- SPORT SEARCH + PROBLEM -->
-  <section style="padding:110px 2rem;background:white;position:relative;overflow:hidden;" class="reveal">
-    <div style="position:absolute;top:-20%;right:-8%;width:55%;height:140%;background:linear-gradient(135deg,rgba(27,94,138,0.2) 0%,transparent 70%);transform:skewX(-10deg);pointer-events:none;"></div>
-    <div style="position:absolute;top:10%;right:5%;width:38%;height:85%;background:linear-gradient(135deg,rgba(212,97,78,0.1) 0%,transparent 70%);transform:skewX(-10deg);pointer-events:none;"></div>
-    <div style="position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,0.03) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;"></div>
+  <!-- SPORT SEARCH -->
+  <section style="padding:80px 2rem;background:white;position:relative;overflow:hidden;" class="reveal">
     <div class="section-inner" style="position:relative;z-index:1;">
-      <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:40px;align-items:center;margin-bottom:64px;padding-bottom:56px;border-bottom:1px solid var(--muted);">
+      <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:40px;align-items:center;">
         <div>
           <div class="eyebrow">Is OneSide right for your sport?</div>
           <h2 style="font-family:'DM Serif Display',serif;font-size:1.5rem;color:var(--midnight);line-height:1.3;margin-bottom:8px;">Check if your sport is covered.</h2>
@@ -210,17 +207,25 @@
           <div id="home-sport-result" style="margin-top:10px;display:none;"></div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- PROBLEM -->
+  <section style="padding:110px 2rem;background:var(--midnight);position:relative;overflow:hidden;" class="reveal">
+    <div style="position:absolute;top:-20%;right:-8%;width:55%;height:140%;background:linear-gradient(135deg,rgba(27,94,138,0.2) 0%,transparent 70%);transform:skewX(-10deg);pointer-events:none;"></div>
+    <div style="position:absolute;top:10%;right:5%;width:38%;height:85%;background:linear-gradient(135deg,rgba(212,97,78,0.1) 0%,transparent 70%);transform:skewX(-10deg);pointer-events:none;"></div>
+    <div class="section-inner" style="position:relative;z-index:1;">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start;">
         <div>
-          <div class="eyebrow">The problem</div>
-          <h2 class="section-title">Information overload. Zero clarity on what to actually do.</h2>
-          <p class="lead" style="margin-bottom:24px;">Clubs are required to navigate a wide and complex set of child safe requirements. National frameworks, sport-specific policies, and state obligations that shift and overlap. Most clubs know they need to act. Very few know where to start.</p>
+          <div class="eyebrow" style="color:var(--coral-light);">The problem</div>
+          <h2 class="section-title" style="color:white;">Information overload. Zero clarity on what to actually do.</h2>
+          <p class="lead" style="color:rgba(255,255,255,0.55);margin-bottom:24px;">Clubs are required to navigate a wide and complex set of child safe requirements. National frameworks, sport-specific policies, and state obligations that shift and overlap. Most clubs know they need to act. Very few know where to start.</p>
           <a href="/assessment" class="btn-primary">See how OneSide helps →</a>
         </div>
         <div class="reveal-stagger">
-          <div style="display:flex;align-items:flex-start;gap:14px;padding:18px 20px;background:var(--off-white);border:1px solid var(--muted);border-left:3px solid var(--coral);border-radius:0 10px 10px 0;margin-bottom:14px;" class="hover-card"><div><strong style="display:block;font-size:15px;color:var(--midnight);margin-bottom:3px;font-weight:500;">Broad, layered, constantly evolving requirements</strong><p style="font-size:14px;color:var(--text-mid);line-height:1.65;">The National Principles, the National Integrity Framework Safeguarding Children and Young People Policy, and peak sporting bodies each have their own requirements, often overlapping, always changing.</p></div></div>
-          <div style="display:flex;align-items:flex-start;gap:14px;padding:18px 20px;background:var(--off-white);border:1px solid var(--muted);border-left:3px solid var(--coral);border-radius:0 10px 10px 0;margin-bottom:14px;" class="hover-card"><div><strong style="display:block;font-size:15px;color:var(--midnight);margin-bottom:3px;font-weight:500;">Generic guidance that doesn't fit your club</strong><p style="font-size:14px;color:var(--text-mid);line-height:1.65;">Frameworks, fact sheets, and templates exist, but none tell your committee exactly what your club needs to do.</p></div></div>
-          <div style="display:flex;align-items:flex-start;gap:14px;padding:18px 20px;background:var(--off-white);border:1px solid var(--muted);border-left:3px solid var(--coral);border-radius:0 10px 10px 0;" class="hover-card"><div><strong style="display:block;font-size:15px;color:var(--midnight);margin-bottom:3px;font-weight:500;">The requirements apply to everyone</strong><p style="font-size:14px;color:var(--text-mid);line-height:1.65;">Committee members, coaches, volunteers, contractors, students on placement, not just the people on the field.</p></div></div>
+          <div style="display:flex;align-items:flex-start;gap:14px;padding:18px 20px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-left:3px solid var(--coral);border-radius:0 10px 10px 0;margin-bottom:14px;" class="hover-card-dark"><div><strong style="display:block;font-size:15px;color:white;margin-bottom:3px;font-weight:500;">Broad, layered, constantly evolving requirements</strong><p style="font-size:14px;color:rgba(255,255,255,0.5);line-height:1.65;">The National Principles, the National Integrity Framework Safeguarding Children and Young People Policy, and peak sporting bodies each have their own requirements, often overlapping, always changing.</p></div></div>
+          <div style="display:flex;align-items:flex-start;gap:14px;padding:18px 20px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-left:3px solid var(--coral);border-radius:0 10px 10px 0;margin-bottom:14px;" class="hover-card-dark"><div><strong style="display:block;font-size:15px;color:white;margin-bottom:3px;font-weight:500;">Generic guidance that doesn't fit your club</strong><p style="font-size:14px;color:rgba(255,255,255,0.5);line-height:1.65;">Frameworks, fact sheets, and templates exist, but none tell your committee exactly what your club needs to do.</p></div></div>
+          <div style="display:flex;align-items:flex-start;gap:14px;padding:18px 20px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-left:3px solid var(--coral);border-radius:0 10px 10px 0;" class="hover-card-dark"><div><strong style="display:block;font-size:15px;color:white;margin-bottom:3px;font-weight:500;">The requirements apply to everyone</strong><p style="font-size:14px;color:rgba(255,255,255,0.5);line-height:1.65;">Committee members, coaches, volunteers, contractors, students on placement, not just the people on the field.</p></div></div>
         </div>
       </div>
     </div>

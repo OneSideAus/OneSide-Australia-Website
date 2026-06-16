@@ -126,133 +126,90 @@
 
   </div>
 
-  <!-- Bouncing ball -->
-  <!-- AFL Goal Posts -->
-  <div id="hero-posts" style="position:absolute;left:8%;bottom:0;z-index:3;pointer-events:none;">
-    <svg width="150" height="175" viewBox="0 0 150 175" xmlns="http://www.w3.org/2000/svg">
-      <!-- Behind post left -->
-      <rect x="8"   y="65"  width="4" height="110" fill="white" opacity="0.45" rx="2"/>
-      <!-- Goal post left -->
-      <rect x="42"  y="0"   width="6" height="175" fill="white" opacity="0.85" rx="2.5"/>
-      <!-- Goal post right -->
-      <rect x="102" y="0"   width="6" height="175" fill="white" opacity="0.85" rx="2.5"/>
-      <!-- Behind post right -->
-      <rect x="138" y="65"  width="4" height="110" fill="white" opacity="0.45" rx="2"/>
-      <!-- Glow on center posts -->
-      <rect x="40"  y="0"   width="10" height="175" fill="rgba(255,255,255,0.06)" rx="5"/>
-      <rect x="100" y="0"   width="10" height="175" fill="rgba(255,255,255,0.06)" rx="5"/>
-    </svg>
+  <!-- Basketball -->
+  <div id="hero-ball" style="position:absolute;width:50px;height:50px;pointer-events:none;z-index:10;opacity:0;top:0;left:0;"></div>
+
+  <!-- Marquee -->
+  <div class="marquee-wrap">
+    <div class="marquee-inner">
+      <span class="marquee-item">Child Safety Assessments</span>
+      <span class="marquee-item">Policy &amp; Governance</span>
+      <span class="marquee-item">Training &amp; Workshops</span>
+      <span class="marquee-item">Strategic Advisory</span>
+      <span class="marquee-item">National Principles</span>
+      <span class="marquee-item">Child Safe Cultures</span>
+      <span class="marquee-item">Club Compliance</span>
+      <span class="marquee-item">Child Safety Assessments</span>
+      <span class="marquee-item">Policy &amp; Governance</span>
+      <span class="marquee-item">Training &amp; Workshops</span>
+      <span class="marquee-item">Strategic Advisory</span>
+      <span class="marquee-item">National Principles</span>
+      <span class="marquee-item">Child Safe Cultures</span>
+      <span class="marquee-item">Club Compliance</span>
+    </div>
   </div>
-
-  <!-- GOAL! flash -->
-  <div id="goal-flash" style="position:absolute;font-family:'DM Serif Display',serif;font-size:2.2rem;font-style:italic;color:#D4614E;opacity:0;pointer-events:none;z-index:20;text-shadow:0 0 24px rgba(212,97,78,0.9),0 2px 8px rgba(0,0,0,0.5);white-space:nowrap;left:8%;bottom:185px;">GOAL!</div>
-
-  <!-- Football ball -->
-  <div id="hero-ball" style="position:absolute;width:54px;height:54px;pointer-events:none;z-index:10;opacity:0;top:0;left:0;"></div>
 </section>
 
 <script>
 (function(){
-  var footballSVG = '<svg viewBox="0 0 54 54" style="width:100%;height:100%;display:block;" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="fg" cx="36%" cy="30%" r="65%"><stop offset="0%" stop-color="#D08828"/><stop offset="50%" stop-color="#8B4A10"/><stop offset="100%" stop-color="#3E1A04"/></radialGradient><radialGradient id="fs" cx="32%" cy="26%" r="40%"><stop offset="0%" stop-color="rgba(255,255,255,0.26)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><filter id="dshadow"><feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="rgba(0,0,0,0.6)"/></filter><clipPath id="fclip"><ellipse cx="27" cy="27" rx="25" ry="16"/></clipPath></defs><ellipse cx="27" cy="27" rx="25" ry="16" fill="url(#fg)" filter="url(#dshadow)"/><g clip-path="url(#fclip)" stroke="#1e0800" stroke-width="1.3" fill="none"><path d="M2 27 Q27 12 52 27"/><path d="M2 27 Q27 42 52 27"/></g><line x1="27" y1="14" x2="27" y2="40" stroke="rgba(255,255,255,0.45)" stroke-width="0.9"/><g stroke="white" stroke-width="1.9" stroke-linecap="round"><line x1="22" y1="19" x2="32" y2="19"/><line x1="22" y1="23" x2="32" y2="23"/><line x1="22" y1="27" x2="32" y2="27"/><line x1="22" y1="31" x2="32" y2="31"/><line x1="22" y1="35" x2="32" y2="35"/></g><ellipse cx="27" cy="27" rx="25" ry="16" fill="url(#fs)"/><ellipse cx="27" cy="27" rx="25" ry="16" fill="none" stroke="#1a0500" stroke-width="1.2"/></svg>';
+  var bSVG = '<svg viewBox="0 0 50 50" style="width:100%;height:100%;display:block;" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="b1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#F8873C"/><stop offset="45%" stop-color="#D4581A"/><stop offset="100%" stop-color="#7A2400"/></radialGradient><radialGradient id="b2" cx="34%" cy="26%" r="42%"><stop offset="0%" stop-color="rgba(255,255,255,0.3)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><clipPath id="bc"><circle cx="25" cy="25" r="24"/></clipPath></defs><circle cx="25" cy="25" r="24" fill="url(#b1)"/><g clip-path="url(#bc)" stroke="#1e0800" stroke-width="1.5" fill="none" stroke-linecap="round"><line x1="1" y1="25" x2="49" y2="25"/><line x1="25" y1="1" x2="25" y2="49"/><path d="M25 1 C13 9 8 17 8 25 C8 33 13 41 25 49"/><path d="M25 1 C37 9 42 17 42 25 C42 33 37 41 25 49"/></g><circle cx="25" cy="25" r="24" fill="url(#b2)"/><circle cx="25" cy="25" r="24" fill="none" stroke="#1a0500" stroke-width="1"/></svg>';
 
-  var ballEl   = document.getElementById('hero-ball');
-  var postsEl  = document.getElementById('hero-posts');
-  var flashEl  = document.getElementById('goal-flash');
-  var hero     = ballEl.closest('section');
-  var SIZE     = 54;
-
-  function bezier(t, p0, p1, p2) {
-    var m = 1 - t; return m*m*p0 + 2*m*t*p1 + t*t*p2;
-  }
-
-  function flashGoal() {
-    flashEl.style.transition = 'opacity 0.12s ease';
-    flashEl.style.opacity = '1';
-    setTimeout(function(){
-      flashEl.style.transition = 'opacity 0.6s ease';
-      flashEl.style.opacity = '0';
-    }, 600);
-  }
+  var ballEl = document.getElementById('hero-ball');
+  var hero   = ballEl.closest('section');
+  var SIZE   = 50;
 
   function runBall() {
-    ballEl.innerHTML = footballSVG;
-    var hr = hero.getBoundingClientRect();
-    var pr = postsEl.getBoundingClientRect();
-
-    // Center of the gap between the two goal posts
-    var goalCenterX = (pr.left - hr.left) + 75 - SIZE / 2;  // 75 = SVG center
-    var goalY       = (pr.top  - hr.top)  + 30 - SIZE / 2;  // near post tops
-
-    var startX = hr.width - 80;
-    var startY = hr.height * 0.55;
-    var ctrlX  = hr.width * 0.48;
-    var ctrlY  = hr.height * 0.08;
-
-    var duration = 3400;
-    var start    = null;
-    var goalFired = false;
+    ballEl.innerHTML = bSVG;
+    var hr     = hero.getBoundingClientRect();
+    var leftX  = 28;
+    var rightX = hr.width - SIZE - 28;
+    var floorY = hr.height * 0.76 - SIZE;
+    var peakY  = hr.height * 0.1;
+    var circ   = Math.PI * SIZE;
+    var duration = 6000;
+    var start  = null;
 
     ballEl.style.opacity = '1';
 
     function step(ts) {
       if (!start) start = ts;
       var p = Math.min((ts - start) / duration, 1);
+      var x, y, rot, alpha = 1;
 
-      var x   = bezier(p, startX, ctrlX, goalCenterX);
-      var y   = bezier(p, startY, ctrlY, goalY);
-      var rot = p * 1080;
-      var alpha = p > 0.78 ? 1 - (p - 0.78) / 0.22 : 1;
+      if (p < 0.62) {
+        // Bounce phase: left to right, 3 bounces
+        var bp = p / 0.62;
+        x = leftX + (rightX - leftX) * bp;
+        var h = (floorY - peakY) * Math.pow(1 - bp * 0.6, 1.3);
+        y = floorY - Math.abs(Math.sin(bp * 3 * Math.PI)) * h;
+        rot = (x - leftX) / circ * 360;
+      } else {
+        // Roll off right edge, accelerating
+        var rp = (p - 0.62) / 0.38;
+        var dist = rp * rp * hr.width * 0.35;
+        x = rightX + dist;
+        y = floorY;
+        rot = (rightX - leftX + dist) / circ * 360;
+        alpha = Math.max(0, 1 - rp * 1.4);
+      }
 
-      // Fire GOAL! when ball reaches ~80% of its journey
-      if (p >= 0.78 && !goalFired) { goalFired = true; flashGoal(); }
-
-      ballEl.style.opacity  = String(Math.max(0, alpha));
+      ballEl.style.opacity = String(alpha);
       ballEl.style.transform = 'translate(' + x + 'px,' + y + 'px) rotate(' + rot + 'deg)';
 
       if (p < 1) {
         requestAnimationFrame(step);
       } else {
         ballEl.style.opacity = '0';
-        setTimeout(runBall, 3500);
+        setTimeout(runBall, 3000);
       }
     }
 
     requestAnimationFrame(step);
   }
 
-  setTimeout(runBall, 1800);
+  setTimeout(runBall, 2000);
 })();
 </script>
-
-  <!-- Sports ticker -->
-  <div style="position:relative;z-index:1;padding-bottom:28px;border-top:1px solid rgba(255,255,255,0.08);">
-    <div style="padding-top:16px;">
-      <div style="font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.25);margin-bottom:10px;padding:0 2rem;">Sports covered</div>
-      <div class="ticker-wrap">
-        <div class="ticker-track">
-          <span class="ticker-item">AFL <span class="ticker-dot"></span></span>
-          <span class="ticker-item">Netball <span class="ticker-dot"></span></span>
-          <span class="ticker-item">Cricket <span class="ticker-dot"></span></span>
-          <span class="ticker-item">Soccer <span class="ticker-dot"></span></span>
-          <span class="ticker-item">Rugby League <span class="ticker-dot"></span></span>
-          <span class="ticker-item">Rugby Union <span class="ticker-dot"></span></span>
-          <span class="ticker-item">Basketball <span class="ticker-dot"></span></span>
-          <span class="ticker-item">Tennis <span class="ticker-dot"></span></span>
-          <span class="ticker-item">Golf <span class="ticker-dot"></span></span>
-          <span class="ticker-item">AFL <span class="ticker-dot"></span></span>
-          <span class="ticker-item">Netball <span class="ticker-dot"></span></span>
-          <span class="ticker-item">Cricket <span class="ticker-dot"></span></span>
-          <span class="ticker-item">Soccer <span class="ticker-dot"></span></span>
-          <span class="ticker-item">Rugby League <span class="ticker-dot"></span></span>
-          <span class="ticker-item">Rugby Union <span class="ticker-dot"></span></span>
-          <span class="ticker-item">Basketball <span class="ticker-dot"></span></span>
-          <span class="ticker-item">Tennis <span class="ticker-dot"></span></span>
-          <span class="ticker-item">Golf <span class="ticker-dot"></span></span>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
 
   <!-- FEATURE CARDS -->
   <section style="padding:72px 2rem 80px;background:var(--off-white);" class="reveal">

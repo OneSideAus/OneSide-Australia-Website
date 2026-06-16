@@ -8,11 +8,11 @@ html { scroll-behavior: smooth; }
 body { font-family: 'DM Sans', sans-serif; background: var(--off-white); color: var(--midnight); line-height: 1.6; }
 
 /* NAV */
-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(13,31,53,0.98); backdrop-filter: blur(8px); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 64px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: #F8FAFC; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 64px; border-bottom: 1px solid rgba(13,31,53,0.08); }
 .nav-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; cursor: pointer; }
 .nav-links { display: flex; align-items: center; gap: 1.75rem; list-style: none; }
-.nav-links a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; cursor: pointer; }
-.nav-links a:hover, .nav-links a.active { color: white; }
+.nav-links a { color: rgba(13,31,53,0.55); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; cursor: pointer; }
+.nav-links a:hover, .nav-links a.active { color: #0D1F35; }
 .nav-cta { background: linear-gradient(135deg, #E07060, #D4614E) !important; color: white !important; padding: 8px 18px; border-radius: 6px; font-weight: 600 !important; }
 .nav-cta:hover { background: linear-gradient(135deg, #D4614E, #B84A39) !important; }
 
@@ -266,10 +266,10 @@ footer { background: #080F1A; padding: 40px 2rem 32px; border-top: 1px solid rgb
 
 /* HAMBURGER MOBILE NAV */
 .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 8px; background: none; border: none; }
-.hamburger span { display: block; width: 22px; height: 2px; background: white; border-radius: 2px; transition: all 0.2s; }
-.mobile-nav { display: none; position: fixed; top: 64px; left: 0; right: 0; background: rgba(13,31,53,0.98); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(255,255,255,0.07); z-index: 99; padding: 12px 0; }
+.hamburger span { display: block; width: 22px; height: 2px; background: #0D1F35; border-radius: 2px; transition: all 0.2s; }
+.mobile-nav { display: none; position: fixed; top: 64px; left: 0; right: 0; background: #F8FAFC; border-bottom: 1px solid rgba(13,31,53,0.08); z-index: 99; padding: 12px 0; }
 .mobile-nav.open { display: block; }
-.mobile-nav a { display: block; padding: 12px 2rem; color: rgba(255,255,255,0.75); text-decoration: none; font-size: 15px; font-weight: 500; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.mobile-nav a { display: block; padding: 12px 2rem; color: rgba(13,31,53,0.65); text-decoration: none; font-size: 15px; font-weight: 500; border-bottom: 1px solid rgba(13,31,53,0.06); }
 .mobile-nav a:last-child { border-bottom: none; }
 .mobile-nav a.nav-cta { color: var(--coral); }
 
@@ -306,9 +306,9 @@ footer { background: #080F1A; padding: 40px 2rem 32px; border-top: 1px solid rgb
 /* Anchor scrolling clears the fixed nav */
 html { scroll-padding-top: 84px; }
 
-/* NAV — slightly translucent at top, solid + shadow once scrolling */
-nav { background: rgba(13,31,53,0.88); transition: background 0.3s ease, box-shadow 0.3s ease; }
-nav.scrolled { background: rgba(13,31,53,0.98); box-shadow: 0 6px 24px rgba(8,15,26,0.35); }
+/* NAV — white, gains subtle shadow on scroll */
+nav { background: #F8FAFC; transition: box-shadow 0.3s ease; }
+nav.scrolled { box-shadow: 0 4px 20px rgba(13,31,53,0.08); }
 
 /* Staggered reveal for card groups inside a .reveal section */
 .reveal-stagger > * { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }

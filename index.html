@@ -425,7 +425,7 @@ function closeNewsletterModal(){document.getElementById('newsletter-modal').styl
     sub.style.letterSpacing='0em';
     var bw=brand.getBoundingClientRect().width;
     var sw=sub.getBoundingClientRect().width;
-    var chars='Child Safety in Sport'.length;
+    var chars='Child Safety in Sport'.length-1;
     var fs=parseFloat(getComputedStyle(sub).fontSize);
     var extra=(bw-sw)/chars/fs;
     sub.style.letterSpacing=extra+'em';

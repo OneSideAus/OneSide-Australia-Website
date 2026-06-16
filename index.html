@@ -51,8 +51,8 @@
 <nav>
   <div class="nav-logo">
     <a href="/" aria-label="OneSide Australia Home" style="text-decoration:none;display:flex;flex-direction:column;gap:1px;">
-      <span style="font-family:'DM Serif Display',Georgia,serif;font-size:1.4rem;color:#0D1F35;letter-spacing:-0.02em;line-height:1.1;">One<span style="color:#D4614E;">Side</span> Australia</span>
-      <span style="font-size:10px;font-weight:600;letter-spacing:0.32em;text-transform:uppercase;color:rgba(13,31,53,0.45);">Child Safety in Sport</span>
+      <span id="nav-brand" style="font-family:'DM Serif Display',Georgia,serif;font-size:1.4rem;color:#0D1F35;letter-spacing:-0.02em;line-height:1.1;">One<span style="color:#D4614E;">Side</span> Australia</span>
+      <span id="nav-sub" style="font-size:10px;font-weight:600;letter-spacing:0.32em;text-transform:uppercase;color:rgba(13,31,53,0.45);">Child Safety in Sport</span>
     </a>
   </div>
   <ul class="nav-links">
@@ -417,6 +417,22 @@
   },20000);
 })();
 function closeNewsletterModal(){document.getElementById('newsletter-modal').style.display='none';}
+(function(){
+  function fitSubtitle(){
+    var brand=document.getElementById('nav-brand');
+    var sub=document.getElementById('nav-sub');
+    if(!brand||!sub)return;
+    sub.style.letterSpacing='0em';
+    var bw=brand.getBoundingClientRect().width;
+    var sw=sub.getBoundingClientRect().width;
+    var chars='Child Safety in Sport'.length;
+    var fs=parseFloat(getComputedStyle(sub).fontSize);
+    var extra=(bw-sw)/chars/fs;
+    sub.style.letterSpacing=extra+'em';
+  }
+  document.addEventListener('DOMContentLoaded',fitSubtitle);
+  window.addEventListener('resize',fitSubtitle);
+})();
 </script>
 </body>
 </html>

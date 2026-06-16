@@ -126,9 +126,6 @@
 
   </div>
 
-  <!-- Basketball -->
-  <div id="hero-ball" style="position:absolute;width:50px;height:50px;pointer-events:none;z-index:10;opacity:0;top:0;left:0;"></div>
-
   <!-- Marquee -->
   <div class="marquee-wrap">
     <div class="marquee-inner">
@@ -150,66 +147,6 @@
   </div>
 </section>
 
-<script>
-(function(){
-  var bSVG = '<svg viewBox="0 0 50 50" style="width:100%;height:100%;display:block;" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="b1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#F8873C"/><stop offset="45%" stop-color="#D4581A"/><stop offset="100%" stop-color="#7A2400"/></radialGradient><radialGradient id="b2" cx="34%" cy="26%" r="42%"><stop offset="0%" stop-color="rgba(255,255,255,0.3)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><clipPath id="bc"><circle cx="25" cy="25" r="24"/></clipPath></defs><circle cx="25" cy="25" r="24" fill="url(#b1)"/><g clip-path="url(#bc)" stroke="#1e0800" stroke-width="1.5" fill="none" stroke-linecap="round"><line x1="1" y1="25" x2="49" y2="25"/><line x1="25" y1="1" x2="25" y2="49"/><path d="M25 1 C13 9 8 17 8 25 C8 33 13 41 25 49"/><path d="M25 1 C37 9 42 17 42 25 C42 33 37 41 25 49"/></g><circle cx="25" cy="25" r="24" fill="url(#b2)"/><circle cx="25" cy="25" r="24" fill="none" stroke="#1a0500" stroke-width="1"/></svg>';
-
-  var ballEl = document.getElementById('hero-ball');
-  var hero   = ballEl.closest('section');
-  var SIZE   = 50;
-
-  function runBall() {
-    ballEl.innerHTML = bSVG;
-    var hr     = hero.getBoundingClientRect();
-    var leftX  = 28;
-    var rightX = hr.width - SIZE - 28;
-    var floorY = hr.height * 0.76 - SIZE;
-    var peakY  = hr.height * 0.1;
-    var circ   = Math.PI * SIZE;
-    var duration = 6000;
-    var start  = null;
-
-    ballEl.style.opacity = '1';
-
-    function step(ts) {
-      if (!start) start = ts;
-      var p = Math.min((ts - start) / duration, 1);
-      var x, y, rot, alpha = 1;
-
-      if (p < 0.62) {
-        // Bounce phase: left to right, 3 bounces
-        var bp = p / 0.62;
-        x = leftX + (rightX - leftX) * bp;
-        var h = (floorY - peakY) * Math.pow(1 - bp * 0.6, 1.3);
-        y = floorY - Math.abs(Math.sin(bp * 3 * Math.PI)) * h;
-        rot = (x - leftX) / circ * 360;
-      } else {
-        // Roll off right edge, accelerating
-        var rp = (p - 0.62) / 0.38;
-        var dist = rp * rp * hr.width * 0.35;
-        x = rightX + dist;
-        y = floorY;
-        rot = (rightX - leftX + dist) / circ * 360;
-        alpha = Math.max(0, 1 - rp * 1.4);
-      }
-
-      ballEl.style.opacity = String(alpha);
-      ballEl.style.transform = 'translate(' + x + 'px,' + y + 'px) rotate(' + rot + 'deg)';
-
-      if (p < 1) {
-        requestAnimationFrame(step);
-      } else {
-        ballEl.style.opacity = '0';
-        setTimeout(runBall, 3000);
-      }
-    }
-
-    requestAnimationFrame(step);
-  }
-
-  setTimeout(runBall, 2000);
-})();
-</script>
 
   <!-- FEATURE CARDS -->
   <section style="padding:72px 2rem 80px;background:var(--off-white);" class="reveal">

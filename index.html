@@ -95,7 +95,10 @@
 
     <!-- Text content -->
     <div style="flex:1;min-width:280px;max-width:620px;">
-      <h1 style="font-family:'DM Serif Display',serif;font-size:clamp(2.6rem,4.5vw,3.8rem);line-height:1.05;color:white;margin-bottom:20px;">Empowering clubs.<br><em style="font-style:italic;color:var(--coral-light);">Protecting children.</em></h1>
+      <h1 style="font-family:'DM Serif Display',serif;font-size:clamp(2.6rem,4.5vw,3.8rem);line-height:1.05;color:white;margin-bottom:20px;overflow:hidden;">
+        <span id="hero-line1" style="display:block;opacity:0;transform:translateY(40px);transition:opacity 0.6s ease,transform 0.6s ease;">Empowering clubs.</span>
+        <em id="hero-line2" style="display:block;font-style:italic;color:var(--coral-light);opacity:0;transform:translateY(40px);transition:opacity 0.6s ease 0.35s,transform 0.6s ease 0.35s;">Protecting children.</em>
+      </h1>
       <p style="font-size:17px;color:rgba(255,255,255,0.6);line-height:1.8;margin-bottom:36px;">Helping your club and your volunteers navigate complex child safety requirements. OneSide measures your club's processes against your state's child safety standards, identifies the gaps, and gives you a clear path to close them, giving your club the confidence to know you're on the right track, and your kids the protection they deserve.</p>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <a href="/assessment" class="btn-primary" style="font-size:13px;padding:9px 16px;">How it works ↗</a>
@@ -434,6 +437,16 @@ function closeNewsletterModal(){document.getElementById('newsletter-modal').styl
   }
   document.fonts.ready.then(fitSubtitle);
   window.addEventListener('resize',fitSubtitle);
+})();
+(function(){
+  function animateHero(){
+    var l1=document.getElementById('hero-line1');
+    var l2=document.getElementById('hero-line2');
+    if(!l1||!l2)return;
+    l1.style.opacity='1';l1.style.transform='translateY(0)';
+    l2.style.opacity='1';l2.style.transform='translateY(0)';
+  }
+  window.addEventListener('load',animateHero);
 })();
 </script>
 </body>

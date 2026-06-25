@@ -10,7 +10,7 @@
 <link rel="canonical" href="https://www.onesideaustralia.com.au/about">
 <meta property="og:title" content="About OneSide Australia | Child Safety Consultancy for Sport">
 <meta property="og:url" content="https://www.onesideaustralia.com.au/about">
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Playfair+Display:wght@700&family=Raleway:wght@300&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <script type="application/ld+json">
 {
@@ -27,7 +27,16 @@
 </head>
 <body>
 <nav>
-  <div class="nav-logo"><a href="/" aria-label="OneSide Australia Home" style="font-family:'DM Serif Display',Georgia,serif;font-size:1.4rem;color:#0D1F35;text-decoration:none;letter-spacing:-0.02em;">One<span style="color:#D4614E;">Side</span> Australia</a></div>
+  <div class="nav-logo">
+    <a href="/" style="text-decoration:none;">
+      <div>
+        <div id="nav-brand" style="font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:28px;line-height:1;letter-spacing:-0.3px;white-space:nowrap;"><span style="color:#0D1F35">One</span><span style="color:#D4614E">Side</span><span style="color:#0D1F35"> Australia</span></div>
+        <div id="logo-sub-wrap" style="margin-top:5px;">
+          <div style="display:flex;justify-content:space-between;"><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">C</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">H</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">I</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">L</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">D</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">&nbsp;&nbsp;</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">S</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">A</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">F</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">E</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">T</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">Y</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">&nbsp;&nbsp;</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">I</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">N</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">&nbsp;&nbsp;</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">S</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">P</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">O</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">R</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">T</span></div>
+        </div>
+      </div>
+    </a>
+  </div>
   <ul class="nav-links">
     <li><a href="/assessment">The Assessment</a></li>
     <li><a href="/prepare">Prepare</a></li>
@@ -160,6 +169,13 @@
   },20000);
 })();
 function closeNewsletterModal(){document.getElementById('newsletter-modal').style.display='none';}
+</script>
+<script>
+window.addEventListener('load',function(){
+  var brand=document.getElementById('nav-brand');
+  var wrap=document.getElementById('logo-sub-wrap');
+  if(brand&&wrap){wrap.style.width=brand.offsetWidth+'px';}
+});
 </script>
 </body>
 </html>

@@ -45,9 +45,9 @@ nav::before { content: ''; position: fixed; top: 0; left: 0; right: 0; height: 4
 .ph-inner { max-width: 1100px; margin: 0 auto; position: relative; z-index: 1; }
 .ph-tag { display: inline-flex; align-items: center; gap: 8px; background: rgba(212,97,78,0.12); border: 1px solid rgba(212,97,78,0.3); color: var(--coral-light); font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; padding: 6px 14px; border-radius: 100px; margin-bottom: 20px; }
 .ph-tag::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--coral); }
-.page-hero h1 { font-family: 'DM Serif Display', serif; font-size: clamp(2.2rem, 4vw, 3.2rem); color: white; line-height: 1.1; margin-bottom: 16px; }
+.page-hero h1 { font-family: 'DM Serif Display', serif; font-size: clamp(2.2rem, 4vw, 3.2rem); color: black; line-height: 1.1; margin-bottom: 16px; }
 .page-hero h1 em { font-style: italic; color: var(--coral-light); }
-.page-hero p { font-size: 17px; color: rgba(255,255,255,0.6); max-width: 600px; line-height: 1.8; }
+.page-hero p { font-size: 17px; color: rgba(0,0,0,0.6); max-width: 600px; line-height: 1.8; }
 
 /* TRUST BAR */
 .trust-bar { background: white; border-bottom: 1px solid var(--muted); padding: 16px 2rem; }

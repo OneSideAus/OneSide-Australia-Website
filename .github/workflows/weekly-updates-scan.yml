@@ -13,11 +13,13 @@ jobs:
 
     steps:
       - name: Trigger updates scan
+        env:
+          SCAN_SECRET: ${{ secrets.SCAN_SECRET }}
         run: |
           echo "Triggering OneSide Australia Weekly Updates Scan..."
 
           RESPONSE=$(curl -s -o /tmp/response.json -w "%{http_code}" \
-            "https://onesideaustralia.com.au/api/scan?secret=${{ secrets.SCAN_SECRET }}")
+            "https://onesideaustralia.com.au/api/scan?secret=${SCAN_SECRET}")
 
           echo "HTTP Status: $RESPONSE"
           echo "Response body:"

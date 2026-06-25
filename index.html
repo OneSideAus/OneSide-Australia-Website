@@ -16,7 +16,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Child Safety Gap Assessment for Sporting Clubs | OneSide Australia">
 <meta name="twitter:description" content="Understand exactly where your club stands on child safety. OneSide measures your club against national frameworks.">
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Playfair+Display:wght@700&family=Raleway:wght@300&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <script type="application/ld+json">
 {
@@ -50,9 +50,13 @@
 
 <nav>
   <div class="nav-logo">
-    <a href="/" aria-label="OneSide Australia Home" style="text-decoration:none;display:flex;flex-direction:column;gap:1px;">
-      <span id="nav-brand" style="font-family:'DM Serif Display',Georgia,serif;font-size:1.4rem;color:#0D1F35;letter-spacing:-0.02em;line-height:1.1;">One<span style="color:#D4614E;">Side</span> Australia</span>
-      <span id="nav-sub" style="font-size:10px;font-weight:600;letter-spacing:0.32em;text-transform:uppercase;color:rgba(13,31,53,0.45);">Child Safety in Sport</span>
+    <a href="/" style="text-decoration:none;">
+      <div>
+        <div id="nav-brand" style="font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:36px;line-height:1;letter-spacing:-0.3px;white-space:nowrap;"><span style="color:#0D1F35">One</span><span style="color:#D4614E">Side</span><span style="color:#0D1F35"> Australia</span></div>
+        <div id="logo-sub-wrap" style="margin-top:5px;">
+          <div style="display:flex;justify-content:space-between;"><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#8A9BB0;">C</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#8A9BB0;">H</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#8A9BB0;">I</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#8A9BB0;">L</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#8A9BB0;">D</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#8A9BB0;">&nbsp;&nbsp;</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#8A9BB0;">S</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#8A9BB0;">A</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#8A9BB0;">F</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#8A9BB0;">E</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#8A9BB0;">T</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#8A9BB0;">Y</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#8A9BB0;">&nbsp;&nbsp;</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#8A9BB0;">I</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#8A9BB0;">N</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#8A9BB0;">&nbsp;&nbsp;</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#8A9BB0;">S</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#8A9BB0;">P</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#8A9BB0;">O</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#8A9BB0;">R</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#8A9BB0;">T</span></div>
+        </div>
+      </div>
     </a>
   </div>
   <ul class="nav-links">
@@ -448,6 +452,13 @@ function closeNewsletterModal(){document.getElementById('newsletter-modal').styl
   }
   window.addEventListener('load',animateHero);
 })();
+</script>
+<script>
+window.addEventListener('load',function(){
+  var brand=document.getElementById('nav-brand');
+  var wrap=document.getElementById('logo-sub-wrap');
+  if(brand&&wrap){wrap.style.width=brand.offsetWidth+'px';}
+});
 </script>
 </body>
 </html>

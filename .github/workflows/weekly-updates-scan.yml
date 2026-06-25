@@ -19,6 +19,7 @@ jobs:
           echo "Triggering OneSide Australia Weekly Updates Scan..."
 
           RESPONSE=$(curl -s -o /tmp/response.json -w "%{http_code}" \
+            --max-time 320 \
             "https://onesideaustralia.com.au/api/scan?secret=${SCAN_SECRET}")
 
           echo "HTTP Status: $RESPONSE"

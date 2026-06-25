@@ -1,0 +1,31 @@
+name: Weekly Updates Scan
+
+on:
+  schedule:
+    # 7:00am AEST Monday = 21:00 UTC Sunday (AEST is UTC+10)
+    - cron: '0 21 * * 0'
+  workflow_dispatch:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Trigger updates scan
+        run: |
+          echo "Triggering OneSide Australia Weekly Updates Scan..."
+
+          RESPONSE=$(curl -s -o /tmp/response.json -w "%{http_code}" \
+            "https://onesideaustralia.com.au/api/scan?secret=${{ secrets.SCAN_SECRET }}")
+
+          echo "HTTP Status: $RESPONSE"
+          echo "Response body:"
+          cat /tmp/response.json
+
+          if [ "$RESPONSE" != "200" ]; then
+            echo "Scan failed with status $RESPONSE"
+            exit 1
+          fi
+
+          echo "Scan completed successfully"

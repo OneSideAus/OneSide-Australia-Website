@@ -263,6 +263,9 @@ footer { background: #080F1A; padding: 40px 2rem 32px; border-top: 1px solid rgb
   /* HERO BADGES ROW */
   [style*="display:flex"][style*="gap:28px"] { flex-wrap: wrap; gap: 12px !important; }
   [style*="display:flex"][style*="gap:36px"] { flex-wrap: wrap; gap: 12px !important; }
+
+  /* UPDATES PAGE SIDEBAR: don't let it stick over the list once columns stack */
+  [style*="position:sticky"] { position: static !important; top: auto !important; }
 }
 
 /* HAMBURGER MOBILE NAV */

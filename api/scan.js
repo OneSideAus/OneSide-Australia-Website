@@ -283,8 +283,8 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  const sinceDate = req.query.since || null;
-  console.log(`OneSide Updates Agent starting Google News scan... ${sinceDate ? `(since ${sinceDate})` : '(last 7 days)'}`);
+  const sinceDate = req.query.since || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  console.log(`OneSide Updates Agent starting Google News scan... (since ${sinceDate})`);
 
   // ── Fetch updates.html: extract published titles + purge cards > 6 months ─
   let publishedTitles = [];

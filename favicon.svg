@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <g>
+    <circle cx="32.00" cy="9.00" r="3.60" fill="#D4614E" opacity="1.00"/>
+    <circle cx="43.50" cy="12.08" r="3.45" fill="#D76652" opacity="0.92"/>
+    <circle cx="51.92" cy="20.50" r="3.31" fill="#DA6B57" opacity="0.84"/>
+    <circle cx="55.00" cy="32.00" r="3.16" fill="#DD705B" opacity="0.76"/>
+    <circle cx="51.92" cy="43.50" r="3.02" fill="#E07560" opacity="0.68"/>
+    <circle cx="43.50" cy="51.92" r="2.87" fill="#E37A64" opacity="0.60"/>
+    <circle cx="32.00" cy="55.00" r="2.73" fill="#E57E69" opacity="0.52"/>
+    <circle cx="20.50" cy="51.92" r="2.58" fill="#E8836D" opacity="0.44"/>
+    <circle cx="12.08" cy="43.50" r="2.44" fill="#EB8872" opacity="0.36"/>
+    <circle cx="9.00" cy="32.00" r="2.29" fill="#EE8D76" opacity="0.28"/>
+    <circle cx="12.08" cy="20.50" r="2.15" fill="#F1927B" opacity="0.20"/>
+    <circle cx="20.50" cy="12.08" r="2.00" fill="#F4977F" opacity="0.12"/>
+    <animateTransform attributeName="transform" type="rotate" from="0 32 32" to="360 32 32" dur="1.8s" repeatCount="indefinite"/>
+  </g>
+  <circle cx="32" cy="32" r="12" fill="none" stroke="#0D1F35" stroke-width="7"/>
+</svg>

@@ -2,7 +2,19 @@
 // OneSide Australia — Updates Agent
 // Searches Google News RSS for child safety updates relevant to Australian sporting clubs
 
+import crypto from 'node:crypto';
+
 export const config = { maxDuration: 300 };
+
+// ─── Regulator/sport-body pages watched directly for content changes ──────────
+// (news search alone misses silent page edits, e.g. a regulator updating a
+// page's effective date with no article ever being written about it)
+
+const WATCHED_PAGES = [
+  { url: 'https://www.workingwithchildren.vic.gov.au/', label: 'Working with Children Check Victoria', category: 'VIC' },
+  { url: 'https://www.vic.gov.au/social-services-regulator-media-centre', label: 'Social Services Regulator Victoria — News', category: 'VIC' },
+  { url: 'https://www.vicsport.com.au/child-safe', label: 'Vicsport — Child Safe Sport', category: 'VIC' },
+];
 
 // ─── Search queries ───────────────────────────────────────────────────────────
 
@@ -211,6 +223,156 @@ If there are relevant articles, respond in this exact JSON format only — no ot
   }
 }
 
+// ─── Fetch a watched page and reduce it to comparable text ───────────────────
+
+function extractPageText(html) {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<!--[\s\S]*?-->/g, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim()
+    .substring(0, 8000);
+}
+
+async function fetchWatchedPage(url) {
+  try {
+    const res = await fetch(url, {
+      headers: { 'User-Agent': 'OneSide Australia Updates Agent/1.0' },
+      signal: AbortSignal.timeout(15000)
+    });
+    if (!res.ok) return null;
+    return extractPageText(await res.text());
+  } catch (err) {
+    console.error(`Watched page fetch failed for "${url}":`, err.message);
+    return null;
+  }
+}
+
+function hashText(text) {
+  return crypto.createHash('sha256').update(text).digest('hex');
+}
+
+// ─── Have Claude assess whether a watched page actually changed ──────────────
+
+async function assessPageChange(page, oldText, newText, publishedTitles) {
+  const isFirstSnapshot = oldText === null;
+
+  const prompt = `You are the updates agent for OneSide Australia, a child safety consultancy for Australian sporting clubs.
+
+You track this page for changes: ${page.label} (${page.url}).
+
+${isFirstSnapshot
+    ? `This is the first time this page is being tracked, so there is no previous snapshot to compare against. Read the current page content below and decide if it currently describes a specific, dated regulatory change, reform, or update relevant to child safety in Australian sport (e.g. a new rule, a change to Working With Children Check processes, a new regulator power, a compliance deadline) — as opposed to generic, evergreen "how to apply" content.`
+    : `Below is the previous snapshot of this page's text, and the current snapshot. Identify whether there has been a genuine, substantive change relevant to child safety in Australian sport (e.g. new rules, process changes, compliance deadlines, new powers) — as opposed to incidental changes like navigation, unrelated wording, or formatting.`}
+
+${isFirstSnapshot ? '' : `PREVIOUS SNAPSHOT:\n${oldText}\n\n`}CURRENT SNAPSHOT:\n${newText}
+
+The following titles have already been published — do not flag anything that duplicates or substantially overlaps with them:
+${publishedTitles.length > 0 ? publishedTitles.map(t => `- ${t}`).join('\n') : '(none yet)'}
+
+If there is no genuine, dated, substantive change worth flagging, respond with exactly: NO_MATERIAL_CHANGE
+
+If there is, write a 2-3 sentence update in OneSide Australia's voice (plain Australian English, factual, helpful tone, no em dashes, no AI writing patterns), and respond in this exact JSON format only — no other text:
+{
+  "title": "Short descriptive title",
+  "body": "2-3 sentence summary in OneSide voice",
+  "category": "${page.category}",
+  "type": "Update",
+  "source": "${page.label}",
+  "sourceUrl": "${page.url}",
+  "date": "Month Year"
+}`;
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': process.env.ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-5',
+      max_tokens: 500,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+
+  if (!response.ok) return null;
+  const data = await response.json();
+  const text = data.content?.[0]?.text?.trim() || '';
+
+  if (!text || text.startsWith('NO_MATERIAL_CHANGE')) return null;
+
+  try {
+    const clean = text.replace(/```json|```/g, '').trim();
+    if (clean.startsWith('NO_MATERIAL_CHANGE')) return null;
+    return JSON.parse(clean);
+  } catch {
+    console.error('Watched-page JSON parse failed:', text.substring(0, 200));
+    return null;
+  }
+}
+
+// ─── Check all watched pages against their last-seen snapshot ───────────────
+
+async function checkWatchedPages(ghHeaders, publishedTitles) {
+  const stateUrl = 'https://api.github.com/repos/OneSideAus/OneSide-Australia-Website/contents/_watched-pages.json';
+  let state = {};
+  let stateSha = null;
+  try {
+    const stateRes = await fetch(stateUrl, { headers: ghHeaders });
+    if (stateRes.ok) {
+      const stateData = await stateRes.json();
+      stateSha = stateData.sha;
+      state = JSON.parse(Buffer.from(stateData.content, 'base64').toString('utf-8'));
+    }
+  } catch (e) {
+    console.warn('Could not load watched-pages state:', e.message);
+  }
+
+  const pageChangeUpdates = [];
+  const newState = { ...state };
+
+  for (const page of WATCHED_PAGES) {
+    const newText = await fetchWatchedPage(page.url);
+    if (newText === null) continue;
+
+    const newHash = hashText(newText);
+    const prev = state[page.url];
+
+    if (!prev || prev.hash !== newHash) {
+      const update = await assessPageChange(page, prev ? prev.text : null, newText, publishedTitles);
+      if (update) pageChangeUpdates.push(update);
+    }
+
+    newState[page.url] = { hash: newHash, text: newText, lastChecked: new Date().toISOString() };
+  }
+
+  try {
+    await fetch(stateUrl, {
+      method: 'PUT',
+      headers: ghHeaders,
+      body: JSON.stringify({
+        message: 'Update watched-pages snapshot',
+        content: Buffer.from(JSON.stringify(newState, null, 2)).toString('base64'),
+        ...(stateSha ? { sha: stateSha } : {})
+      })
+    });
+  } catch (e) {
+    console.warn('Could not save watched-pages state:', e.message);
+  }
+
+  return pageChangeUpdates;
+}
+
 // ─── Deduplicate by title ─────────────────────────────────────────────────────
 
 function deduplicateUpdates(updates) {
@@ -363,8 +525,12 @@ export default async function handler(req, res) {
 
   console.log(`Collected ${allArticles.length} unique articles from Google News.`);
 
-  if (allArticles.length === 0) {
-    console.log('No articles found from Google News.');
+  // Check regulator/sport-body pages directly for content changes
+  const pageChangeUpdates = await checkWatchedPages(ghHeaders, publishedTitles);
+  console.log(`Found ${pageChangeUpdates.length} watched-page change(s).`);
+
+  if (allArticles.length === 0 && pageChangeUpdates.length === 0) {
+    console.log('No articles found from Google News and no watched-page changes.');
     const r1 = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.RESEND_API_KEY}` },
@@ -372,7 +538,7 @@ export default async function handler(req, res) {
         from: 'OneSide Updates Agent <updates@onesideaustralia.com.au>',
         to: ['info@onesideaustralia.com.au', 'Angela_Marcon@hotmail.com'],
         subject: 'OneSide Weekly Digest — No articles found',
-        html: `<p style="font-family:Arial,sans-serif;">The Google News scan returned no articles this week. This may be a temporary issue — the agent will run again next week.</p>`
+        html: `<p style="font-family:Arial,sans-serif;">The Google News scan returned no articles this week, and no changes were detected on the watched regulator pages. This may be a temporary issue — the agent will run again next week.</p>`
       })
     });
     if (!r1.ok) console.error('Resend error (no articles):', await r1.text());
@@ -381,7 +547,7 @@ export default async function handler(req, res) {
   }
 
   // Send articles to Claude in batches of 30 for assessment
-  const allUpdates = [];
+  const allUpdates = [...pageChangeUpdates];
   const BATCH_SIZE = 30;
   for (let i = 0; i < allArticles.length; i += BATCH_SIZE) {
     const batch = allArticles.slice(i, i + BATCH_SIZE);
@@ -402,7 +568,7 @@ export default async function handler(req, res) {
         from: 'OneSide Updates Agent <updates@onesideaustralia.com.au>',
         to: ['info@onesideaustralia.com.au', 'Angela_Marcon@hotmail.com'],
         subject: 'OneSide Weekly Digest — No changes this week',
-        html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:32px;background:#f8fafc;"><div style="background:#0D1F35;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;"><h1 style="color:white;font-size:1.3rem;margin:0;">OneSide Weekly Digest</h1><p style="color:rgba(255,255,255,0.5);font-size:13px;margin:6px 0 0;">${date}</p></div><div style="background:white;border-radius:12px;padding:24px;"><p style="font-size:15px;color:#0D1F35;font-weight:600;margin:0 0 8px;">No changes detected this week</p><p style="font-size:14px;color:#4A6580;line-height:1.6;margin:0;">The agent scanned Google News across all sources and found nothing new relevant to child safety in sport. No action needed.</p></div><p style="font-size:12px;color:#aaa;text-align:center;margin-top:20px;">Next scan: Sunday/Tuesday · <a href="https://onesideaustralia.com.au/updates" style="color:#D4614E;">View Updates page</a></p></div>`
+        html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:32px;background:#f8fafc;"><div style="background:#0D1F35;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;"><h1 style="color:white;font-size:1.3rem;margin:0;">OneSide Weekly Digest</h1><p style="color:rgba(255,255,255,0.5);font-size:13px;margin:6px 0 0;">${date}</p></div><div style="background:white;border-radius:12px;padding:24px;"><p style="font-size:15px;color:#0D1F35;font-weight:600;margin:0 0 8px;">No changes detected this week</p><p style="font-size:14px;color:#4A6580;line-height:1.6;margin:0;">The agent scanned Google News across all sources and checked the watched regulator pages, and found nothing new relevant to child safety in sport. No action needed.</p></div><p style="font-size:12px;color:#aaa;text-align:center;margin-top:20px;">Next scan: Sunday/Tuesday · <a href="https://onesideaustralia.com.au/updates" style="color:#D4614E;">View Updates page</a></p></div>`
       })
     });
     if (!r2.ok) console.error('Resend error (no updates):', await r2.text());

@@ -176,6 +176,10 @@ ${publishedTitles.length > 0 ? publishedTitles.map(t => `- ${t}`).join('\n') : '
 
 6. For sourceUrl, always use the official primary source — the government website, regulator, or sporting body's own page — NOT a media article or news coverage of the item. If you only have a media article URL, find the official source it refers to and use that instead.
 
+7. Do not infer or assume relevance to sport. If a source describes a change to an unrelated sector (e.g. early childhood education, aged care, disability services) and does not itself mention sport, sporting clubs, or sporting organisations, do not claim it has "implications for" or "may affect" sporting clubs — leave that article out entirely. Every fact in the body must be something the source page actually states, not something you think is a reasonable extrapolation.
+
+Note: everything you produce here is independently re-verified against the live sourceUrl page before publication, and anything not directly supported by that page's actual text is discarded. There is no benefit to guessing or padding out relevance — it will just be dropped.
+
 If NONE of the articles are relevant, respond with exactly: NO_NEW_CONTENT
 
 If there are relevant articles, respond in this exact JSON format only — no other text:
@@ -278,6 +282,8 @@ ${isFirstSnapshot ? '' : `PREVIOUS SNAPSHOT:\n${oldText}\n\n`}CURRENT SNAPSHOT:\
 The following titles have already been published — do not flag anything that duplicates or substantially overlaps with them:
 ${publishedTitles.length > 0 ? publishedTitles.map(t => `- ${t}`).join('\n') : '(none yet)'}
 
+Every fact in your summary must be something this page's text actually states — do not add implications, extrapolations, or relevance claims the page itself doesn't make. This will be independently re-verified against the same page text before publication, and anything not directly supported is discarded.
+
 If there is no genuine, dated, substantive change worth flagging, respond with exactly: NO_MATERIAL_CHANGE
 
 If there is, write a 2-3 sentence update in OneSide Australia's voice (plain Australian English, factual, helpful tone, no em dashes, no AI writing patterns), and respond in this exact JSON format only — no other text:
@@ -339,6 +345,7 @@ async function checkWatchedPages(ghHeaders, publishedTitles) {
   }
 
   const pageChangeUpdates = [];
+  const pageTextByUrl = {};
   const newState = { ...state };
 
   for (const page of WATCHED_PAGES) {
@@ -350,7 +357,10 @@ async function checkWatchedPages(ghHeaders, publishedTitles) {
 
     if (!prev || prev.hash !== newHash) {
       const update = await assessPageChange(page, prev ? prev.text : null, newText, publishedTitles);
-      if (update) pageChangeUpdates.push(update);
+      if (update) {
+        pageChangeUpdates.push(update);
+        pageTextByUrl[page.url] = newText;
+      }
     }
 
     newState[page.url] = { hash: newHash, text: newText, lastChecked: new Date().toISOString() };
@@ -370,7 +380,90 @@ async function checkWatchedPages(ghHeaders, publishedTitles) {
     console.warn('Could not save watched-pages state:', e.message);
   }
 
-  return pageChangeUpdates;
+  return { pageChangeUpdates, pageTextByUrl };
+}
+
+// ─── Verify a drafted update against the real, live text of its claimed source ─
+// (the draft above is written from a Google News snippet or a page diff, not
+// necessarily the source page itself — this independently fetches sourceUrl,
+// re-checks the claim against the actual page, and rejects anything the source
+// doesn't explicitly support. No source, or no support in the source, no item.)
+
+async function verifySourceClaim(update, pageTextOverride) {
+  const pageText = pageTextOverride !== undefined ? pageTextOverride : await fetchWatchedPage(update.sourceUrl);
+  if (pageText === null) {
+    return { verdict: 'UNVERIFIABLE', reason: 'sourceUrl could not be fetched' };
+  }
+
+  const prompt = `You are a strict fact-checker for OneSide Australia, a child safety consultancy for Australian sporting clubs. Publishing an unsupported regulatory claim is a serious credibility risk for this business, so reject anything not directly and explicitly stated in the source text below.
+
+DRAFT ITEM
+Title: ${update.title}
+Body: ${update.body}
+Claimed source: ${update.source} (${update.sourceUrl})
+
+ACTUAL TEXT FETCHED FROM THAT SOURCE URL JUST NOW:
+${pageText}
+
+Check strictly, using only the fetched text above — no outside knowledge, no inference:
+1. Does the source text explicitly state the core facts asserted in the title and body? "Plausible" or "likely true" is not enough — it must be directly stated.
+2. If the title or body claims or implies relevance to sport, sporting clubs, sporting organisations, or athletes, the fetched text must itself explicitly mention sport / sporting clubs / sporting organisations in that context. A generic page about an unrelated sector (e.g. early childhood education, aged care, disability services) with no explicit mention of sport does NOT support a sport-relevance claim, even if it seems like a reasonable extrapolation.
+3. If the fetched text doesn't mention the claim at all, or covers a different topic than the URL was claimed to support, that's CONTRADICTED, not UNCONFIRMED.
+
+Respond in exactly this JSON format, no other text:
+{
+  "verdict": "VERIFIED" | "CONTRADICTED" | "UNCONFIRMED",
+  "reason": "one sentence explaining the verdict",
+  "quote": "a direct quote (max 40 words) from the fetched text that supports the claim, or empty string if not VERIFIED"
+}`;
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': process.env.ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-5',
+      max_tokens: 400,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+
+  if (!response.ok) return { verdict: 'UNVERIFIABLE', reason: 'verification request failed' };
+  const data = await response.json();
+  const text = data.content?.[0]?.text?.trim() || '';
+
+  try {
+    const clean = text.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+    if (!['VERIFIED', 'CONTRADICTED', 'UNCONFIRMED'].includes(parsed.verdict)) {
+      return { verdict: 'UNVERIFIABLE', reason: 'malformed verifier response' };
+    }
+    return parsed;
+  } catch {
+    console.error('Verifier JSON parse failed:', text.substring(0, 200));
+    return { verdict: 'UNVERIFIABLE', reason: 'malformed verifier response' };
+  }
+}
+
+// ─── Run every drafted update through source verification; keep only VERIFIED ─
+
+async function verifyUpdates(updates, pageTextByUrl = {}) {
+  const verified = [];
+  for (const update of updates) {
+    const override = Object.prototype.hasOwnProperty.call(pageTextByUrl, update.sourceUrl)
+      ? pageTextByUrl[update.sourceUrl]
+      : undefined;
+    const result = await verifySourceClaim(update, override);
+    if (result.verdict === 'VERIFIED') {
+      verified.push({ ...update, verifiedQuote: result.quote });
+    } else {
+      console.log(`Dropped "${update.title}" — ${result.verdict}: ${result.reason}`);
+    }
+  }
+  return verified;
 }
 
 // ─── Deduplicate by title ─────────────────────────────────────────────────────
@@ -387,11 +480,24 @@ function deduplicateUpdates(updates) {
 
 // ─── Build email HTML ─────────────────────────────────────────────────────────
 
+function escapeHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 function buildEmailHtml(allUpdates, approveBaseUrl, scanSecret) {
   const date = new Date().toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
   const updateCards = allUpdates.map((update) => {
     const approveUrl = `${approveBaseUrl}/api/approve?id=${encodeURIComponent(update.title)}&title=${encodeURIComponent(update.title)}&body=${encodeURIComponent(update.body)}&category=${encodeURIComponent(update.category)}&type=${encodeURIComponent(update.type)}&date=${encodeURIComponent(update.date)}&source=${encodeURIComponent(update.source)}&sourceUrl=${encodeURIComponent(update.sourceUrl)}`;
+
+    const quoteBlock = update.verifiedQuote ? `
+      <p style="font-size:12px;color:#4A6580;background:#eef4f8;border-radius:6px;padding:10px 12px;margin:0 0 14px;font-style:italic;">
+        <span style="text-transform:uppercase;font-style:normal;font-weight:600;color:#1B5E8A;">Verified against source: </span>"${escapeHtml(update.verifiedQuote)}"
+      </p>` : '';
 
     return `
     <div style="background:#f8fafc;border:1px solid #e2eaf0;border-left:3px solid #D4614E;border-radius:0 8px 8px 0;padding:20px;margin-bottom:16px;">
@@ -403,6 +509,7 @@ function buildEmailHtml(allUpdates, approveBaseUrl, scanSecret) {
       <h3 style="font-size:15px;font-weight:600;color:#0D1F35;margin:0 0 8px;">${update.title}</h3>
       <p style="font-size:14px;color:#4A6580;line-height:1.6;margin:0 0 14px;">${update.body}</p>
       <p style="font-size:12px;color:#7A95AA;margin:0 0 14px;">Source: <a href="${update.sourceUrl}" style="color:#1B5E8A;">${update.source}</a></p>
+      ${quoteBlock}
       <a href="${approveUrl}" style="display:inline-block;background:#D4614E;color:white;font-size:13px;font-weight:600;padding:8px 20px;border-radius:6px;text-decoration:none;">Approve and publish →</a>
     </div>`;
   }).join('');
@@ -526,7 +633,7 @@ export default async function handler(req, res) {
   console.log(`Collected ${allArticles.length} unique articles from Google News.`);
 
   // Check regulator/sport-body pages directly for content changes
-  const pageChangeUpdates = await checkWatchedPages(ghHeaders, publishedTitles);
+  const { pageChangeUpdates, pageTextByUrl } = await checkWatchedPages(ghHeaders, publishedTitles);
   console.log(`Found ${pageChangeUpdates.length} watched-page change(s).`);
 
   if (allArticles.length === 0 && pageChangeUpdates.length === 0) {
@@ -558,9 +665,18 @@ export default async function handler(req, res) {
   const dedupedUpdates = deduplicateUpdates(allUpdates);
   console.log(`Found ${dedupedUpdates.length} relevant updates after Claude assessment.`);
 
+  // Independently re-fetch each claimed source and verify the draft against it.
+  // No source, or the source doesn't explicitly support the claim, no item.
+  const verifiedUpdates = await verifyUpdates(dedupedUpdates, pageTextByUrl);
+  console.log(`${verifiedUpdates.length} of ${dedupedUpdates.length} updates verified against their live source.`);
+
   const date = new Date().toLocaleDateString('en-AU', { weekday:'long',day:'numeric',month:'long',year:'numeric' });
 
-  if (dedupedUpdates.length === 0) {
+  if (verifiedUpdates.length === 0) {
+    const droppedCount = dedupedUpdates.length;
+    const droppedNote = droppedCount > 0
+      ? `<p style="font-size:13px;color:#7A95AA;line-height:1.6;margin:12px 0 0;">${droppedCount} candidate update${droppedCount !== 1 ? 's were' : ' was'} drafted this week but discarded because the claimed source didn't explicitly support the claim on independent verification.</p>`
+      : '';
     const r2 = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.RESEND_API_KEY}` },
@@ -568,12 +684,12 @@ export default async function handler(req, res) {
         from: 'OneSide Updates Agent <updates@onesideaustralia.com.au>',
         to: ['info@onesideaustralia.com.au', 'Angela_Marcon@hotmail.com'],
         subject: 'OneSide Weekly Digest — No changes this week',
-        html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:32px;background:#f8fafc;"><div style="background:#0D1F35;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;"><h1 style="color:white;font-size:1.3rem;margin:0;">OneSide Weekly Digest</h1><p style="color:rgba(255,255,255,0.5);font-size:13px;margin:6px 0 0;">${date}</p></div><div style="background:white;border-radius:12px;padding:24px;"><p style="font-size:15px;color:#0D1F35;font-weight:600;margin:0 0 8px;">No changes detected this week</p><p style="font-size:14px;color:#4A6580;line-height:1.6;margin:0;">The agent scanned Google News across all sources and checked the watched regulator pages, and found nothing new relevant to child safety in sport. No action needed.</p></div><p style="font-size:12px;color:#aaa;text-align:center;margin-top:20px;">Next scan: Sunday/Tuesday · <a href="https://onesideaustralia.com.au/updates" style="color:#D4614E;">View Updates page</a></p></div>`
+        html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:32px;background:#f8fafc;"><div style="background:#0D1F35;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;"><h1 style="color:white;font-size:1.3rem;margin:0;">OneSide Weekly Digest</h1><p style="color:rgba(255,255,255,0.5);font-size:13px;margin:6px 0 0;">${date}</p></div><div style="background:white;border-radius:12px;padding:24px;"><p style="font-size:15px;color:#0D1F35;font-weight:600;margin:0 0 8px;">No changes detected this week</p><p style="font-size:14px;color:#4A6580;line-height:1.6;margin:0;">The agent scanned Google News across all sources and checked the watched regulator pages, and found nothing new, verifiable, and relevant to child safety in sport. No action needed.</p>${droppedNote}</div><p style="font-size:12px;color:#aaa;text-align:center;margin-top:20px;">Next scan: Sunday/Tuesday · <a href="https://onesideaustralia.com.au/updates" style="color:#D4614E;">View Updates page</a></p></div>`
       })
     });
     if (!r2.ok) console.error('Resend error (no updates):', await r2.text());
     else console.log('No-updates email sent OK');
-    return res.status(200).json({ message: 'No relevant updates found', count: 0 });
+    return res.status(200).json({ message: 'No relevant, verified updates found', count: 0, draftedButUnverified: droppedCount });
   }
 
   const approveBaseUrl = process.env.SITE_URL || 'https://onesideaustralia.com.au';
@@ -594,16 +710,16 @@ export default async function handler(req, res) {
       headers: ghHeaders,
       body: JSON.stringify({
         message: 'Save pending updates for approve-all',
-        content: Buffer.from(JSON.stringify(dedupedUpdates)).toString('base64'),
+        content: Buffer.from(JSON.stringify(verifiedUpdates)).toString('base64'),
         ...(existingData?.sha ? { sha: existingData.sha } : {})
       })
     });
-    console.log(`Saved ${dedupedUpdates.length} pending updates to GitHub.`);
+    console.log(`Saved ${verifiedUpdates.length} pending updates to GitHub.`);
   } catch (e) {
     console.warn('Could not save pending updates:', e.message);
   }
 
-  const emailHtml = buildEmailHtml(dedupedUpdates, approveBaseUrl, process.env.SCAN_SECRET);
+  const emailHtml = buildEmailHtml(verifiedUpdates, approveBaseUrl, process.env.SCAN_SECRET);
 
   const emailResponse = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -611,7 +727,7 @@ export default async function handler(req, res) {
     body: JSON.stringify({
       from: 'OneSide Updates Agent <updates@onesideaustralia.com.au>',
       to: ['info@onesideaustralia.com.au', 'Angela_Marcon@hotmail.com'],
-      subject: `OneSide Updates Digest${sinceDate ? ` (since ${sinceDate})` : ''} — ${dedupedUpdates.length} update${dedupedUpdates.length !== 1 ? 's' : ''} found`,
+      subject: `OneSide Updates Digest${sinceDate ? ` (since ${sinceDate})` : ''} — ${verifiedUpdates.length} update${verifiedUpdates.length !== 1 ? 's' : ''} found`,
       html: emailHtml
     })
   });
@@ -622,6 +738,6 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Failed to send email', details: err });
   }
 
-  console.log(`Digest sent with ${dedupedUpdates.length} updates.`);
-  return res.status(200).json({ message: 'Digest sent', count: dedupedUpdates.length });
+  console.log(`Digest sent with ${verifiedUpdates.length} verified updates (${dedupedUpdates.length - verifiedUpdates.length} dropped on verification).`);
+  return res.status(200).json({ message: 'Digest sent', count: verifiedUpdates.length, droppedOnVerification: dedupedUpdates.length - verifiedUpdates.length });
 }

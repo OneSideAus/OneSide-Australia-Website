@@ -34,7 +34,7 @@ async function submitSubscribe(e) {
   } catch {
     btn.disabled = false;
     btn.textContent = 'Subscribe →';
-    msg.style.color = '#D4614E';
+    msg.style.color = '#F25C44';
     msg.textContent = 'Something went wrong. Please try again.';
   }
 }
@@ -113,7 +113,7 @@ function notifyFormHtml(sportLabel) {
     + '<input type="email" class="nf-email" placeholder="your@email.com.au" style="flex:1;min-width:130px;' + fi + '">'
     + '</div>'
     + '<div id="nf-msg-' + sportLabel.replace(/\s/g,'-') + '" style="font-size:12px;color:#854F0B;display:none;"></div>'
-    + '<button onclick="notifySport(this,\'' + sportLabel + '\')" style="background:#D4614E;color:white;border:none;border-radius:8px;padding:8px 18px;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:600;cursor:pointer;align-self:flex-start;">Notify me ↗</button>'
+    + '<button onclick="notifySport(this,\'' + sportLabel + '\')" style="background:#F25C44;color:white;border:none;border-radius:8px;padding:8px 18px;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:600;cursor:pointer;align-self:flex-start;">Notify me ↗</button>'
     + '</div>';
 }
 
@@ -175,7 +175,7 @@ async function submitHeroForm() {
   var btn   = document.getElementById('hf-btn');
 
   if (!email || !email.includes('@')) {
-    result.innerHTML = '<p style="color:#F4977F;font-size:13px;margin-top:8px;">Please enter a valid email address.</p>';
+    result.innerHTML = '<p style="color:#FF9A82;font-size:13px;margin-top:8px;">Please enter a valid email address.</p>';
     return;
   }
 
@@ -196,13 +196,13 @@ async function submitHeroForm() {
       btn.disabled = false;
       btn.textContent = 'Book a discovery call →';
       btn.style.opacity = '1';
-      result.innerHTML = '<p style="color:#F4977F;font-size:13px;margin-top:8px;">Something went wrong — please try again or email <a href="mailto:info@onesideaustralia.com.au" style="color:#F4977F;">info@onesideaustralia.com.au</a>.</p>';
+      result.innerHTML = '<p style="color:#FF9A82;font-size:13px;margin-top:8px;">Something went wrong — please try again or email <a href="mailto:info@onesideaustralia.com.au" style="color:#FF9A82;">info@onesideaustralia.com.au</a>.</p>';
     }
   } catch(err) {
     btn.disabled = false;
     btn.textContent = 'Book a discovery call →';
     btn.style.opacity = '1';
-    result.innerHTML = '<p style="color:#F4977F;font-size:13px;margin-top:8px;">Something went wrong — please try again or email <a href="mailto:info@onesideaustralia.com.au" style="color:#F4977F;">info@onesideaustralia.com.au</a>.</p>';
+    result.innerHTML = '<p style="color:#FF9A82;font-size:13px;margin-top:8px;">Something went wrong — please try again or email <a href="mailto:info@onesideaustralia.com.au" style="color:#FF9A82;">info@onesideaustralia.com.au</a>.</p>';
   }
 }
 
@@ -220,7 +220,7 @@ async function submitContactForm() {
   var btn   = document.getElementById('cf-btn');
 
   if (!email || !email.includes('@')) {
-    result.innerHTML = '<p style="color:#B84A39;font-size:13px;margin-top:8px;">Please enter a valid email address.</p>';
+    result.innerHTML = '<p style="color:#D24530;font-size:13px;margin-top:8px;">Please enter a valid email address.</p>';
     return;
   }
 
@@ -240,12 +240,12 @@ async function submitContactForm() {
     } else {
       btn.disabled = false;
       btn.textContent = 'Send enquiry ↗';
-      result.innerHTML = '<p style="color:#B84A39;font-size:13px;margin-top:8px;">Something went wrong — please try again or email <a href="mailto:info@onesideaustralia.com.au" style="color:#B84A39;">info@onesideaustralia.com.au</a>.</p>';
+      result.innerHTML = '<p style="color:#D24530;font-size:13px;margin-top:8px;">Something went wrong — please try again or email <a href="mailto:info@onesideaustralia.com.au" style="color:#D24530;">info@onesideaustralia.com.au</a>.</p>';
     }
   } catch(err) {
     btn.disabled = false;
     btn.textContent = 'Send enquiry ↗';
-    result.innerHTML = '<p style="color:#B84A39;font-size:13px;margin-top:8px;">Something went wrong — please try again or email <a href="mailto:info@onesideaustralia.com.au" style="color:#B84A39;">info@onesideaustralia.com.au</a>.</p>';
+    result.innerHTML = '<p style="color:#D24530;font-size:13px;margin-top:8px;">Something went wrong — please try again or email <a href="mailto:info@onesideaustralia.com.au" style="color:#D24530;">info@onesideaustralia.com.au</a>.</p>';
   }
 }
 
@@ -265,7 +265,7 @@ async function notifySport(btn, sport) {
   var email = emailEl ? emailEl.value.trim() : '';
 
   if (!email || !email.includes('@')) {
-    if (emailEl) emailEl.style.borderColor = '#D4614E';
+    if (emailEl) emailEl.style.borderColor = '#F25C44';
     return;
   }
 

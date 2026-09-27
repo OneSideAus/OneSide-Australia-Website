@@ -71,7 +71,7 @@ function buildContactEmail({ label, name, club, email, sport, state, message }) 
 <body style="font-family:Arial,sans-serif;background:#f0f4f8;padding:32px 16px;margin:0;">
   <div style="max-width:560px;margin:0 auto;">
     <div style="background:#0D1F35;border-radius:12px;padding:24px;margin-bottom:16px;text-align:center;">
-      <p style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#D4614E;margin:0 0 6px;">OneSide Australia</p>
+      <p style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#F25C44;margin:0 0 6px;">OneSide Australia</p>
       <h1 style="font-size:1.15rem;color:white;margin:0;font-weight:600;">${label}</h1>
     </div>
     <div style="background:white;border-radius:12px;padding:28px;margin-bottom:16px;">
@@ -97,7 +97,7 @@ function buildWaitlistEmail({ name, club, email, sport, state }) {
 <body style="font-family:Arial,sans-serif;background:#f0f4f8;padding:32px 16px;margin:0;">
   <div style="max-width:560px;margin:0 auto;">
     <div style="background:#0D1F35;border-radius:12px;padding:24px;margin-bottom:16px;text-align:center;">
-      <p style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#D4614E;margin:0 0 6px;">OneSide Australia</p>
+      <p style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#F25C44;margin:0 0 6px;">OneSide Australia</p>
       <h1 style="font-size:1.15rem;color:white;margin:0;font-weight:600;">Sport waitlist signup</h1>
     </div>
     <div style="background:white;border-radius:12px;padding:28px;">

@@ -500,9 +500,9 @@ function buildEmailHtml(allUpdates, approveBaseUrl, scanSecret) {
       </p>` : '';
 
     return `
-    <div style="background:#f8fafc;border:1px solid #e2eaf0;border-left:3px solid #E8664F;border-radius:0 8px 8px 0;padding:20px;margin-bottom:16px;">
+    <div style="background:#f8fafc;border:1px solid #e2eaf0;border-left:3px solid #ED614A;border-radius:0 8px 8px 0;padding:20px;margin-bottom:16px;">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-        <span style="background:rgba(232,102,79,0.1);color:#C9503C;font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;text-transform:uppercase;">${update.category}</span>
+        <span style="background:rgba(237,97,74,0.1);color:#CE4B36;font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;text-transform:uppercase;">${update.category}</span>
         <span style="background:rgba(92,221,154,0.15);color:#3B6D11;font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;text-transform:uppercase;">${update.type}</span>
         <span style="font-size:12px;color:#7A95AA;">${update.date}</span>
       </div>
@@ -510,7 +510,7 @@ function buildEmailHtml(allUpdates, approveBaseUrl, scanSecret) {
       <p style="font-size:14px;color:#4A6580;line-height:1.6;margin:0 0 14px;">${update.body}</p>
       <p style="font-size:12px;color:#7A95AA;margin:0 0 14px;">Source: <a href="${update.sourceUrl}" style="color:#1B5E8A;">${update.source}</a></p>
       ${quoteBlock}
-      <a href="${approveUrl}" style="display:inline-block;background:#E8664F;color:white;font-size:13px;font-weight:600;padding:8px 20px;border-radius:6px;text-decoration:none;">Approve and publish →</a>
+      <a href="${approveUrl}" style="display:inline-block;background:#ED614A;color:white;font-size:13px;font-weight:600;padding:8px 20px;border-radius:6px;text-decoration:none;">Approve and publish →</a>
     </div>`;
   }).join('');
 
@@ -520,7 +520,7 @@ function buildEmailHtml(allUpdates, approveBaseUrl, scanSecret) {
 <body style="font-family:'DM Sans',Arial,sans-serif;background:#f0f4f8;padding:32px 16px;margin:0;">
   <div style="max-width:640px;margin:0 auto;">
     <div style="background:#0D1F35;border-radius:12px;padding:24px;margin-bottom:24px;text-align:center;">
-      <p style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#E8664F;margin:0 0 8px;">OneSide Australia</p>
+      <p style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#ED614A;margin:0 0 8px;">OneSide Australia</p>
       <h1 style="font-size:1.4rem;color:white;margin:0 0 6px;">Weekly Updates Digest</h1>
       <p style="font-size:13px;color:rgba(255,255,255,0.5);margin:0;">${date}</p>
     </div>
@@ -533,7 +533,7 @@ function buildEmailHtml(allUpdates, approveBaseUrl, scanSecret) {
       <p style="font-size:14px;color:#4A6580;margin:0 0 16px;">Happy with everything? Publish all ${allUpdates.length} updates in one click.</p>
       <a href="${approveBaseUrl}/api/approve-all?secret=${encodeURIComponent(scanSecret || '')}" style="display:inline-block;background:#0D1F35;color:white;font-size:14px;font-weight:600;padding:14px 32px;border-radius:8px;text-decoration:none;">Approve all ${allUpdates.length} updates →</a>
     </div>
-    <p style="font-size:12px;color:#7A95AA;text-align:center;margin-top:24px;">OneSide Australia — Updates Agent · <a href="https://onesideaustralia.com.au" style="color:#E8664F;">onesideaustralia.com.au</a></p>
+    <p style="font-size:12px;color:#7A95AA;text-align:center;margin-top:24px;">OneSide Australia — Updates Agent · <a href="https://onesideaustralia.com.au" style="color:#ED614A;">onesideaustralia.com.au</a></p>
   </div>
 </body>
 </html>`;
@@ -684,7 +684,7 @@ export default async function handler(req, res) {
         from: 'OneSide Updates Agent <updates@onesideaustralia.com.au>',
         to: ['info@onesideaustralia.com.au', 'Angela_Marcon@hotmail.com'],
         subject: 'OneSide Weekly Digest — No changes this week',
-        html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:32px;background:#f8fafc;"><div style="background:#0D1F35;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;"><h1 style="color:white;font-size:1.3rem;margin:0;">OneSide Weekly Digest</h1><p style="color:rgba(255,255,255,0.5);font-size:13px;margin:6px 0 0;">${date}</p></div><div style="background:white;border-radius:12px;padding:24px;"><p style="font-size:15px;color:#0D1F35;font-weight:600;margin:0 0 8px;">No changes detected this week</p><p style="font-size:14px;color:#4A6580;line-height:1.6;margin:0;">The agent scanned Google News across all sources and checked the watched regulator pages, and found nothing new, verifiable, and relevant to child safety in sport. No action needed.</p>${droppedNote}</div><p style="font-size:12px;color:#aaa;text-align:center;margin-top:20px;">Next scan: Sunday/Tuesday · <a href="https://onesideaustralia.com.au/updates" style="color:#E8664F;">View Updates page</a></p></div>`
+        html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:32px;background:#f8fafc;"><div style="background:#0D1F35;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;"><h1 style="color:white;font-size:1.3rem;margin:0;">OneSide Weekly Digest</h1><p style="color:rgba(255,255,255,0.5);font-size:13px;margin:6px 0 0;">${date}</p></div><div style="background:white;border-radius:12px;padding:24px;"><p style="font-size:15px;color:#0D1F35;font-weight:600;margin:0 0 8px;">No changes detected this week</p><p style="font-size:14px;color:#4A6580;line-height:1.6;margin:0;">The agent scanned Google News across all sources and checked the watched regulator pages, and found nothing new, verifiable, and relevant to child safety in sport. No action needed.</p>${droppedNote}</div><p style="font-size:12px;color:#aaa;text-align:center;margin-top:20px;">Next scan: Sunday/Tuesday · <a href="https://onesideaustralia.com.au/updates" style="color:#ED614A;">View Updates page</a></p></div>`
       })
     });
     if (!r2.ok) console.error('Resend error (no updates):', await r2.text());

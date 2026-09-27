@@ -194,7 +194,7 @@ function renderPage(status, message) {
   .icon { font-size: 3rem; margin-bottom: 16px; }
   h1 { font-size: 1.4rem; color: #0D1F35; margin: 0 0 10px; }
   p { font-size: 14px; color: #4A6580; line-height: 1.6; margin: 0 0 24px; }
-  a { display: inline-block; background: #E8664F; color: white; padding: 10px 24px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600; }
+  a { display: inline-block; background: #ED614A; color: white; padding: 10px 24px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600; }
 </style>
 </head>
 <body>

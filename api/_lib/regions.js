@@ -47,11 +47,14 @@ export const REGIONS = {
   VIC: {
     name: 'Victoria',
     category: 'VIC',
-    focus: 'Victoria: Working with Children Check (now run by the Social Services Regulator, incl. WWC Connect, mandatory child safety training, Service Victoria transactions), the Child Safe Standards and Reportable Conduct Scheme (moving from the Commission for Children and Young People to the Social Services Regulator), Sport and Recreation Victoria, Vicsport.',
+    focus: 'Victoria: Working with Children Check (now run by the Social Services Regulator, incl. WWC Connect for applicants and organisations verifying workers, mandatory child safety training from 19 October 2026, Service Victoria transactions), the Child Safe Standards and Reportable Conduct Scheme (moving from the Commission for Children and Young People to the Social Services Regulator), Sport and Recreation Victoria, Vicsport.',
     domains: ['vic.gov.au', 'vicsport.com.au'],
     watchedPages: [
       { url: 'https://www.workingwithchildren.vic.gov.au/', label: 'Working with Children Check Victoria' },
       { url: 'https://www.vic.gov.au/social-services-regulator-media-centre', label: 'Social Services Regulator Victoria: News' },
+      { url: 'https://www.vic.gov.au/social-services-regulator', label: 'Social Services Regulator Victoria' },
+      { url: 'https://www.vic.gov.au/mandatory-child-safety-training-working-children-clearance-holders', label: 'SSR: Mandatory child safety training for WWC Clearance holders' },
+      { url: 'https://www.vic.gov.au/changes-working-children-check-from-july-2026', label: 'SSR: Changes to the Working with Children Check' },
       { url: 'https://www.vicsport.com.au/child-safe', label: 'Vicsport: Child Safe Sport' }
     ],
     queries: [

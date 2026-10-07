@@ -265,12 +265,15 @@ Check strictly, using only the fetched text above — no outside knowledge, no i
 1. Does the source text explicitly state the core facts asserted in the title and body? "Plausible" or "likely true" is not enough — it must be directly stated.
 2. If the title or body claims relevance specifically to sport, sporting clubs, sporting organisations, or athletes, the fetched text must itself support that. A general requirement (e.g. a Working With Children Check or child safe standards change that applies to everyone working with children) does not need to mention sport. But a page about an unrelated sector (e.g. early childhood education, aged care, disability services) does NOT support a sport-relevance claim.
 3. If the fetched text doesn't mention the claim at all, or covers a different topic than the URL was claimed to support, that's CONTRADICTED, not UNCONFIRMED.
+4. If the source clearly supports the main point of the draft but a detail is wrong or overstated (a date, a deadline, who it applies to, something described as done that is still upcoming, or a claim the page doesn't make), don't reject it: verdict CORRECTED, and rewrite the title and body so that every fact matches the source text exactly. Drop any detail the page doesn't state. Keep plain Australian English, 2-3 sentences, no em dashes.
 
 Respond in exactly this JSON format, no other text:
 {
-  "verdict": "VERIFIED" | "CONTRADICTED" | "UNCONFIRMED",
-  "reason": "one sentence explaining the verdict",
-  "quote": "a direct quote (max 40 words) from the fetched text that supports the claim, or empty string if not VERIFIED"
+  "verdict": "VERIFIED" | "CORRECTED" | "CONTRADICTED" | "UNCONFIRMED",
+  "reason": "one sentence explaining the verdict (for CORRECTED, say what you fixed)",
+  "quote": "a direct quote (max 40 words) from the fetched text that supports the claim, or empty string if CONTRADICTED or UNCONFIRMED",
+  "correctedTitle": "only for CORRECTED, otherwise empty string",
+  "correctedBody": "only for CORRECTED, otherwise empty string"
 }`;
 
   try {
@@ -281,14 +284,14 @@ Respond in exactly this JSON format, no other text:
         'x-api-key': process.env.ANTHROPIC_API_KEY,
         'anthropic-version': '2023-06-01'
       },
-      body: JSON.stringify({ model: VERIFY_MODEL, max_tokens: 400, messages: [{ role: 'user', content: prompt }] }),
+      body: JSON.stringify({ model: VERIFY_MODEL, max_tokens: 1500, messages: [{ role: 'user', content: prompt }] }),
       signal: AbortSignal.timeout(40000)
     });
     if (!response.ok) return { verdict: 'UNVERIFIABLE', reason: 'verification request failed' };
     const data = await response.json();
     const text = data.content?.[0]?.text?.trim() || '';
     const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
-    if (!['VERIFIED', 'CONTRADICTED', 'UNCONFIRMED'].includes(parsed.verdict)) {
+    if (!['VERIFIED', 'CORRECTED', 'CONTRADICTED', 'UNCONFIRMED'].includes(parsed.verdict)) {
       return { verdict: 'UNVERIFIABLE', reason: 'malformed verifier response' };
     }
     return parsed;
@@ -354,11 +357,14 @@ export default async function handler(req, res) {
   const updates = [];
   const dropped = [];
   for (const { update, result } of results) {
+    const { evidence, ...rest } = update;
     if (result.verdict === 'VERIFIED') {
-      const { evidence, ...rest } = update;
       updates.push({ ...rest, verifiedQuote: result.quote });
+    } else if (result.verdict === 'CORRECTED' && result.correctedTitle && result.correctedBody) {
+      updates.push({ ...rest, title: result.correctedTitle, body: result.correctedBody, verifiedQuote: result.quote, correction: result.reason });
+      console.log(`[${regionKey}] Corrected "${update.title}" — ${result.reason}`);
     } else {
-      dropped.push({ title: update.title, body: update.body, sourceUrl: update.sourceUrl, evidence: update.evidence || '', verdict: result.verdict, reason: result.reason });
+      dropped.push({ ...rest, evidence: evidence || '', verdict: result.verdict, reason: result.reason });
       console.log(`[${regionKey}] Dropped "${update.title}" — ${result.verdict}: ${result.reason}`);
     }
   }

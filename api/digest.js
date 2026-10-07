@@ -84,10 +84,18 @@ function regionSummaryRows(results) {
   }).join('');
 }
 
-function updateCard(update, approveBaseUrl) {
+function approveUrlFor(update, approveBaseUrl) {
   const params = ['title', 'body', 'category', 'type', 'date', 'source', 'sourceUrl']
     .map(k => `${k}=${encodeURIComponent(update[k] || '')}`).join('&');
-  const approveUrl = `${approveBaseUrl}/api/approve?id=${encodeURIComponent(update.title)}&${params}`;
+  return `${approveBaseUrl}/api/approve?id=${encodeURIComponent(update.title)}&${params}`;
+}
+
+function updateCard(update, approveBaseUrl) {
+  const approveUrl = approveUrlFor(update, approveBaseUrl);
+  const correctionBlock = update.correction ? `
+      <p style="font-size:12px;color:#7A5A12;background:#fdf5e1;border-radius:6px;padding:10px 12px;margin:0 0 14px;">
+        <span style="text-transform:uppercase;font-weight:600;">Corrected by fact-checker: </span>${escapeHtml(update.correction)}
+      </p>` : '';
   const quoteBlock = update.verifiedQuote ? `
       <p style="font-size:12px;color:#4A6580;background:#eef4f8;border-radius:6px;padding:10px 12px;margin:0 0 14px;font-style:italic;">
         <span style="text-transform:uppercase;font-style:normal;font-weight:600;color:#1B5E8A;">Verified against source: </span>"${escapeHtml(update.verifiedQuote)}"
@@ -104,18 +112,20 @@ function updateCard(update, approveBaseUrl) {
       <p style="font-size:14px;color:#4A6580;line-height:1.6;margin:0 0 14px;">${escapeHtml(update.body)}</p>
       <p style="font-size:12px;color:#7A95AA;margin:0 0 14px;">Source: <a href="${escapeHtml(update.sourceUrl)}" style="color:#1B5E8A;">${escapeHtml(update.source)}</a></p>
       ${quoteBlock}
+      ${correctionBlock}
       <a href="${approveUrl}" style="display:inline-block;background:#F25C44;color:white;font-size:13px;font-weight:600;padding:8px 20px;border-radius:6px;text-decoration:none;">Approve and publish →</a>
     </div>`;
 }
 
-function droppedCard(item) {
+function droppedCard(item, approveBaseUrl) {
   return `
     <div style="border:1px dashed #cdd9e3;border-radius:8px;padding:14px 16px;margin-bottom:12px;">
       <p style="font-size:11px;font-weight:600;text-transform:uppercase;color:#7A95AA;margin:0 0 6px;">${escapeHtml(item.regionName)} · not verified</p>
       <p style="font-size:14px;font-weight:600;color:#0D1F35;margin:0 0 6px;">${escapeHtml(item.title)}</p>
       <p style="font-size:13px;color:#4A6580;line-height:1.5;margin:0 0 6px;">${escapeHtml(item.body)}</p>
       ${item.evidence ? `<p style="font-size:12px;color:#4A6580;font-style:italic;margin:0 0 6px;">Agent's evidence: "${escapeHtml(item.evidence)}"</p>` : ''}
-      <p style="font-size:12px;color:#7A95AA;margin:0;">Why it wasn't verified: ${escapeHtml(item.reason)}${item.sourceUrl ? ` · <a href="${escapeHtml(item.sourceUrl)}" style="color:#1B5E8A;">Check the source</a>` : ''}</p>
+      <p style="font-size:12px;color:#7A95AA;margin:0 0 12px;">Why it wasn't verified: ${escapeHtml(item.reason)}${item.sourceUrl ? ` · <a href="${escapeHtml(item.sourceUrl)}" style="color:#1B5E8A;">Check the source</a>` : ''}</p>
+      ${item.category && item.type ? `<a href="${approveUrlFor(item, approveBaseUrl)}" style="display:inline-block;background:white;color:#D24530;border:1px solid #F25C44;font-size:12px;font-weight:600;padding:6px 16px;border-radius:6px;text-decoration:none;">Approve anyway →</a>` : ''}
     </div>`;
 }
 
@@ -136,8 +146,8 @@ function buildEmailHtml({ results, updates, dropped, approveBaseUrl, scanSecret,
   const droppedSection = dropped.length ? `
     <div style="background:white;border-radius:12px;padding:24px;margin-bottom:16px;">
       <p style="font-size:15px;color:#0D1F35;font-weight:600;margin:0 0 6px;">Worth a manual check</p>
-      <p style="font-size:13px;color:#7A95AA;line-height:1.5;margin:0 0 16px;">The agents found these but couldn't confirm them word-for-word on the official page (sometimes the site blocks automated checks). They won't be published unless you add them yourself.</p>
-      ${dropped.map(droppedCard).join('')}
+      <p style="font-size:13px;color:#7A95AA;line-height:1.5;margin:0 0 16px;">The agents found these but couldn't confirm them word-for-word on the official page (sometimes the site blocks automated checks). Check the source first: these are only published if you click Approve anyway.</p>
+      ${dropped.map(d => droppedCard(d, approveBaseUrl)).join('')}
     </div>` : '';
 
   return `<!DOCTYPE html>

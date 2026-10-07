@@ -1,12 +1,6 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
-  "crons": [
-    {
-      "path": "/api/scan",
-      "schedule": "0 20 * * 0,2"
-    }
-  ],
   "rewrites": [
     { "source": "/assessment", "destination": "/assessment.html" },
     { "source": "/prepare", "destination": "/prepare.html" },

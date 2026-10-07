@@ -1,399 +1,255 @@
 // api/scan.js
-// OneSide Australia — Updates Agent
-// Searches Google News RSS for child safety updates relevant to Australian sporting clubs
+// OneSide Australia — Updates Agent (one region per call)
+//
+// Called once per region (?region=VIC, ?region=NSW, ...) by the weekly GitHub
+// Actions workflow, so every state gets its own agent and its own time budget.
+// Each agent:
+//   1. diffs its watched regulator pages against last week's snapshot,
+//   2. pulls region-specific Google News results as leads,
+//   3. has Claude search and read the region's OFFICIAL websites (web search +
+//      web fetch restricted to those domains) and follow links to detail pages,
+//   4. independently re-fetches every claimed source and fact-checks the draft.
+// It returns its findings as JSON; api/digest.js combines all regions, saves
+// state and sends the single weekly email. This endpoint writes nothing.
 
 import crypto from 'node:crypto';
+import { REGIONS } from './_lib/regions.js';
+import { readRepoFile, extractPublishedTitles } from './_lib/github.js';
 
 export const config = { maxDuration: 300 };
 
-// ─── Regulator/sport-body pages watched directly for content changes ──────────
-// (news search alone misses silent page edits, e.g. a regulator updating a
-// page's effective date with no article ever being written about it)
+const AGENT_MODEL = 'claude-opus-5-5';
+const VERIFY_MODEL = 'claude-sonnet-4-5';
+const TIME_BUDGET_MS = 280000; // leave headroom under maxDuration
 
-const WATCHED_PAGES = [
-  { url: 'https://www.workingwithchildren.vic.gov.au/', label: 'Working with Children Check Victoria', category: 'VIC' },
-  { url: 'https://www.vic.gov.au/social-services-regulator-media-centre', label: 'Social Services Regulator Victoria — News', category: 'VIC' },
-  { url: 'https://www.vicsport.com.au/child-safe', label: 'Vicsport — Child Safe Sport', category: 'VIC' },
-];
-
-// ─── Search queries ───────────────────────────────────────────────────────────
-
-const SEARCH_QUERIES = [
-  // National regulatory & standards
-  { query: 'child safe standards Australia sport compliance', label: 'National — Standards' },
-  { query: 'Working With Children Check Australia changes', label: 'National — WWCC' },
-  { query: 'mandatory child safety training Australia sport volunteers', label: 'National — Training' },
-  { query: 'Sport Integrity Australia safeguarding child safety update', label: 'National — Sport Integrity' },
-  { query: 'child safety legislation Australia sport new policy', label: 'National — Legislation' },
-  { query: 'child safety resources toolkit sport Australia', label: 'National — Resources' },
-  { query: 'child protection sport Australia inquiry review tribunal', label: 'National — News & Inquiries' },
-
-  // State — Victoria
-  { query: 'child safe sport Victoria child safety update', label: 'VIC' },
-  { query: 'Working With Children Check Victoria changes', label: 'VIC — WWCC' },
-  { query: 'Social Services Regulator Victoria child safety sport', label: 'VIC — Regulator' },
-
-  // State — New South Wales
-  { query: 'child safe sport NSW child safety update', label: 'NSW' },
-  { query: 'Working With Children Check NSW changes', label: 'NSW — WWCC' },
-  { query: 'Office of the Children\'s Guardian NSW sport', label: 'NSW — Regulator' },
-
-  // State — Queensland
-  { query: 'child safe sport Queensland child safety update', label: 'QLD' },
-  { query: 'Working With Children Check Queensland Blue Card changes', label: 'QLD — WWCC' },
-  { query: 'Queensland child safe standards sport compliance deadline', label: 'QLD — Standards' },
-  { query: 'Reportable Conduct Scheme Queensland sport', label: 'QLD — Reportable Conduct' },
-
-  // State — South Australia
-  { query: 'child safe sport South Australia update', label: 'SA' },
-  { query: 'Working With Children Check South Australia changes', label: 'SA — WWCC' },
-
-  // State — Western Australia
-  { query: 'child safe sport Western Australia update', label: 'WA' },
-  { query: 'Working With Children Check Western Australia changes', label: 'WA — WWCC' },
-
-  // State — Tasmania, ACT, NT
-  { query: 'child safe sport Tasmania ACT Northern Territory update', label: 'TAS/ACT/NT' },
-
-  // eSafety Commissioner
-  { query: 'site:esafety.gov.au sport online safety update', label: 'eSafety Commissioner' },
-  { query: 'eSafety Commissioner sport community clubs online safety', label: 'eSafety — Sport' },
-
-  // National Office for Child Safety
-  { query: 'site:childsafety.gov.au organisations update', label: 'National Office for Child Safety' },
-  { query: 'National Office for Child Safety sport organisations guidance', label: 'National Office for Child Safety — Sport' },
-
-  // Sport-specific
-  { query: 'AFL child safeguarding safe sport update', label: 'AFL' },
-  { query: 'Football Australia soccer child safeguarding update', label: 'Soccer' },
-  { query: 'Rugby Australia child safeguarding safe sport update', label: 'Rugby' },
-  { query: 'Cricket Australia child safeguarding safe sport update', label: 'Cricket' },
-  { query: 'Basketball Australia child safeguarding safe sport update', label: 'Basketball' },
-  { query: 'Netball Australia child safeguarding safe sport update', label: 'Netball' },
-  { query: 'Tennis Australia child safeguarding safe sport update', label: 'Tennis' },
-  { query: 'Golf Australia child safeguarding safe sport update', label: 'Golf' },
-];
-
-// ─── Fetch Google News RSS for a query ───────────────────────────────────────
+// ─── Google News RSS (leads only — official sources are what get published) ──
 
 async function fetchGoogleNewsRSS(query, sinceDate) {
-  // Build query — add date filter if sinceDate provided
-  const dateFilter = sinceDate ? ` after:${sinceDate}` : '';
-  const encodedQuery = encodeURIComponent(query + dateFilter);
+  const encodedQuery = encodeURIComponent(`${query} after:${sinceDate}`);
   const url = `https://news.google.com/rss/search?q=${encodedQuery}&hl=en-AU&gl=AU&ceid=AU:en`;
-
   try {
     const res = await fetch(url, {
       headers: { 'User-Agent': 'OneSide Australia Updates Agent/1.0' },
       signal: AbortSignal.timeout(10000)
     });
     if (!res.ok) return [];
-    const xml = await res.text();
-    return parseRSSItems(xml);
+    return parseRSSItems(await res.text());
   } catch (err) {
     console.error(`RSS fetch failed for "${query}":`, err.message);
     return [];
   }
 }
 
-// ─── Parse RSS XML into article objects ──────────────────────────────────────
-
 function parseRSSItems(xml) {
   const items = [];
   const itemRegex = /<item>([\s\S]*?)<\/item>/g;
   let match;
-
   while ((match = itemRegex.exec(xml)) !== null) {
     const itemXml = match[1];
-
     const title   = decodeXml(itemXml.match(/<title>([\s\S]*?)<\/title>/)?.[1] || '');
-    const link    = itemXml.match(/<link>([\s\S]*?)<\/link>/)?.[1]?.trim() ||
-                    itemXml.match(/<link\s+href="([^"]+)"/)?.[1] || '';
+    const link    = itemXml.match(/<link>([\s\S]*?)<\/link>/)?.[1]?.trim() || '';
     const pubDate = itemXml.match(/<pubDate>([\s\S]*?)<\/pubDate>/)?.[1] || '';
     const source  = decodeXml(itemXml.match(/<source[^>]*>([\s\S]*?)<\/source>/)?.[1] || '');
-    const desc    = decodeXml(stripHtml(itemXml.match(/<description>([\s\S]*?)<\/description>/)?.[1] || ''));
-
-    if (title && link) {
-      items.push({ title, link, pubDate, source, desc });
-    }
+    if (title && link) items.push({ title, link, pubDate, source });
   }
-
   return items;
 }
 
 function decodeXml(str) {
   return str
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/\s+/g, ' ')
-    .trim();
+    .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+    .replace(/\s+/g, ' ').trim();
 }
 
-function stripHtml(html) {
-  return html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+// ─── Page fetching ───────────────────────────────────────────────────────────
+
+function decodeEntities(str) {
+  return str
+    .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
 }
 
-// ─── Have Claude assess and write up the articles ────────────────────────────
-
-async function assessArticlesWithClaude(articles, sinceDate, publishedTitles = []) {
-  if (articles.length === 0) return null;
-
-  const today = new Date().toISOString().split('T')[0];
-  const since = sinceDate || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-
-  // Format articles for Claude
-  const articleList = articles.slice(0, 30).map((a, i) =>
-    `[${i + 1}] ${a.title}\nSource: ${a.source || 'Unknown'}\nDate: ${a.pubDate}\nURL: ${a.link}\nSummary: ${a.desc}`
-  ).join('\n\n');
-
-  const prompt = `You are the updates agent for OneSide Australia, a child safety consultancy for Australian sporting clubs.
-
-Today is ${today}. You have been given a list of news articles found since ${since}.
-
-Articles:
-${articleList}
-
-Your task:
-1. Identify which articles are genuinely relevant to child safety in Australian sport. Include:
-   - Child safe standards, regulatory changes, compliance deadlines
-   - Working With Children Check changes
-   - New resources, toolkits, training, or guidance for sporting clubs
-   - Notable safeguarding incidents, inquiries, or reviews in an Australian sport context
-
-2. Exclude anything not relevant to Australian sporting clubs (e.g. school education, international news with no Australian relevance, unrelated child welfare topics).
-
-3. Exclude any article that covers the same topic as an already-published update. The following titles have already been published — do not include updates that duplicate or substantially overlap with them:
-${publishedTitles.length > 0 ? publishedTitles.map(t => `- ${t}`).join('\n') : '(none yet)'}
-
-4. For each relevant article, write a 2-3 sentence update in OneSide Australia's voice: plain Australian English, factual, helpful tone, no em dashes, no AI writing patterns.
-
-5. Assign:
-   - category: National, VIC, NSW, QLD, SA, WA, TAS, ACT, NT, AFL, Netball, Cricket, Soccer, Rugby League, Rugby Union, Basketball, Tennis, Golf
-   - type: New, Update, Reminder, Resource, News
-
-6. For sourceUrl, always use the official primary source — the government website, regulator, or sporting body's own page — NOT a media article or news coverage of the item. If you only have a media article URL, find the official source it refers to and use that instead.
-
-7. Do not infer or assume relevance to sport. If a source describes a change to an unrelated sector (e.g. early childhood education, aged care, disability services) and does not itself mention sport, sporting clubs, or sporting organisations, do not claim it has "implications for" or "may affect" sporting clubs — leave that article out entirely. Every fact in the body must be something the source page actually states, not something you think is a reasonable extrapolation.
-
-Note: everything you produce here is independently re-verified against the live sourceUrl page before publication, and anything not directly supported by that page's actual text is discarded. There is no benefit to guessing or padding out relevance — it will just be dropped.
-
-If NONE of the articles are relevant, respond with exactly: NO_NEW_CONTENT
-
-If there are relevant articles, respond in this exact JSON format only — no other text:
-{
-  "updates": [
-    {
-      "title": "Short descriptive title",
-      "body": "2-3 sentence summary in OneSide voice",
-      "category": "National",
-      "type": "New",
-      "source": "Source organisation name",
-      "sourceUrl": "https://...",
-      "date": "Month Year"
-    }
-  ]
-}`;
-
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': process.env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01'
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-5',
-      max_tokens: 2000,
-      messages: [{ role: 'user', content: prompt }]
-    })
-  });
-
-  if (!response.ok) return null;
-  const data = await response.json();
-  const text = data.content?.[0]?.text?.trim() || '';
-
-  if (!text || text === 'NO_NEW_CONTENT') return null;
-
-  try {
-    const clean = text.replace(/```json|```/g, '').trim();
-    if (clean.startsWith('NO_NEW_CONTENT')) return null;
-    return JSON.parse(clean);
-  } catch {
-    console.error('JSON parse failed:', text.substring(0, 200));
-    return null;
-  }
-}
-
-// ─── Fetch a watched page and reduce it to comparable text ───────────────────
-
-function extractPageText(html) {
-  return html
+function extractPageText(html, limit) {
+  return decodeEntities(html
     .replace(/<script[\s\S]*?<\/script>/gi, ' ')
     .replace(/<style[\s\S]*?<\/style>/gi, ' ')
     .replace(/<!--[\s\S]*?-->/g, ' ')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
+    .replace(/<[^>]+>/g, ' '))
     .replace(/\s+/g, ' ')
     .trim()
-    .substring(0, 8000);
+    .substring(0, limit);
 }
 
-async function fetchWatchedPage(url) {
+// "Link text | absolute URL" for every link on the page, so a new link like
+// "Changes to Working with Children Check" shows up as a lead with its URL.
+function extractLinks(html, baseUrl) {
+  const links = new Set();
+  const linkRegex = /<a\s[^>]*href="([^"#]+)"[^>]*>([\s\S]*?)<\/a>/gi;
+  let m;
+  while ((m = linkRegex.exec(html)) !== null && links.size < 300) {
+    const text = decodeEntities(m[2].replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
+    if (!text) continue;
+    try {
+      const url = new URL(decodeEntities(m[1]), baseUrl);
+      if (url.protocol === 'https:' || url.protocol === 'http:') links.add(`${text} | ${url.href}`);
+    } catch { /* ignore malformed hrefs */ }
+  }
+  return [...links];
+}
+
+async function fetchPage(url, textLimit) {
   try {
     const res = await fetch(url, {
-      headers: { 'User-Agent': 'OneSide Australia Updates Agent/1.0' },
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; OneSide Australia Updates Agent/2.0)' },
       signal: AbortSignal.timeout(15000)
     });
     if (!res.ok) return null;
-    return extractPageText(await res.text());
+    const html = await res.text();
+    return { text: extractPageText(html, textLimit), links: extractLinks(html, url) };
   } catch (err) {
-    console.error(`Watched page fetch failed for "${url}":`, err.message);
+    console.error(`Page fetch failed for "${url}":`, err.message);
     return null;
   }
 }
 
-function hashText(text) {
-  return crypto.createHash('sha256').update(text).digest('hex');
+const hashText = (text) => crypto.createHash('sha256').update(text).digest('hex');
+
+// ─── Watched pages: what changed since last week's snapshot ─────────────────
+
+async function checkWatchedPages(region, previousState) {
+  const snapshots = {};
+  const changes = [];
+
+  await Promise.all(region.watchedPages.map(async (page) => {
+    const current = await fetchPage(page.url, 8000);
+    if (!current) return;
+
+    const hash = hashText(current.text);
+    snapshots[page.url] = { hash, text: current.text, links: current.links, lastChecked: new Date().toISOString() };
+
+    const prev = previousState[page.url];
+    const newLinks = prev?.links ? current.links.filter(l => !prev.links.includes(l)) : [];
+    if (!prev || prev.hash !== hash || newLinks.length > 0) {
+      // Older snapshots stored no links, so pass the whole list for the agent to follow.
+      changes.push({ ...page, oldText: prev?.text || null, newText: current.text,
+        links: prev?.links ? newLinks : current.links.slice(0, 120), linksAreNew: Boolean(prev?.links) });
+    }
+  }));
+
+  return { snapshots, changes };
 }
 
-// ─── Have Claude assess whether a watched page actually changed ──────────────
+// ─── The region agent ────────────────────────────────────────────────────────
 
-async function assessPageChange(page, oldText, newText, publishedTitles) {
-  const isFirstSnapshot = oldText === null;
+function buildAgentPrompt(region, sinceDate, today, changes, articles, publishedTitles) {
+  const changeSection = changes.length === 0
+    ? '(none of the watched pages changed)'
+    : changes.map(c => [
+        `PAGE: ${c.label} (${c.url})`,
+        c.oldText ? `PREVIOUS TEXT:\n${c.oldText}` : 'PREVIOUS TEXT: (first time this page has been tracked)',
+        `CURRENT TEXT:\n${c.newText}`,
+        c.links.length ? `${c.linksAreNew ? 'LINKS THAT ARE NEW SINCE LAST WEEK' : 'LINKS ON THIS PAGE'}:\n${c.links.join('\n')}` : ''
+      ].filter(Boolean).join('\n\n')).join('\n\n---\n\n');
 
-  const prompt = `You are the updates agent for OneSide Australia, a child safety consultancy for Australian sporting clubs.
+  const articleSection = articles.length === 0
+    ? '(no news results)'
+    : articles.map((a, i) => `[${i + 1}] ${a.title} (${a.source || 'unknown source'}, ${a.pubDate})`).join('\n');
 
-You track this page for changes: ${page.label} (${page.url}).
+  return `You are the ${region.name} updates agent for OneSide Australia, a child safety consultancy for Australian community sporting clubs. Your job is to find every genuinely new, official change to child safety requirements that affects sporting clubs in your area, so the clubs OneSide works with are not caught out.
 
-${isFirstSnapshot
-    ? `This is the first time this page is being tracked, so there is no previous snapshot to compare against. Read the current page content below and decide if it currently describes a specific, dated regulatory change, reform, or update relevant to child safety in Australian sport (e.g. a new rule, a change to Working With Children Check processes, a new regulator power, a compliance deadline) — as opposed to generic, evergreen "how to apply" content.`
-    : `Below is the previous snapshot of this page's text, and the current snapshot. Identify whether there has been a genuine, substantive change relevant to child safety in Australian sport (e.g. new rules, process changes, compliance deadlines, new powers) — as opposed to incidental changes like navigation, unrelated wording, or formatting.`}
+Today is ${today}. Report changes published, announced, or taking effect since ${sinceDate} (or taking effect in the coming months, if announced since then).
 
-${isFirstSnapshot ? '' : `PREVIOUS SNAPSHOT:\n${oldText}\n\n`}CURRENT SNAPSHOT:\n${newText}
+YOUR AREA
+${region.focus}
 
-The following titles have already been published — do not flag anything that duplicates or substantially overlaps with them:
-${publishedTitles.length > 0 ? publishedTitles.map(t => `- ${t}`).join('\n') : '(none yet)'}
+HOW TO WORK
+1. Use web_search and web_fetch to check the official websites for your area yourself. Do not rely on the leads below alone; regulators often change requirements without any news coverage. Look specifically for: Working With Children Check / screening changes (new systems, new training or ID requirements, fees, renewal changes), child safe standards and compliance deadlines, reportable conduct schemes, changes of regulator or where guidance lives, new mandatory training, and new official guidance or resources for sport and recreation organisations.
+2. When a page links to a "changes to…", "what's new", news or media release page, open it. The details usually live one click deeper than the landing page.
+3. Investigate the leads below: watched pages that changed since last week, and news headlines. For a news lead, find the official page it is about; never cite the media article itself.
+4. Skip anything already published (list below), anything outside your area, and anything that isn't about child safety obligations or resources relevant to organisations working with children. A general change (for example to Working With Children Checks or child safe standards) applies to sporting clubs and should be included; a change limited to an unrelated sector (schools only, early childhood only, aged care, disability services) should not, unless the official page itself says it applies to sport or community organisations.
+5. Every fact you write must be stated on the official page you cite. Your work is independently re-checked against that page and anything it doesn't support is discarded.
 
-Every fact in your summary must be something this page's text actually states — do not add implications, extrapolations, or relevance claims the page itself doesn't make. This will be independently re-verified against the same page text before publication, and anything not directly supported is discarded.
+LEADS: WATCHED PAGES THAT CHANGED SINCE LAST WEEK
+${changeSection}
 
-If there is no genuine, dated, substantive change worth flagging, respond with exactly: NO_MATERIAL_CHANGE
+LEADS: NEWS HEADLINES SINCE ${sinceDate}
+${articleSection}
 
-If there is, write a 2-3 sentence update in OneSide Australia's voice (plain Australian English, factual, helpful tone, no em dashes, no AI writing patterns), and respond in this exact JSON format only — no other text:
-{
-  "title": "Short descriptive title",
-  "body": "2-3 sentence summary in OneSide voice",
-  "category": "${page.category}",
-  "type": "Update",
-  "source": "${page.label}",
-  "sourceUrl": "${page.url}",
-  "date": "Month Year"
-}`;
+ALREADY PUBLISHED (do not repeat these or anything substantially overlapping)
+${publishedTitles.length ? publishedTitles.map(t => `- ${t}`).join('\n') : '(none yet)'}
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': process.env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01'
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-5',
-      max_tokens: 500,
-      messages: [{ role: 'user', content: prompt }]
-    })
-  });
+OUTPUT
+Finish with a single JSON object and nothing after it:
+{"updates": [{"title": "Short descriptive title", "body": "2-3 sentence summary in plain Australian English, factual and helpful, no em dashes", "category": "${region.category}", "type": "New | Update | Reminder | Resource | News", "source": "Official organisation name", "sourceUrl": "https://the official page that states these facts", "date": "Month Year", "evidence": "a short direct quote from that page supporting the update"}]}
+If you find nothing new, return {"updates": []}.`;
+}
 
-  if (!response.ok) return null;
-  const data = await response.json();
-  const text = data.content?.[0]?.text?.trim() || '';
-
-  if (!text || text.startsWith('NO_MATERIAL_CHANGE')) return null;
-
+function parseAgentJson(text) {
+  // The agent may think aloud before answering; the JSON is the last thing it writes.
+  const starts = [...text.matchAll(/\{\s*"updates"/g)];
+  const start = starts.length ? starts[starts.length - 1].index : -1;
+  const end = text.lastIndexOf('}');
+  if (start === -1 || end <= start) return null;
   try {
-    const clean = text.replace(/```json|```/g, '').trim();
-    if (clean.startsWith('NO_MATERIAL_CHANGE')) return null;
-    return JSON.parse(clean);
+    return JSON.parse(text.slice(start, end + 1));
   } catch {
-    console.error('Watched-page JSON parse failed:', text.substring(0, 200));
     return null;
   }
 }
 
-// ─── Check all watched pages against their last-seen snapshot ───────────────
+async function runRegionAgent(region, prompt, deadline) {
+  const tools = [
+    { type: 'web_search_20260209', name: 'web_search', max_uses: 10, allowed_domains: region.domains,
+      user_location: { type: 'approximate', country: 'AU' } },
+    { type: 'web_fetch_20260209', name: 'web_fetch', max_uses: 12, allowed_domains: region.domains }
+  ];
+  const messages = [{ role: 'user', content: prompt }];
+  let text = '';
 
-async function checkWatchedPages(ghHeaders, publishedTitles) {
-  const stateUrl = 'https://api.github.com/repos/OneSideAus/OneSide-Australia-Website/contents/_watched-pages.json';
-  let state = {};
-  let stateSha = null;
-  try {
-    const stateRes = await fetch(stateUrl, { headers: ghHeaders });
-    if (stateRes.ok) {
-      const stateData = await stateRes.json();
-      stateSha = stateData.sha;
-      state = JSON.parse(Buffer.from(stateData.content, 'base64').toString('utf-8'));
-    }
-  } catch (e) {
-    console.warn('Could not load watched-pages state:', e.message);
-  }
+  // Server-side tool loops can pause (stop_reason "pause_turn"); resend to resume.
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const remaining = deadline - Date.now() - 45000; // keep time for verification
+    if (remaining < 20000) throw new Error('ran out of time while searching');
 
-  const pageChangeUpdates = [];
-  const pageTextByUrl = {};
-  const newState = { ...state };
-
-  for (const page of WATCHED_PAGES) {
-    const newText = await fetchWatchedPage(page.url);
-    if (newText === null) continue;
-
-    const newHash = hashText(newText);
-    const prev = state[page.url];
-
-    if (!prev || prev.hash !== newHash) {
-      const update = await assessPageChange(page, prev ? prev.text : null, newText, publishedTitles);
-      if (update) {
-        pageChangeUpdates.push(update);
-        pageTextByUrl[page.url] = newText;
-      }
-    }
-
-    newState[page.url] = { hash: newHash, text: newText, lastChecked: new Date().toISOString() };
-  }
-
-  try {
-    await fetch(stateUrl, {
-      method: 'PUT',
-      headers: ghHeaders,
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-beta': 'server-side-fallback-2026-07-01'
+      },
       body: JSON.stringify({
-        message: 'Update watched-pages snapshot',
-        content: Buffer.from(JSON.stringify(newState, null, 2)).toString('base64'),
-        ...(stateSha ? { sha: stateSha } : {})
-      })
+        model: AGENT_MODEL,
+        max_tokens: 16000,
+        fallbacks: 'default',
+        output_config: { effort: 'medium' },
+        tools,
+        messages
+      }),
+      signal: AbortSignal.timeout(remaining)
     });
-  } catch (e) {
-    console.warn('Could not save watched-pages state:', e.message);
+
+    if (!response.ok) throw new Error(`Claude API ${response.status}: ${(await response.text()).substring(0, 300)}`);
+    const data = await response.json();
+    if (data.stop_reason === 'refusal') throw new Error('Claude declined the request');
+
+    text += (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+    if (data.stop_reason !== 'pause_turn') break;
+    messages.push({ role: 'assistant', content: data.content });
   }
 
-  return { pageChangeUpdates, pageTextByUrl };
+  const parsed = parseAgentJson(text);
+  if (!parsed) throw new Error(`could not read agent output: ${text.slice(-300)}`);
+  return Array.isArray(parsed.updates) ? parsed.updates : [];
 }
 
-// ─── Verify a drafted update against the real, live text of its claimed source ─
-// (the draft above is written from a Google News snippet or a page diff, not
-// necessarily the source page itself — this independently fetches sourceUrl,
-// re-checks the claim against the actual page, and rejects anything the source
-// doesn't explicitly support. No source, or no support in the source, no item.)
+// ─── Independent verification against the live source page ──────────────────
 
-async function verifySourceClaim(update, pageTextOverride) {
-  const pageText = pageTextOverride !== undefined ? pageTextOverride : await fetchWatchedPage(update.sourceUrl);
-  if (pageText === null) {
-    return { verdict: 'UNVERIFIABLE', reason: 'sourceUrl could not be fetched' };
-  }
+async function verifySourceClaim(update) {
+  const page = update.sourceUrl ? await fetchPage(update.sourceUrl, 40000) : null;
+  if (!page) return { verdict: 'UNVERIFIABLE', reason: 'the source page could not be fetched for checking' };
 
   const prompt = `You are a strict fact-checker for OneSide Australia, a child safety consultancy for Australian sporting clubs. Publishing an unsupported regulatory claim is a serious credibility risk for this business, so reject anything not directly and explicitly stated in the source text below.
 
@@ -403,11 +259,11 @@ Body: ${update.body}
 Claimed source: ${update.source} (${update.sourceUrl})
 
 ACTUAL TEXT FETCHED FROM THAT SOURCE URL JUST NOW:
-${pageText}
+${page.text}
 
 Check strictly, using only the fetched text above — no outside knowledge, no inference:
 1. Does the source text explicitly state the core facts asserted in the title and body? "Plausible" or "likely true" is not enough — it must be directly stated.
-2. If the title or body claims or implies relevance to sport, sporting clubs, sporting organisations, or athletes, the fetched text must itself explicitly mention sport / sporting clubs / sporting organisations in that context. A generic page about an unrelated sector (e.g. early childhood education, aged care, disability services) with no explicit mention of sport does NOT support a sport-relevance claim, even if it seems like a reasonable extrapolation.
+2. If the title or body claims relevance specifically to sport, sporting clubs, sporting organisations, or athletes, the fetched text must itself support that. A general requirement (e.g. a Working With Children Check or child safe standards change that applies to everyone working with children) does not need to mention sport. But a page about an unrelated sector (e.g. early childhood education, aged care, disability services) does NOT support a sport-relevance claim.
 3. If the fetched text doesn't mention the claim at all, or covers a different topic than the URL was claimed to support, that's CONTRADICTED, not UNCONFIRMED.
 
 Respond in exactly this JSON format, no other text:
@@ -417,327 +273,104 @@ Respond in exactly this JSON format, no other text:
   "quote": "a direct quote (max 40 words) from the fetched text that supports the claim, or empty string if not VERIFIED"
 }`;
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': process.env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01'
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-5',
-      max_tokens: 400,
-      messages: [{ role: 'user', content: prompt }]
-    })
-  });
-
-  if (!response.ok) return { verdict: 'UNVERIFIABLE', reason: 'verification request failed' };
-  const data = await response.json();
-  const text = data.content?.[0]?.text?.trim() || '';
-
   try {
-    const clean = text.replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(clean);
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({ model: VERIFY_MODEL, max_tokens: 400, messages: [{ role: 'user', content: prompt }] }),
+      signal: AbortSignal.timeout(40000)
+    });
+    if (!response.ok) return { verdict: 'UNVERIFIABLE', reason: 'verification request failed' };
+    const data = await response.json();
+    const text = data.content?.[0]?.text?.trim() || '';
+    const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
     if (!['VERIFIED', 'CONTRADICTED', 'UNCONFIRMED'].includes(parsed.verdict)) {
       return { verdict: 'UNVERIFIABLE', reason: 'malformed verifier response' };
     }
     return parsed;
-  } catch {
-    console.error('Verifier JSON parse failed:', text.substring(0, 200));
-    return { verdict: 'UNVERIFIABLE', reason: 'malformed verifier response' };
+  } catch (e) {
+    return { verdict: 'UNVERIFIABLE', reason: `verification failed: ${e.message}` };
   }
-}
-
-// ─── Run every drafted update through source verification; keep only VERIFIED ─
-
-async function verifyUpdates(updates, pageTextByUrl = {}) {
-  const verified = [];
-  for (const update of updates) {
-    const override = Object.prototype.hasOwnProperty.call(pageTextByUrl, update.sourceUrl)
-      ? pageTextByUrl[update.sourceUrl]
-      : undefined;
-    const result = await verifySourceClaim(update, override);
-    if (result.verdict === 'VERIFIED') {
-      verified.push({ ...update, verifiedQuote: result.quote });
-    } else {
-      console.log(`Dropped "${update.title}" — ${result.verdict}: ${result.reason}`);
-    }
-  }
-  return verified;
-}
-
-// ─── Deduplicate by title ─────────────────────────────────────────────────────
-
-function deduplicateUpdates(updates) {
-  const seen = new Set();
-  return updates.filter(u => {
-    const key = u.title.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 40);
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-}
-
-// ─── Build email HTML ─────────────────────────────────────────────────────────
-
-function escapeHtml(str) {
-  return String(str || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-function buildEmailHtml(allUpdates, approveBaseUrl, scanSecret) {
-  const date = new Date().toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-
-  const updateCards = allUpdates.map((update) => {
-    const approveUrl = `${approveBaseUrl}/api/approve?id=${encodeURIComponent(update.title)}&title=${encodeURIComponent(update.title)}&body=${encodeURIComponent(update.body)}&category=${encodeURIComponent(update.category)}&type=${encodeURIComponent(update.type)}&date=${encodeURIComponent(update.date)}&source=${encodeURIComponent(update.source)}&sourceUrl=${encodeURIComponent(update.sourceUrl)}`;
-
-    const quoteBlock = update.verifiedQuote ? `
-      <p style="font-size:12px;color:#4A6580;background:#eef4f8;border-radius:6px;padding:10px 12px;margin:0 0 14px;font-style:italic;">
-        <span style="text-transform:uppercase;font-style:normal;font-weight:600;color:#1B5E8A;">Verified against source: </span>"${escapeHtml(update.verifiedQuote)}"
-      </p>` : '';
-
-    return `
-    <div style="background:#f8fafc;border:1px solid #e2eaf0;border-left:3px solid #F25C44;border-radius:0 8px 8px 0;padding:20px;margin-bottom:16px;">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-        <span style="background:rgba(242,92,68,0.1);color:#D24530;font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;text-transform:uppercase;">${update.category}</span>
-        <span style="background:rgba(92,221,154,0.15);color:#3B6D11;font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;text-transform:uppercase;">${update.type}</span>
-        <span style="font-size:12px;color:#7A95AA;">${update.date}</span>
-      </div>
-      <h3 style="font-size:15px;font-weight:600;color:#0D1F35;margin:0 0 8px;">${update.title}</h3>
-      <p style="font-size:14px;color:#4A6580;line-height:1.6;margin:0 0 14px;">${update.body}</p>
-      <p style="font-size:12px;color:#7A95AA;margin:0 0 14px;">Source: <a href="${update.sourceUrl}" style="color:#1B5E8A;">${update.source}</a></p>
-      ${quoteBlock}
-      <a href="${approveUrl}" style="display:inline-block;background:#F25C44;color:white;font-size:13px;font-weight:600;padding:8px 20px;border-radius:6px;text-decoration:none;">Approve and publish →</a>
-    </div>`;
-  }).join('');
-
-  return `<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"></head>
-<body style="font-family:'DM Sans',Arial,sans-serif;background:#f0f4f8;padding:32px 16px;margin:0;">
-  <div style="max-width:640px;margin:0 auto;">
-    <div style="background:#0D1F35;border-radius:12px;padding:24px;margin-bottom:24px;text-align:center;">
-      <p style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#F25C44;margin:0 0 8px;">OneSide Australia</p>
-      <h1 style="font-size:1.4rem;color:white;margin:0 0 6px;">Weekly Updates Digest</h1>
-      <p style="font-size:13px;color:rgba(255,255,255,0.5);margin:0;">${date}</p>
-    </div>
-    <div style="background:white;border-radius:12px;padding:24px;margin-bottom:16px;">
-      <p style="font-size:14px;color:#4A6580;margin:0 0 6px;">Found <strong style="color:#0D1F35;">${allUpdates.length} potential update${allUpdates.length !== 1 ? 's' : ''}</strong> this week.</p>
-      <p style="font-size:13px;color:#7A95AA;margin:0;">Review each update below and click <strong>Approve and publish</strong> for any you want to add to the Updates page. Ignored updates will not be published.</p>
-    </div>
-    ${updateCards}
-    <div style="background:white;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;">
-      <p style="font-size:14px;color:#4A6580;margin:0 0 16px;">Happy with everything? Publish all ${allUpdates.length} updates in one click.</p>
-      <a href="${approveBaseUrl}/api/approve-all?secret=${encodeURIComponent(scanSecret || '')}" style="display:inline-block;background:#0D1F35;color:white;font-size:14px;font-weight:600;padding:14px 32px;border-radius:8px;text-decoration:none;">Approve all ${allUpdates.length} updates →</a>
-    </div>
-    <p style="font-size:12px;color:#7A95AA;text-align:center;margin-top:24px;">OneSide Australia — Updates Agent · <a href="https://onesideaustralia.com.au" style="color:#F25C44;">onesideaustralia.com.au</a></p>
-  </div>
-</body>
-</html>`;
 }
 
 // ─── Handler ──────────────────────────────────────────────────────────────────
 
 export default async function handler(req, res) {
+  const startedAt = Date.now();
+  const deadline = startedAt + TIME_BUDGET_MS;
+
   if (req.method !== 'GET' && req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
-
   const secret = req.headers['x-scan-secret'] || req.query.secret;
-  const isCron = req.headers['x-vercel-cron'] === '1';
-  if (!isCron && secret !== process.env.SCAN_SECRET) {
+  if (secret !== process.env.SCAN_SECRET) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  const sinceDate = req.query.since || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-  console.log(`OneSide Updates Agent starting Google News scan... (since ${sinceDate})`);
-
-  // ── Fetch updates.html: extract published titles + purge cards > 6 months ─
-  let publishedTitles = [];
-  const ghHeaders = { 'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json', 'User-Agent': 'OneSide-Updates-Agent' };
-  try {
-    const ghRes = await fetch(
-      'https://api.github.com/repos/OneSideAus/OneSide-Australia-Website/contents/updates.html',
-      { headers: ghHeaders }
-    );
-    if (ghRes.ok) {
-      const ghData = await ghRes.json();
-      const updatesSha = ghData.sha;
-      let updatesHtml = Buffer.from(ghData.content, 'base64').toString('utf-8');
-
-      // Calculate 6-month cutoff as "YYYY-MM"
-      const cutoffDate = new Date();
-      cutoffDate.setMonth(cutoffDate.getMonth() - 6);
-      const cutoff = `${cutoffDate.getFullYear()}-${String(cutoffDate.getMonth() + 1).padStart(2, '0')}`;
-
-      // Extract all cards
-      const cardRegex = /<div class="update-card"[^>]*data-sortdate="([^"]*)"[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/g;
-      const allCards = [], expiredCards = [];
-      let mc;
-      while ((mc = cardRegex.exec(updatesHtml)) !== null) {
-        const card = { sortdate: mc[1], html: mc[0] };
-        if (mc[1] < cutoff) expiredCards.push(card);
-        else allCards.push(card);
-      }
-
-      // Collect titles of kept cards for dedup
-      const titleRegex = /<h5>([^<]+)<\/h5>/g;
-      let mt;
-      while ((mt = titleRegex.exec(updatesHtml)) !== null) {
-        publishedTitles.push(mt[1].replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').trim());
-      }
-      console.log(`Found ${publishedTitles.length} published titles. ${expiredCards.length} cards older than ${cutoff} to purge.`);
-
-      // Push purged updates.html if anything was removed
-      if (expiredCards.length > 0) {
-        allCards.sort((a, b) => b.sortdate.localeCompare(a.sortdate));
-        const sortedListHtml = allCards.map(c => '            ' + c.html.trim()).join('\n');
-        const purgedHtml = updatesHtml.replace(
-          /(<div id="updates-list">)([\s\S]*?)(\n {10}<\/div>)/,
-          `$1\n${sortedListHtml}$3`
-        );
-        const purgeRes = await fetch(
-          'https://api.github.com/repos/OneSideAus/OneSide-Australia-Website/contents/updates.html',
-          { method: 'PUT', headers: ghHeaders, body: JSON.stringify({ message: `Purge ${expiredCards.length} update(s) older than 6 months`, content: Buffer.from(purgedHtml).toString('base64'), sha: updatesSha }) }
-        );
-        if (purgeRes.ok) console.log(`Purged ${expiredCards.length} expired cards from updates.html`);
-        else console.error('Failed to push purged updates.html:', await purgeRes.text());
-      }
-    }
-  } catch (e) {
-    console.warn('Could not fetch/purge updates.html:', e.message);
+  const regionKey = String(req.query.region || '').toUpperCase();
+  const region = REGIONS[regionKey];
+  if (!region) {
+    return res.status(400).json({ error: `Unknown region "${req.query.region}". Use one of: ${Object.keys(REGIONS).join(', ')}` });
   }
 
-  // Fetch all RSS feeds in parallel
-  const rssResults = await Promise.allSettled(
-    SEARCH_QUERIES.map(q => fetchGoogleNewsRSS(q.query, sinceDate))
-  );
+  // 8-day window so a run that's a day late doesn't leave a gap.
+  const sinceDate = req.query.since || new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const today = new Date().toISOString().split('T')[0];
+  console.log(`[${regionKey}] Updates agent starting (since ${sinceDate})`);
 
-  // Collect and deduplicate articles by URL before sending to Claude
-  const seenUrls = new Set();
-  const allArticles = [];
-  for (const result of rssResults) {
-    if (result.status === 'fulfilled') {
-      for (const article of result.value) {
-        if (!seenUrls.has(article.link)) {
-          seenUrls.add(article.link);
-          allArticles.push(article);
-        }
-      }
+  const [updatesFile, watchedFile] = await Promise.all([
+    readRepoFile('updates.html'),
+    readRepoFile('_watched-pages.json')
+  ]);
+  const publishedTitles = updatesFile ? extractPublishedTitles(updatesFile.text) : [];
+  let previousState = {};
+  try { previousState = watchedFile ? JSON.parse(watchedFile.text) : {}; } catch { /* start fresh */ }
+
+  // Leads: watched-page changes and news headlines, gathered in parallel.
+  const [{ snapshots, changes }, rssResults] = await Promise.all([
+    checkWatchedPages(region, previousState),
+    Promise.all(region.queries.map(q => fetchGoogleNewsRSS(q, sinceDate)))
+  ]);
+  const seen = new Set();
+  const articles = rssResults.flat().filter(a => !seen.has(a.title) && seen.add(a.title)).slice(0, 60);
+  console.log(`[${regionKey}] ${changes.length} watched-page change(s), ${articles.length} news lead(s)`);
+
+  let drafted = [];
+  let agentError = null;
+  try {
+    const prompt = buildAgentPrompt(region, sinceDate, today, changes, articles, publishedTitles);
+    drafted = await runRegionAgent(region, prompt, deadline);
+  } catch (e) {
+    agentError = e.message;
+    console.error(`[${regionKey}] Agent failed:`, e.message);
+  }
+  console.log(`[${regionKey}] Agent drafted ${drafted.length} update(s)`);
+
+  const results = await Promise.all(drafted.map(async (update) => ({ update, result: await verifySourceClaim(update) })));
+  const updates = [];
+  const dropped = [];
+  for (const { update, result } of results) {
+    if (result.verdict === 'VERIFIED') {
+      const { evidence, ...rest } = update;
+      updates.push({ ...rest, verifiedQuote: result.quote });
+    } else {
+      dropped.push({ title: update.title, body: update.body, sourceUrl: update.sourceUrl, evidence: update.evidence || '', verdict: result.verdict, reason: result.reason });
+      console.log(`[${regionKey}] Dropped "${update.title}" — ${result.verdict}: ${result.reason}`);
     }
   }
 
-  console.log(`Collected ${allArticles.length} unique articles from Google News.`);
-
-  // Check regulator/sport-body pages directly for content changes
-  const { pageChangeUpdates, pageTextByUrl } = await checkWatchedPages(ghHeaders, publishedTitles);
-  console.log(`Found ${pageChangeUpdates.length} watched-page change(s).`);
-
-  if (allArticles.length === 0 && pageChangeUpdates.length === 0) {
-    console.log('No articles found from Google News and no watched-page changes.');
-    const r1 = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.RESEND_API_KEY}` },
-      body: JSON.stringify({
-        from: 'OneSide Updates Agent <updates@onesideaustralia.com.au>',
-        to: ['info@onesideaustralia.com.au', 'Angela_Marcon@hotmail.com'],
-        subject: 'OneSide Weekly Digest — No articles found',
-        html: `<p style="font-family:Arial,sans-serif;">The Google News scan returned no articles this week, and no changes were detected on the watched regulator pages. This may be a temporary issue — the agent will run again next week.</p>`
-      })
-    });
-    if (!r1.ok) console.error('Resend error (no articles):', await r1.text());
-    else console.log('No-articles email sent OK');
-    return res.status(200).json({ message: 'No articles found', count: 0 });
-  }
-
-  // Send articles to Claude in batches of 30 for assessment
-  const allUpdates = [...pageChangeUpdates];
-  const BATCH_SIZE = 30;
-  for (let i = 0; i < allArticles.length; i += BATCH_SIZE) {
-    const batch = allArticles.slice(i, i + BATCH_SIZE);
-    const result = await assessArticlesWithClaude(batch, sinceDate, publishedTitles);
-    if (result?.updates) allUpdates.push(...result.updates);
-  }
-
-  const dedupedUpdates = deduplicateUpdates(allUpdates);
-  console.log(`Found ${dedupedUpdates.length} relevant updates after Claude assessment.`);
-
-  // Independently re-fetch each claimed source and verify the draft against it.
-  // No source, or the source doesn't explicitly support the claim, no item.
-  const verifiedUpdates = await verifyUpdates(dedupedUpdates, pageTextByUrl);
-  console.log(`${verifiedUpdates.length} of ${dedupedUpdates.length} updates verified against their live source.`);
-
-  const date = new Date().toLocaleDateString('en-AU', { weekday:'long',day:'numeric',month:'long',year:'numeric' });
-
-  if (verifiedUpdates.length === 0) {
-    const droppedCount = dedupedUpdates.length;
-    const droppedNote = droppedCount > 0
-      ? `<p style="font-size:13px;color:#7A95AA;line-height:1.6;margin:12px 0 0;">${droppedCount} candidate update${droppedCount !== 1 ? 's were' : ' was'} drafted this week but discarded because the claimed source didn't explicitly support the claim on independent verification.</p>`
-      : '';
-    const r2 = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.RESEND_API_KEY}` },
-      body: JSON.stringify({
-        from: 'OneSide Updates Agent <updates@onesideaustralia.com.au>',
-        to: ['info@onesideaustralia.com.au', 'Angela_Marcon@hotmail.com'],
-        subject: 'OneSide Weekly Digest — No changes this week',
-        html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:32px;background:#f8fafc;"><div style="background:#0D1F35;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;"><h1 style="color:white;font-size:1.3rem;margin:0;">OneSide Weekly Digest</h1><p style="color:rgba(255,255,255,0.5);font-size:13px;margin:6px 0 0;">${date}</p></div><div style="background:white;border-radius:12px;padding:24px;"><p style="font-size:15px;color:#0D1F35;font-weight:600;margin:0 0 8px;">No changes detected this week</p><p style="font-size:14px;color:#4A6580;line-height:1.6;margin:0;">The agent scanned Google News across all sources and checked the watched regulator pages, and found nothing new, verifiable, and relevant to child safety in sport. No action needed.</p>${droppedNote}</div><p style="font-size:12px;color:#aaa;text-align:center;margin-top:20px;">Next scan: Sunday/Tuesday · <a href="https://onesideaustralia.com.au/updates" style="color:#F25C44;">View Updates page</a></p></div>`
-      })
-    });
-    if (!r2.ok) console.error('Resend error (no updates):', await r2.text());
-    else console.log('No-updates email sent OK');
-    return res.status(200).json({ message: 'No relevant, verified updates found', count: 0, draftedButUnverified: droppedCount });
-  }
-
-  const approveBaseUrl = process.env.SITE_URL || 'https://onesideaustralia.com.au';
-
-  // Save pending updates to GitHub so approve-all can retrieve them
-  try {
-    const ghHeaders = {
-      'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`,
-      'Accept': 'application/vnd.github.v3+json',
-      'Content-Type': 'application/json',
-      'User-Agent': 'OneSide-Updates-Agent'
-    };
-    // Check if file already exists (need sha to update)
-    const existingRes = await fetch('https://api.github.com/repos/OneSideAus/OneSide-Australia-Website/contents/_pending-updates.json', { headers: ghHeaders });
-    const existingData = existingRes.ok ? await existingRes.json() : null;
-    await fetch('https://api.github.com/repos/OneSideAus/OneSide-Australia-Website/contents/_pending-updates.json', {
-      method: 'PUT',
-      headers: ghHeaders,
-      body: JSON.stringify({
-        message: 'Save pending updates for approve-all',
-        content: Buffer.from(JSON.stringify(verifiedUpdates)).toString('base64'),
-        ...(existingData?.sha ? { sha: existingData.sha } : {})
-      })
-    });
-    console.log(`Saved ${verifiedUpdates.length} pending updates to GitHub.`);
-  } catch (e) {
-    console.warn('Could not save pending updates:', e.message);
-  }
-
-  const emailHtml = buildEmailHtml(verifiedUpdates, approveBaseUrl, process.env.SCAN_SECRET);
-
-  const emailResponse = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.RESEND_API_KEY}` },
-    body: JSON.stringify({
-      from: 'OneSide Updates Agent <updates@onesideaustralia.com.au>',
-      to: ['info@onesideaustralia.com.au', 'Angela_Marcon@hotmail.com'],
-      subject: `OneSide Updates Digest${sinceDate ? ` (since ${sinceDate})` : ''} — ${verifiedUpdates.length} update${verifiedUpdates.length !== 1 ? 's' : ''} found`,
-      html: emailHtml
-    })
+  return res.status(200).json({
+    region: regionKey,
+    regionName: region.name,
+    sinceDate,
+    updates,
+    dropped,
+    error: agentError,
+    stats: { watchedPagesChanged: changes.length, newsLeads: articles.length, drafted: drafted.length, seconds: Math.round((Date.now() - startedAt) / 1000) },
+    snapshots
   });
-
-  if (!emailResponse.ok) {
-    const err = await emailResponse.text();
-    console.error('Email send failed:', err);
-    return res.status(500).json({ error: 'Failed to send email', details: err });
-  }
-
-  console.log(`Digest sent with ${verifiedUpdates.length} verified updates (${dedupedUpdates.length - verifiedUpdates.length} dropped on verification).`);
-  return res.status(200).json({ message: 'Digest sent', count: verifiedUpdates.length, droppedOnVerification: dedupedUpdates.length - verifiedUpdates.length });
 }

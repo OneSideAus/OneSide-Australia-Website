@@ -5,28 +5,73 @@ on:
     # 7:00am AEST Monday = 21:00 UTC Sunday (AEST is UTC+10)
     - cron: '0 21 * * 0'
   workflow_dispatch:
+    inputs:
+      since:
+        description: 'Look for changes since this date (YYYY-MM-DD). Leave blank for the last 8 days.'
+        required: false
+        default: ''
+
+env:
+  SITE: https://www.onesideaustralia.com.au
+  SCAN_SECRET: OneSide18042026$AGENT
 
 jobs:
+  # One agent per state/territory, plus national and national sporting bodies.
+  # Each runs as its own job, so one slow or failing region never blocks the rest.
   scan:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      matrix:
+        region: [NATIONAL, SPORT, VIC, NSW, QLD, SA, WA, TAS, ACT, NT]
 
     steps:
-      - name: Trigger updates scan
+      - name: Run ${{ matrix.region }} agent
+        env:
+          SINCE: ${{ github.event.inputs.since }}
         run: |
-          echo "Triggering OneSide Australia Weekly Updates Scan..."
+          echo "Running ${{ matrix.region }} updates agent..."
+          STATUS=$(curl -s -L -o result.json -w "%{http_code}" --max-time 320 \
+            -H "x-scan-secret: $SCAN_SECRET" \
+            "$SITE/api/scan?region=${{ matrix.region }}&since=$SINCE")
+          echo "HTTP Status: $STATUS"
 
-          RESPONSE=$(curl -s -L -o /tmp/response.json -w "%{http_code}" \
-            --max-time 320 \
-            "https://www.onesideaustralia.com.au/api/scan?secret=OneSide18042026%24AGENT")
-
-          echo "HTTP Status: $RESPONSE"
-          echo "Response body:"
-          cat /tmp/response.json
-
-          if [ "$RESPONSE" != "200" ]; then
-            echo "Scan failed with status $RESPONSE"
-            exit 1
+          # Always hand something to the digest, so a failed region is reported in the email.
+          if [ "$STATUS" != "200" ] || ! jq -e . result.json > /dev/null 2>&1; then
+            jq -n --arg r "${{ matrix.region }}" --arg s "$STATUS" \
+              '{region: $r, error: ("The scan request failed (HTTP " + $s + ")"), updates: [], dropped: []}' > result.json
           fi
 
-          echo "Scan completed successfully"
+          jq '{region, error, stats, updates: [.updates[]? | .title], dropped: [.dropped[]? | {title, reason}]}' result.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: result-${{ matrix.region }}
+          path: result.json
+          retention-days: 14
+
+  digest:
+    needs: scan
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: result-*
+          path: results
+
+      - name: Combine results and send the weekly email
+        run: |
+          jq -s '{results: .}' results/*/result.json > payload.json
+          STATUS=$(curl -s -L -o response.json -w "%{http_code}" --max-time 90 \
+            --post301 --post302 -X POST -H "Content-Type: application/json" -H "x-scan-secret: $SCAN_SECRET" \
+            --data @payload.json "$SITE/api/digest")
+          echo "HTTP Status: $STATUS"
+          cat response.json
+          if [ "$STATUS" != "200" ]; then
+            echo "Digest failed with status $STATUS"
+            exit 1
+          fi

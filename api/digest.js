@@ -3,7 +3,7 @@
 //
 // Runs after every region agent (api/scan.js) has finished. The GitHub Actions
 // workflow POSTs all of their results here as {"results": [...]}. This:
-//   - can purge Updates page cards older than 6 months (switched off for now),
+//   - purges Updates page cards older than 6 months,
 //   - saves the watched-page snapshots for next week's diff,
 //   - ADDS new finds to the review queue (_pending-updates.json), skipping
 //     anything already waiting, published or discarded; items stay until
@@ -15,7 +15,7 @@
 import { REGIONS, REGION_KEYS } from './_lib/regions.js';
 import { readRepoFile, writeRepoFile, extractPublishedTitles } from './_lib/github.js';
 import { listCards, setUpdatesList } from './_lib/publish.js';
-import { readPending, writePending, readDiscarded, updateId, titleKey, isExpired, PENDING_MAX_DAYS } from './_lib/pending.js';
+import { readPending, writePending, readDiscarded, recordDiscarded, updateId, titleKey, isExpired, PENDING_MAX_DAYS } from './_lib/pending.js';
 
 export const config = { maxDuration: 60 };
 
@@ -29,12 +29,9 @@ function escapeHtml(str) {
 
 // ─── Purge Updates page cards older than 6 months ────────────────────────────
 
-// Off until Angela decides: it has never actually run (a card-matching bug
-// stopped it), and switching it on would remove every card older than 6 months.
-const PURGE_OLD_CARDS = false;
-
+// Removed cards are also added to the discarded list, so the agents don't
+// rediscover an old item and suggest it again once it's off the page.
 async function purgeExpiredCards() {
-  if (!PURGE_OLD_CARDS) return;
   const file = await readRepoFile('updates.html');
   if (!file) return;
 
@@ -50,6 +47,13 @@ async function purgeExpiredCards() {
   const purged = setUpdatesList(file.text, kept);
   if (purged && await writeRepoFile('updates.html', purged, `Purge ${expired} update(s) older than 6 months`, file.sha)) {
     console.log(`Purged ${expired} expired card(s) from updates.html`);
+    const removed = cards.filter(c => c.sortdate < cutoff).map(c => {
+      const title = (c.html.match(/<h5>([^<]*)<\/h5>/)?.[1] || '')
+        .replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+      const sourceUrl = (c.html.match(/<a href="([^"]*)" class="uc-source-link"/)?.[1] || '').replace(/&amp;/g, '&');
+      return { id: updateId({ title, sourceUrl }), title, sourceUrl };
+    });
+    await recordDiscarded(removed);
   }
 }
 

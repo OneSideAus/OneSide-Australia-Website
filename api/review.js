@@ -184,7 +184,9 @@ function send(res, status, html, cookie) {
 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
-  res.setHeader('Referrer-Policy', 'no-referrer');
+  // "same-origin" (not "no-referrer"): with no-referrer, browsers send
+  // "Origin: null" on this page's own form posts.
+  res.setHeader('Referrer-Policy', 'same-origin');
 
   if (req.method !== 'GET' && req.method !== 'POST') return res.status(405).send('Method not allowed');
 
@@ -202,11 +204,16 @@ export default async function handler(req, res) {
       : lockedView({ action, id, items }));
   }
 
-  // POST: only accept forms submitted from this site.
+  // POST: refuse forms that clearly come from another website. A missing or
+  // "null" Origin is allowed: the unlock cookie is SameSite=Lax (never sent
+  // from other sites) and without it the password is required anyway.
   const origin = req.headers.origin;
-  let originHost = null;
-  try { originHost = origin ? new URL(origin).host : null; } catch { /* "null" or malformed */ }
-  if (origin && originHost !== req.headers.host) return res.status(403).send('Forbidden');
+  if (origin && origin !== 'null') {
+    let originHost = null;
+    try { originHost = new URL(origin).host; } catch { /* malformed */ }
+    const hosts = [req.headers.host, req.headers['x-forwarded-host']].filter(Boolean);
+    if (!hosts.includes(originHost)) return res.status(403).send('Forbidden');
+  }
 
   const form = readForm(req);
   const action = ACTIONS.includes(form.do) ? form.do : '';

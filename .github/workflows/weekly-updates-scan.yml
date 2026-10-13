@@ -2,7 +2,7 @@ name: Weekly Updates Scan
 
 on:
   schedule:
-    # 7:00am AEST Monday = 21:00 UTC Sunday (AEST is UTC+10)
+    # 21:00 UTC Sunday = Monday 7:00am AEST (winter) / 8:00am AEDT (daylight saving)
     - cron: '0 21 * * 0'
   workflow_dispatch:
     inputs:
@@ -13,7 +13,9 @@ on:
 
 env:
   SITE: https://www.onesideaustralia.com.au
-  SCAN_SECRET: OneSide18042026$AGENT
+  # Stored in GitHub: Settings → Secrets and variables → Actions → SCAN_SECRET.
+  # Must match SCAN_SECRET in Vercel's environment variables.
+  SCAN_SECRET: ${{ secrets.SCAN_SECRET }}
 
 jobs:
   # One agent per state/territory, plus national and national sporting bodies.

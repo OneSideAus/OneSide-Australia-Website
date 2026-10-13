@@ -7,14 +7,17 @@
 //   1. diffs its watched regulator pages against last week's snapshot,
 //   2. pulls region-specific Google News results as leads,
 //   3. has Claude search and read the region's OFFICIAL websites (web search +
-//      web fetch restricted to those domains) and follow links to detail pages,
-//   4. independently re-fetches every claimed source and fact-checks the draft.
+//      web fetch restricted to those domains, plus local news sites as leads)
+//      and follow links to detail pages,
+//   4. rejects any draft that cites a news article instead of an official page,
+//   5. independently re-fetches every claimed source and fact-checks the draft.
 // It returns its findings as JSON; api/digest.js combines all regions, saves
 // state and sends the single weekly email. This endpoint writes nothing.
 
 import crypto from 'node:crypto';
-import { REGIONS } from './_lib/regions.js';
+import { REGIONS, NATIONAL_NEWS_DOMAINS, isOnDomains } from './_lib/regions.js';
 import { readRepoFile, extractPublishedTitles } from './_lib/github.js';
+import { readPending, readDiscarded } from './_lib/pending.js';
 
 export const config = { maxDuration: 300 };
 
@@ -120,10 +123,11 @@ const hashText = (text) => crypto.createHash('sha256').update(text).digest('hex'
 async function checkWatchedPages(region, previousState) {
   const snapshots = {};
   const changes = [];
+  const failed = [];
 
   await Promise.all(region.watchedPages.map(async (page) => {
     const current = await fetchPage(page.url, 8000);
-    if (!current) return;
+    if (!current) { failed.push(page); return; }
 
     const hash = hashText(current.text);
     snapshots[page.url] = { hash, text: current.text, links: current.links, lastChecked: new Date().toISOString() };
@@ -137,12 +141,12 @@ async function checkWatchedPages(region, previousState) {
     }
   }));
 
-  return { snapshots, changes };
+  return { snapshots, changes, failed };
 }
 
 // ─── The region agent ────────────────────────────────────────────────────────
 
-function buildAgentPrompt(region, sinceDate, today, changes, articles, publishedTitles) {
+function buildAgentPrompt(region, newsDomains, sinceDate, today, changes, articles, publishedTitles) {
   const changeSection = changes.length === 0
     ? '(none of the watched pages changed)'
     : changes.map(c => [
@@ -163,10 +167,16 @@ Today is ${today}. Report changes published, announced, or taking effect since $
 YOUR AREA
 ${region.focus}
 
+OFFICIAL WEBSITES (the only sites you may cite as a source)
+${region.domains.join(', ')}
+
+NEWS WEBSITES (you may search and read these for leads, but never cite them)
+${newsDomains.join(', ')}
+
 HOW TO WORK
 1. Use web_search and web_fetch to check the official websites for your area yourself. Do not rely on the leads below alone; regulators often change requirements without any news coverage. Look specifically for: Working With Children Check / screening changes (new systems, new training or ID requirements, fees, renewal changes), child safe standards and compliance deadlines, reportable conduct schemes, changes of regulator or where guidance lives, new mandatory training, and new official guidance or resources for sport and recreation organisations.
 2. When a page links to a "changes to…", "what's new", news or media release page, open it. The details usually live one click deeper than the landing page.
-3. Investigate the leads below: watched pages that changed since last week, and news headlines. For a news lead, find the official page it is about; never cite the media article itself.
+3. Investigate the leads below (watched pages that changed since last week, and news headlines) and check the news websites above for recent stories. For a news lead, find the official page it is about; never cite the media article itself. An update whose sourceUrl is not on one of your official websites is discarded automatically.
 4. Skip anything already published (list below), anything outside your area, and anything that isn't about child safety obligations or resources relevant to organisations working with children. A general change (for example to Working With Children Checks or child safe standards) applies to sporting clubs and should be included; a change limited to an unrelated sector (schools only, early childhood only, aged care, disability services) should not, unless the official page itself says it applies to sport or community organisations.
 5. Every fact you write must be stated on the official page you cite. Your work is independently re-checked against that page and anything it doesn't support is discarded.
 
@@ -176,7 +186,7 @@ ${changeSection}
 LEADS: NEWS HEADLINES SINCE ${sinceDate}
 ${articleSection}
 
-ALREADY PUBLISHED (do not repeat these or anything substantially overlapping)
+ALREADY PUBLISHED, WAITING FOR APPROVAL OR DISCARDED (do not repeat these or anything substantially overlapping)
 ${publishedTitles.length ? publishedTitles.map(t => `- ${t}`).join('\n') : '(none yet)'}
 
 OUTPUT
@@ -198,11 +208,12 @@ function parseAgentJson(text) {
   }
 }
 
-async function runRegionAgent(region, prompt, deadline) {
+async function runRegionAgent(region, newsDomains, prompt, deadline) {
+  const readableDomains = [...region.domains, ...newsDomains];
   const tools = [
-    { type: 'web_search_20260209', name: 'web_search', max_uses: 10, allowed_domains: region.domains,
+    { type: 'web_search_20260209', name: 'web_search', max_uses: 12, allowed_domains: readableDomains,
       user_location: { type: 'approximate', country: 'AU' } },
-    { type: 'web_fetch_20260209', name: 'web_fetch', max_uses: 12, allowed_domains: region.domains }
+    { type: 'web_fetch_20260209', name: 'web_fetch', max_uses: 15, allowed_domains: readableDomains }
   ];
   const messages = [{ role: 'user', content: prompt }];
   let text = '';
@@ -325,35 +336,47 @@ export default async function handler(req, res) {
   const today = new Date().toISOString().split('T')[0];
   console.log(`[${regionKey}] Updates agent starting (since ${sinceDate})`);
 
-  const [updatesFile, watchedFile] = await Promise.all([
+  const [updatesFile, watchedFile, pending, discarded] = await Promise.all([
     readRepoFile('updates.html'),
-    readRepoFile('_watched-pages.json')
+    readRepoFile('_watched-pages.json'),
+    readPending(),
+    readDiscarded()
   ]);
-  const publishedTitles = updatesFile ? extractPublishedTitles(updatesFile.text) : [];
+  const publishedTitles = [
+    ...(updatesFile ? extractPublishedTitles(updatesFile.text) : []),
+    ...pending.items.map(i => i.title),
+    ...discarded.items.slice(0, 100).map(i => i.title)
+  ];
   let previousState = {};
   try { previousState = watchedFile ? JSON.parse(watchedFile.text) : {}; } catch { /* start fresh */ }
 
   // Leads: watched-page changes and news headlines, gathered in parallel.
-  const [{ snapshots, changes }, rssResults] = await Promise.all([
+  const [{ snapshots, changes, failed: watchFailures }, rssResults] = await Promise.all([
     checkWatchedPages(region, previousState),
     Promise.all(region.queries.map(q => fetchGoogleNewsRSS(q, sinceDate)))
   ]);
   const seen = new Set();
   const articles = rssResults.flat().filter(a => !seen.has(a.title) && seen.add(a.title)).slice(0, 60);
-  console.log(`[${regionKey}] ${changes.length} watched-page change(s), ${articles.length} news lead(s)`);
+  console.log(`[${regionKey}] ${changes.length} watched-page change(s), ${watchFailures.length} failed to load, ${articles.length} news lead(s)`);
 
+  const newsDomains = [...new Set([...(region.newsDomains || []), ...NATIONAL_NEWS_DOMAINS])];
   let drafted = [];
   let agentError = null;
   try {
-    const prompt = buildAgentPrompt(region, sinceDate, today, changes, articles, publishedTitles);
-    drafted = await runRegionAgent(region, prompt, deadline);
+    const prompt = buildAgentPrompt(region, newsDomains, sinceDate, today, changes, articles, publishedTitles);
+    drafted = await runRegionAgent(region, newsDomains, prompt, deadline);
   } catch (e) {
     agentError = e.message;
     console.error(`[${regionKey}] Agent failed:`, e.message);
   }
   console.log(`[${regionKey}] Agent drafted ${drafted.length} update(s)`);
 
-  const results = await Promise.all(drafted.map(async (update) => ({ update, result: await verifySourceClaim(update) })));
+  // Only official pages can be published as a source; news articles are leads.
+  const notOfficial = { verdict: 'NOT_OFFICIAL', reason: 'the source is not one of this region\'s official websites (possibly a news article), so it was not fact-checked' };
+  const results = await Promise.all(drafted.map(async (update) => ({
+    update,
+    result: isOnDomains(update.sourceUrl, region.domains) ? await verifySourceClaim(update) : notOfficial
+  })));
   const updates = [];
   const dropped = [];
   for (const { update, result } of results) {
@@ -376,7 +399,8 @@ export default async function handler(req, res) {
     updates,
     dropped,
     error: agentError,
-    stats: { watchedPagesChanged: changes.length, newsLeads: articles.length, drafted: drafted.length, seconds: Math.round((Date.now() - startedAt) / 1000) },
+    watchFailures: watchFailures.map(p => ({ label: p.label, url: p.url })),
+    stats: { watchedPagesChanged: changes.length, watchedPagesFailed: watchFailures.length, newsLeads: articles.length, drafted: drafted.length, seconds: Math.round((Date.now() - startedAt) / 1000) },
     snapshots
   });
 }

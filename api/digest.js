@@ -5,12 +5,17 @@
 // workflow POSTs all of their results here as {"results": [...]}. This:
 //   - purges Updates page cards older than 6 months,
 //   - saves the watched-page snapshots for next week's diff,
-//   - saves verified updates to _pending-updates.json for "Approve all",
-//   - sends one email: what each region found, plus anything drafted but not
-//     verified (so a real change is never silently dropped).
+//   - ADDS new finds to the review queue (_pending-updates.json), skipping
+//     anything already waiting, published or discarded; items stay until
+//     they're approved, discarded or have waited 4 weeks,
+//   - sends one email: what each region found, new verified updates, new items
+//     worth a manual check, and anything still waiting from earlier weeks.
+//     Every button opens the password-protected review page (api/review.js).
 
 import { REGIONS, REGION_KEYS } from './_lib/regions.js';
-import { readRepoFile, writeRepoFile } from './_lib/github.js';
+import { readRepoFile, writeRepoFile, extractPublishedTitles } from './_lib/github.js';
+import { listCards, setUpdatesList } from './_lib/publish.js';
+import { readPending, writePending, readDiscarded, recordDiscarded, updateId, titleKey, isExpired, PENDING_MAX_DAYS } from './_lib/pending.js';
 
 export const config = { maxDuration: 60 };
 
@@ -24,6 +29,8 @@ function escapeHtml(str) {
 
 // ─── Purge Updates page cards older than 6 months ────────────────────────────
 
+// Removed cards are also added to the discarded list, so the agents don't
+// rediscover an old item and suggest it again once it's off the page.
 async function purgeExpiredCards() {
   const file = await readRepoFile('updates.html');
   if (!file) return;
@@ -32,21 +39,21 @@ async function purgeExpiredCards() {
   cutoffDate.setMonth(cutoffDate.getMonth() - 6);
   const cutoff = `${cutoffDate.getFullYear()}-${String(cutoffDate.getMonth() + 1).padStart(2, '0')}`;
 
-  const cardRegex = /<div class="update-card"[^>]*data-sortdate="([^"]*)"[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/g;
-  const kept = [];
-  let expired = 0;
-  let m;
-  while ((m = cardRegex.exec(file.text)) !== null) {
-    if (m[1] < cutoff) expired++;
-    else kept.push({ sortdate: m[1], html: m[0] });
-  }
+  const cards = listCards(file.text);
+  const kept = cards.filter(c => c.sortdate >= cutoff);
+  const expired = cards.length - kept.length;
   if (expired === 0) return;
 
-  kept.sort((a, b) => b.sortdate.localeCompare(a.sortdate));
-  const listHtml = kept.map(c => '            ' + c.html.trim()).join('\n');
-  const purged = file.text.replace(/(<div id="updates-list">)([\s\S]*?)(\n {10}<\/div>)/, `$1\n${listHtml}$3`);
-  if (await writeRepoFile('updates.html', purged, `Purge ${expired} update(s) older than 6 months`, file.sha)) {
+  const purged = setUpdatesList(file.text, kept);
+  if (purged && await writeRepoFile('updates.html', purged, `Purge ${expired} update(s) older than 6 months`, file.sha)) {
     console.log(`Purged ${expired} expired card(s) from updates.html`);
+    const removed = cards.filter(c => c.sortdate < cutoff).map(c => {
+      const title = (c.html.match(/<h5>([^<]*)<\/h5>/)?.[1] || '')
+        .replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+      const sourceUrl = (c.html.match(/<a href="([^"]*)" class="uc-source-link"/)?.[1] || '').replace(/&amp;/g, '&');
+      return { id: updateId({ title, sourceUrl }), title, sourceUrl };
+    });
+    await recordDiscarded(removed);
   }
 }
 
@@ -80,18 +87,25 @@ function regionSummaryRows(results) {
       status = found ? `<strong style="color:#0D1F35;">${found} update${found !== 1 ? 's' : ''}</strong>` : 'Nothing new';
       if (dropped) status += ` · ${dropped} to check manually`;
     }
+    const unloaded = (r?.watchFailures || []).length;
+    if (unloaded) status += ` · <span style="color:#D24530;">${unloaded} watched page${unloaded !== 1 ? 's' : ''} didn't load</span>`;
     return `<tr><td style="padding:6px 0;font-size:13px;color:#4A6580;">${escapeHtml(name)}</td><td style="padding:6px 0;font-size:13px;color:#4A6580;text-align:right;">${status}</td></tr>`;
   }).join('');
 }
 
-function approveUrlFor(update, approveBaseUrl) {
-  const params = ['title', 'body', 'category', 'type', 'date', 'source', 'sourceUrl']
-    .map(k => `${k}=${encodeURIComponent(update[k] || '')}`).join('&');
-  return `${approveBaseUrl}/api/approve?id=${encodeURIComponent(update.title)}&${params}`;
+function reviewUrl(base, action, id) {
+  const params = new URLSearchParams({ do: action, ...(id ? { id } : {}) });
+  return `${base}/api/review?${params}`;
 }
 
-function updateCard(update, approveBaseUrl) {
-  const approveUrl = approveUrlFor(update, approveBaseUrl);
+const BTN_PRIMARY = 'display:inline-block;background:#F25C44;color:white;font-size:13px;font-weight:600;padding:8px 20px;border-radius:6px;text-decoration:none;margin-right:8px;';
+const BTN_GHOST = 'display:inline-block;background:white;color:#D24530;border:1px solid #F25C44;font-size:13px;font-weight:600;padding:7px 18px;border-radius:6px;text-decoration:none;';
+
+function buttons(item, base, approveLabel) {
+  return `<a href="${escapeHtml(reviewUrl(base, 'approve', item.id))}" style="${BTN_PRIMARY}">${approveLabel} →</a><a href="${escapeHtml(reviewUrl(base, 'discard', item.id))}" style="${BTN_GHOST}">Discard</a>`;
+}
+
+function updateCard(update, base) {
   const correctionBlock = update.correction ? `
       <p style="font-size:12px;color:#7A5A12;background:#fdf5e1;border-radius:6px;padding:10px 12px;margin:0 0 14px;">
         <span style="text-transform:uppercase;font-weight:600;">Corrected by fact-checker: </span>${escapeHtml(update.correction)}
@@ -113,41 +127,69 @@ function updateCard(update, approveBaseUrl) {
       <p style="font-size:12px;color:#7A95AA;margin:0 0 14px;">Source: <a href="${escapeHtml(update.sourceUrl)}" style="color:#1B5E8A;">${escapeHtml(update.source)}</a></p>
       ${quoteBlock}
       ${correctionBlock}
-      <a href="${approveUrl}" style="display:inline-block;background:#F25C44;color:white;font-size:13px;font-weight:600;padding:8px 20px;border-radius:6px;text-decoration:none;">Approve and publish →</a>
+      ${buttons(update, base, 'Approve and publish')}
     </div>`;
 }
 
-function droppedCard(item, approveBaseUrl) {
+function droppedCard(item, base) {
   return `
     <div style="border:1px dashed #cdd9e3;border-radius:8px;padding:14px 16px;margin-bottom:12px;">
-      <p style="font-size:11px;font-weight:600;text-transform:uppercase;color:#7A95AA;margin:0 0 6px;">${escapeHtml(item.regionName)} · not verified</p>
+      <p style="font-size:11px;font-weight:600;text-transform:uppercase;color:#7A95AA;margin:0 0 6px;">${escapeHtml(item.regionName || item.category)} · not verified</p>
       <p style="font-size:14px;font-weight:600;color:#0D1F35;margin:0 0 6px;">${escapeHtml(item.title)}</p>
       <p style="font-size:13px;color:#4A6580;line-height:1.5;margin:0 0 6px;">${escapeHtml(item.body)}</p>
       ${item.evidence ? `<p style="font-size:12px;color:#4A6580;font-style:italic;margin:0 0 6px;">Agent's evidence: "${escapeHtml(item.evidence)}"</p>` : ''}
       <p style="font-size:12px;color:#7A95AA;margin:0 0 12px;">Why it wasn't verified: ${escapeHtml(item.reason)}${item.sourceUrl ? ` · <a href="${escapeHtml(item.sourceUrl)}" style="color:#1B5E8A;">Check the source</a>` : ''}</p>
-      ${item.category && item.type ? `<a href="${approveUrlFor(item, approveBaseUrl)}" style="display:inline-block;background:white;color:#D24530;border:1px solid #F25C44;font-size:12px;font-weight:600;padding:6px 16px;border-radius:6px;text-decoration:none;">Approve anyway →</a>` : ''}
+      ${buttons(item, base, 'Approve anyway')}
     </div>`;
 }
 
-function buildEmailHtml({ results, updates, dropped, approveBaseUrl, scanSecret, sinceDate }) {
+function waitingCard(item, base) {
+  const weeks = Math.max(1, Math.round((Date.now() - new Date(item.addedAt).getTime()) / (7 * 24 * 60 * 60 * 1000)));
+  return `
+    <div style="border:1px solid #e2eaf0;border-radius:8px;padding:14px 16px;margin-bottom:12px;">
+      <p style="font-size:11px;font-weight:600;text-transform:uppercase;color:#7A95AA;margin:0 0 6px;">${escapeHtml(item.category)} · ${item.status === 'check' ? 'not verified' : 'verified'} · waiting ${weeks} week${weeks !== 1 ? 's' : ''}</p>
+      <p style="font-size:14px;font-weight:600;color:#0D1F35;margin:0 0 6px;">${escapeHtml(item.title)}</p>
+      <p style="font-size:13px;color:#4A6580;line-height:1.5;margin:0 0 12px;">${escapeHtml(item.body)}</p>
+      ${buttons(item, base, item.status === 'check' ? 'Approve anyway' : 'Approve and publish')}
+    </div>`;
+}
+
+function buildEmailHtml({ results, newVerified, newCheck, waiting, verifiedWaiting, base, sinceDate }) {
   const date = new Date().toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
-  const updatesSection = updates.length ? `
-    ${updates.map(u => updateCard(u, approveBaseUrl)).join('')}
-    <div style="background:white;border-radius:12px;padding:24px;text-align:center;margin-bottom:16px;">
-      <p style="font-size:14px;color:#4A6580;margin:0 0 16px;">Happy with everything? Publish all ${updates.length} updates in one click.</p>
-      <a href="${approveBaseUrl}/api/approve-all?secret=${encodeURIComponent(scanSecret || '')}" style="display:inline-block;background:#0D1F35;color:white;font-size:14px;font-weight:600;padding:14px 32px;border-radius:8px;text-decoration:none;">Approve all ${updates.length} updates →</a>
-    </div>` : `
+  const updatesSection = newVerified.length ? `
+    ${newVerified.map(u => updateCard(u, base)).join('')}` : `
     <div style="background:white;border-radius:12px;padding:24px;margin-bottom:16px;">
-      <p style="font-size:15px;color:#0D1F35;font-weight:600;margin:0 0 8px;">No verified updates this week</p>
-      <p style="font-size:14px;color:#4A6580;line-height:1.6;margin:0;">Every agent searched its official sites and news, and nothing new could be confirmed against an official source.${dropped.length ? ' Have a look at the items below to check manually.' : ''}</p>
+      <p style="font-size:15px;color:#0D1F35;font-weight:600;margin:0 0 8px;">No new verified updates this week</p>
+      <p style="font-size:14px;color:#4A6580;line-height:1.6;margin:0;">Every agent searched its official sites and news, and nothing new could be confirmed against an official source.${newCheck.length ? ' Have a look at the items below to check manually.' : ''}</p>
     </div>`;
 
-  const droppedSection = dropped.length ? `
+  const approveAllSection = verifiedWaiting > 1 ? `
+    <div style="background:white;border-radius:12px;padding:24px;text-align:center;margin-bottom:16px;">
+      <p style="font-size:14px;color:#4A6580;margin:0 0 16px;">Happy with everything? Publish all ${verifiedWaiting} verified updates (including any still waiting from earlier weeks) in one go.</p>
+      <a href="${escapeHtml(reviewUrl(base, 'approve-all'))}" style="display:inline-block;background:#0D1F35;color:white;font-size:14px;font-weight:600;padding:14px 32px;border-radius:8px;text-decoration:none;">Approve all ${verifiedWaiting} updates →</a>
+    </div>` : '';
+
+  const droppedSection = newCheck.length ? `
     <div style="background:white;border-radius:12px;padding:24px;margin-bottom:16px;">
       <p style="font-size:15px;color:#0D1F35;font-weight:600;margin:0 0 6px;">Worth a manual check</p>
-      <p style="font-size:13px;color:#7A95AA;line-height:1.5;margin:0 0 16px;">The agents found these but couldn't confirm them word-for-word on the official page (sometimes the site blocks automated checks). Check the source first: these are only published if you click Approve anyway.</p>
-      ${dropped.map(d => droppedCard(d, approveBaseUrl)).join('')}
+      <p style="font-size:13px;color:#7A95AA;line-height:1.5;margin:0 0 16px;">The agents found these but couldn't confirm them word-for-word on the official page (sometimes the site blocks automated checks, or the source was a news article). Check the source first: these are only published if you click Approve anyway.</p>
+      ${newCheck.map(d => droppedCard(d, base)).join('')}
+    </div>` : '';
+
+  const waitingSection = waiting.length ? `
+    <div style="background:white;border-radius:12px;padding:24px;margin-bottom:16px;">
+      <p style="font-size:15px;color:#0D1F35;font-weight:600;margin:0 0 6px;">Still waiting from earlier weeks</p>
+      <p style="font-size:13px;color:#7A95AA;line-height:1.5;margin:0 0 16px;">You haven't approved or discarded these yet. They're removed automatically after ${PENDING_MAX_DAYS / 7} weeks.</p>
+      ${waiting.map(w => waitingCard(w, base)).join('')}
+    </div>` : '';
+
+  const watchFailures = results.flatMap(r => (r.watchFailures || []).map(p => ({ ...p, regionName: r.regionName || r.region })));
+  const watchFailuresSection = watchFailures.length ? `
+    <div style="background:white;border-radius:12px;padding:24px;margin-bottom:16px;">
+      <p style="font-size:15px;color:#0D1F35;font-weight:600;margin:0 0 6px;">Watched pages that didn't load</p>
+      <p style="font-size:13px;color:#7A95AA;line-height:1.5;margin:0 0 12px;">These pages couldn't be checked for changes this week. If one keeps appearing, it has probably moved or the site is blocking the agent, so the address needs updating.</p>
+      ${watchFailures.map(p => `<p style="font-size:13px;color:#4A6580;margin:0 0 6px;">${escapeHtml(p.regionName)}: <a href="${escapeHtml(p.url)}" style="color:#1B5E8A;">${escapeHtml(p.label)}</a></p>`).join('')}
     </div>` : '';
 
   return `<!DOCTYPE html>
@@ -165,8 +207,11 @@ function buildEmailHtml({ results, updates, dropped, approveBaseUrl, scanSecret,
       <table style="width:100%;border-collapse:collapse;">${regionSummaryRows(results)}</table>
     </div>
     ${updatesSection}
+    ${approveAllSection}
     ${droppedSection}
-    <p style="font-size:12px;color:#7A95AA;text-align:center;margin-top:24px;">OneSide Australia — Updates Agent · <a href="https://onesideaustralia.com.au/updates" style="color:#F25C44;">View Updates page</a></p>
+    ${waitingSection}
+    ${watchFailuresSection}
+    <p style="font-size:12px;color:#7A95AA;text-align:center;margin-top:24px;">Approving or discarding asks for your review password once, then stays unlocked for 5 minutes. <a href="${escapeHtml(`${base}/api/review`)}" style="color:#F25C44;">Review everything on one page</a> · <a href="${escapeHtml(`${base}/updates`)}" style="color:#F25C44;">View Updates page</a></p>
   </div>
 </body>
 </html>`;
@@ -196,23 +241,44 @@ export default async function handler(req, res) {
     await writeRepoFile('_watched-pages.json', JSON.stringify(state, null, 2), 'Update watched-pages snapshot', watchedFile?.sha);
   }
 
-  const updates = deduplicate(results.flatMap(r => r.updates || []));
-  const dropped = deduplicate(results.flatMap(r => (r.dropped || []).map(d => ({ ...d, regionName: r.regionName || r.region }))));
   const sinceDate = results.find(r => r.sinceDate)?.sinceDate || 'last week';
+  const now = new Date().toISOString();
 
-  if (updates.length) {
-    const pendingFile = await readRepoFile('_pending-updates.json');
-    await writeRepoFile('_pending-updates.json', JSON.stringify(updates), 'Save pending updates for approve-all', pendingFile?.sha);
+  // This week's finds: verified first, so a duplicate keeps its verified copy.
+  const found = deduplicate([
+    ...results.flatMap(r => r.updates || []).map(u => ({ ...u, status: 'verified' })),
+    ...results.flatMap(r => (r.dropped || []).map(d => ({
+      ...d, status: 'check', regionName: r.regionName || r.region,
+      category: d.category || REGIONS[r.region]?.category || 'National', type: d.type || 'Update'
+    })))
+  ]).map(u => ({ ...u, id: updateId(u), addedAt: now }));
+
+  // Merge into the review queue instead of replacing it.
+  const [pending, discarded, updatesFile] = await Promise.all([readPending(), readDiscarded(), readRepoFile('updates.html')]);
+  const publishedKeys = new Set((updatesFile ? extractPublishedTitles(updatesFile.text) : []).map(titleKey));
+  const waiting = pending.items.filter(i => !isExpired(i) && !publishedKeys.has(titleKey(i.title)));
+  const seenIds = new Set([...waiting, ...discarded.items].map(i => i.id));
+  const seenKeys = new Set([...[...waiting, ...discarded.items].map(i => titleKey(i.title)), ...publishedKeys]);
+  const fresh = found.filter(u => !seenIds.has(u.id) && !seenKeys.has(titleKey(u.title)));
+  const queue = [...waiting, ...fresh];
+
+  if (JSON.stringify(queue) !== JSON.stringify(pending.items)) {
+    await writePending(queue, pending.sha, `Update review queue: ${fresh.length} new, ${waiting.length} still waiting`);
   }
+
+  const newVerified = fresh.filter(u => u.status === 'verified');
+  const newCheck = fresh.filter(u => u.status === 'check');
+  const verifiedWaiting = queue.filter(u => u.status === 'verified').length;
 
   const failedRegions = REGION_KEYS.filter(k => {
     const r = results.find(x => x.region === k);
     return !r || (r.error && !(r.updates || []).length);
   });
 
-  const subject = updates.length
-    ? `OneSide Updates Digest — ${updates.length} update${updates.length !== 1 ? 's' : ''} found`
-    : `OneSide Weekly Digest — No verified updates${dropped.length ? `, ${dropped.length} to check` : ''}`;
+  const subject = (newVerified.length
+    ? `OneSide Updates Digest — ${newVerified.length} new update${newVerified.length !== 1 ? 's' : ''}`
+    : `OneSide Weekly Digest — No new verified updates${newCheck.length ? `, ${newCheck.length} to check` : ''}`)
+    + (waiting.length ? ` (${waiting.length} still waiting)` : '');
 
   const emailResponse = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -222,9 +288,8 @@ export default async function handler(req, res) {
       to: EMAIL_TO,
       subject: failedRegions.length ? `${subject} (${failedRegions.length} agent${failedRegions.length !== 1 ? 's' : ''} had problems)` : subject,
       html: buildEmailHtml({
-        results, updates, dropped, sinceDate,
-        approveBaseUrl: process.env.SITE_URL || 'https://onesideaustralia.com.au',
-        scanSecret: process.env.SCAN_SECRET
+        results, newVerified, newCheck, waiting, verifiedWaiting, sinceDate,
+        base: process.env.SITE_URL || 'https://onesideaustralia.com.au'
       })
     })
   });
@@ -235,5 +300,5 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Failed to send email', details: err });
   }
 
-  return res.status(200).json({ message: 'Digest sent', updates: updates.length, toCheck: dropped.length, failedRegions });
+  return res.status(200).json({ message: 'Digest sent', newUpdates: newVerified.length, newToCheck: newCheck.length, stillWaiting: waiting.length, failedRegions });
 }

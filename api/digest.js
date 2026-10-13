@@ -80,6 +80,8 @@ function regionSummaryRows(results) {
       status = found ? `<strong style="color:#0D1F35;">${found} update${found !== 1 ? 's' : ''}</strong>` : 'Nothing new';
       if (dropped) status += ` · ${dropped} to check manually`;
     }
+    const unloaded = (r?.watchFailures || []).length;
+    if (unloaded) status += ` · <span style="color:#D24530;">${unloaded} watched page${unloaded !== 1 ? 's' : ''} didn't load</span>`;
     return `<tr><td style="padding:6px 0;font-size:13px;color:#4A6580;">${escapeHtml(name)}</td><td style="padding:6px 0;font-size:13px;color:#4A6580;text-align:right;">${status}</td></tr>`;
   }).join('');
 }
@@ -143,6 +145,14 @@ function buildEmailHtml({ results, updates, dropped, approveBaseUrl, scanSecret,
       <p style="font-size:14px;color:#4A6580;line-height:1.6;margin:0;">Every agent searched its official sites and news, and nothing new could be confirmed against an official source.${dropped.length ? ' Have a look at the items below to check manually.' : ''}</p>
     </div>`;
 
+  const watchFailures = results.flatMap(r => (r.watchFailures || []).map(p => ({ ...p, regionName: r.regionName || r.region })));
+  const watchFailuresSection = watchFailures.length ? `
+    <div style="background:white;border-radius:12px;padding:24px;margin-bottom:16px;">
+      <p style="font-size:15px;color:#0D1F35;font-weight:600;margin:0 0 6px;">Watched pages that didn't load</p>
+      <p style="font-size:13px;color:#7A95AA;line-height:1.5;margin:0 0 12px;">These pages couldn't be checked for changes this week. If one keeps appearing, it has probably moved or the site is blocking the agent, so the address needs updating.</p>
+      ${watchFailures.map(p => `<p style="font-size:13px;color:#4A6580;margin:0 0 6px;">${escapeHtml(p.regionName)}: <a href="${escapeHtml(p.url)}" style="color:#1B5E8A;">${escapeHtml(p.label)}</a></p>`).join('')}
+    </div>` : '';
+
   const droppedSection = dropped.length ? `
     <div style="background:white;border-radius:12px;padding:24px;margin-bottom:16px;">
       <p style="font-size:15px;color:#0D1F35;font-weight:600;margin:0 0 6px;">Worth a manual check</p>
@@ -166,6 +176,7 @@ function buildEmailHtml({ results, updates, dropped, approveBaseUrl, scanSecret,
     </div>
     ${updatesSection}
     ${droppedSection}
+    ${watchFailuresSection}
     <p style="font-size:12px;color:#7A95AA;text-align:center;margin-top:24px;">OneSide Australia — Updates Agent · <a href="https://onesideaustralia.com.au/updates" style="color:#F25C44;">View Updates page</a></p>
   </div>
 </body>

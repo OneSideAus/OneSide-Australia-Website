@@ -17,6 +17,7 @@
 import crypto from 'node:crypto';
 import { REGIONS, NATIONAL_NEWS_DOMAINS, isOnDomains } from './_lib/regions.js';
 import { readRepoFile, extractPublishedTitles } from './_lib/github.js';
+import { readPending, readDiscarded } from './_lib/pending.js';
 
 export const config = { maxDuration: 300 };
 
@@ -185,7 +186,7 @@ ${changeSection}
 LEADS: NEWS HEADLINES SINCE ${sinceDate}
 ${articleSection}
 
-ALREADY PUBLISHED (do not repeat these or anything substantially overlapping)
+ALREADY PUBLISHED, WAITING FOR APPROVAL OR DISCARDED (do not repeat these or anything substantially overlapping)
 ${publishedTitles.length ? publishedTitles.map(t => `- ${t}`).join('\n') : '(none yet)'}
 
 OUTPUT
@@ -335,11 +336,17 @@ export default async function handler(req, res) {
   const today = new Date().toISOString().split('T')[0];
   console.log(`[${regionKey}] Updates agent starting (since ${sinceDate})`);
 
-  const [updatesFile, watchedFile] = await Promise.all([
+  const [updatesFile, watchedFile, pending, discarded] = await Promise.all([
     readRepoFile('updates.html'),
-    readRepoFile('_watched-pages.json')
+    readRepoFile('_watched-pages.json'),
+    readPending(),
+    readDiscarded()
   ]);
-  const publishedTitles = updatesFile ? extractPublishedTitles(updatesFile.text) : [];
+  const publishedTitles = [
+    ...(updatesFile ? extractPublishedTitles(updatesFile.text) : []),
+    ...pending.items.map(i => i.title),
+    ...discarded.items.slice(0, 100).map(i => i.title)
+  ];
   let previousState = {};
   try { previousState = watchedFile ? JSON.parse(watchedFile.text) : {}; } catch { /* start fresh */ }
 

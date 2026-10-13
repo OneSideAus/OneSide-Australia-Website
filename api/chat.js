@@ -22,7 +22,7 @@ Who should complete it: Someone who knows how the club actually runs day to day 
 The report belongs entirely to the club. It is never shared with the sporting body, league, or regulator. OneSide has no reporting obligation based on responses. It is safe to be honest — that is what makes the report useful.
 
 --- SPORTS COVERED ---
-Currently: AFL, Netball, Cricket, Soccer, Rugby League, Rugby Union, Basketball, Tennis, Golf. More sports are being added. There is a sport checker on the homepage where clubs can check if their sport is covered.
+Currently: AFL, Netball, Cricket, Soccer, Rugby League, Rugby Union, Basketball, Tennis, Golf, Table Tennis. More sports are being added. There is a sport checker on the homepage where clubs can check if their sport is covered.
 
 --- STATES AND TERRITORIES ---
 All Australian states and territories are covered. The report is specific to the club's state.

@@ -77,7 +77,8 @@ var sportsCovered = {
   'netball':'Netball','cricket':'Cricket','soccer':'Soccer',
   'football (soccer)':'Soccer','rugby league':'Rugby League',
   'rugby union':'Rugby Union','rugby':'Rugby Union',
-  'basketball':'Basketball','tennis':'Tennis','golf':'Golf'
+  'basketball':'Basketball','tennis':'Tennis','golf':'Golf',
+  'table tennis':'Table Tennis','ping pong':'Table Tennis'
 };
 var sportsSoon = {
   'touch football':'Touch Football','touch':'Touch Football',

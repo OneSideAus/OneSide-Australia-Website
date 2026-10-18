@@ -1,0 +1,184 @@
+/* ============================================================
+   OneSide Australia — brand refresh
+   Navy page, content on large white cards, coral accents,
+   Playfair Display headings, Inter body.
+   Loaded after styles.css; visual only (no layout logic, no JS hooks).
+   ============================================================ */
+
+:root {
+  --navy: #0C243C;
+  --coral-brand: #F45A40;
+  --card: #FCFCFD;
+  --ink: #0C243C;
+  --ink-soft: #52637A;
+  --ink-faint: #7D8BA0;
+  --divider: #E6EAF0;
+  --card-shadow: 0 1px 2px rgba(3, 14, 28, 0.10), 0 18px 40px rgba(3, 14, 28, 0.28);
+
+  /* Re-point the existing tokens so every var() on the site picks up the new palette */
+  --midnight: #0C243C;
+  --midnight2: #14304D;
+  --coral: #F45A40;
+  --coral-dark: #D9452D;
+  --coral-light: #FF8C75;
+  --off-white: #FCFCFD;
+  --muted: #E6EAF0;
+  --text-mid: #52637A;
+  --text-light: #7D8BA0;
+}
+
+/* ── TYPE ─────────────────────────────────────────────────── */
+body { background: var(--navy); color: var(--ink); font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+[style*="DM Sans"], button, input, select, textarea,
+.btn-primary, .btn-secondary, .btn-outline, .btn-dark, .form-submit, .filter-btn, .quiz-btn, .faq-q, .chat-input { font-family: 'Inter', system-ui, sans-serif !important; }
+[style*="DM Serif Display"], .section-title, .page-hero h1, .final-cta h2, .fc-body h3, .value-name, .value-standout,
+.club-name, .fn, .fa, .nl-form h3, .quiz-result-inner h3, .fc-hook {
+  font-family: 'Playfair Display', Georgia, serif !important;
+}
+h1, h2 { font-family: 'Playfair Display', Georgia, serif; font-weight: 600; letter-spacing: -0.01em; }
+.section-title { font-weight: 600; color: var(--ink); }
+
+.eyebrow, .ft, .pc-title {
+  font-size: 12px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--coral);
+}
+.lead { color: var(--ink-soft); }
+
+a { color: inherit; }
+.os-card a:not([class]) { color: var(--coral); }
+
+/* ── CARDS & PAGE STACK ───────────────────────────────────── */
+.os-stack {
+  max-width: 1180px; margin: 0 auto; padding: 96px 20px 56px;
+  display: flex; flex-direction: column; gap: 32px;
+}
+.os-card {
+  background: var(--card); border-radius: 20px; box-shadow: var(--card-shadow);
+  padding: clamp(32px, 5vw, 64px) clamp(24px, 5vw, 64px); position: relative; overflow: hidden;
+}
+.os-card.compact { padding: clamp(28px, 4vw, 44px) clamp(24px, 5vw, 56px); }
+
+/* ── NAV: floating white card ─────────────────────────────── */
+nav {
+  top: 14px; left: 20px; right: 20px; max-width: 1140px; margin: 0 auto;
+  background: var(--card); border: none; border-radius: 16px; height: 64px;
+  box-shadow: 0 8px 28px rgba(3, 14, 28, 0.25);
+}
+nav::before { display: none; }
+nav.scrolled { box-shadow: 0 10px 32px rgba(3, 14, 28, 0.35); }
+.nav-links a { color: var(--ink-soft); font-weight: 500; }
+.nav-links a:hover, .nav-links a.active { color: var(--ink); }
+.nav-cta, .nav-cta:hover { background: var(--coral) !important; border-radius: 999px; padding: 9px 20px; }
+.nav-cta:hover { background: var(--coral-dark) !important; }
+.hamburger span { background: var(--ink); }
+.mobile-nav { top: 86px; left: 20px; right: 20px; border-radius: 16px; background: var(--card); border: none; box-shadow: 0 12px 32px rgba(3, 14, 28, 0.3); }
+
+/* ── BUTTONS: pills ───────────────────────────────────────── */
+.btn-primary, .btn-secondary, .btn-outline, .btn-dark, .form-submit { border-radius: 999px; font-weight: 600; }
+.btn-primary, .form-submit { background: var(--coral); box-shadow: 0 6px 18px rgba(244, 90, 64, 0.28); }
+.btn-primary:hover, .form-submit:hover { background: var(--coral-dark); opacity: 1; box-shadow: 0 8px 22px rgba(244, 90, 64, 0.36); }
+.btn-outline, .os-card .btn-secondary, .final-cta .btn-secondary { background: transparent; color: var(--coral); border: 1.5px solid var(--coral); }
+.btn-outline:hover, .os-card .btn-secondary:hover, .final-cta .btn-secondary:hover { background: var(--coral); color: #fff; border-color: var(--coral); }
+.btn-dark { background: var(--navy); }
+.btn-dark:hover { background: var(--midnight2); }
+
+/* ── TAGS ─────────────────────────────────────────────────── */
+.ph-tag, .uc-tag, .os-pill {
+  display: inline-flex; align-items: center; background: var(--coral); color: #fff; border: none;
+  border-radius: 999px; padding: 5px 13px; font-size: 11px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase;
+}
+.ph-tag::before { display: none; }
+.uc-tag.t-new, .uc-tag.t-update, .uc-tag.t-reminder, .uc-tag.t-resource, .uc-tag.t-news { background: var(--coral); color: #fff; border: none; }
+.pill { background: #F2F4F7; border-color: var(--divider); color: var(--ink); }
+
+/* ── TABLES ───────────────────────────────────────────────── */
+table { border-collapse: collapse; width: 100%; border: none; }
+th {
+  color: var(--coral); font-size: 12px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase;
+  text-align: left; padding: 12px 14px; border: none; border-bottom: 1px solid var(--divider); background: transparent;
+}
+td { padding: 14px; border: none; border-bottom: 1px solid var(--divider); color: var(--ink); }
+tr:last-child td { border-bottom: none; }
+
+/* ── HERO (home) ──────────────────────────────────────────── */
+.os-hero {
+  border-radius: 20px; overflow: hidden; position: relative;
+  background: linear-gradient(rgba(12, 36, 60, 0.86), rgba(12, 36, 60, 0.94)), url('/images/hero-sport.png') center/cover no-repeat;
+  box-shadow: var(--card-shadow);
+}
+.os-hero h1 { font-weight: 600; }
+.os-hero h1 em { color: var(--coral) !important; }
+.os-hero .marquee-wrap { background: rgba(0, 0, 0, 0.18); border-bottom: none; }
+.os-hero .btn-secondary { border-radius: 999px; }
+
+/* Hero chat: white card */
+.os-chat { background: var(--card); border-radius: 18px; box-shadow: 0 18px 44px rgba(3, 14, 28, 0.35); overflow: hidden; }
+.os-chat-head { padding: 26px 22px 12px; text-align: center; border-bottom: 1px solid var(--divider); }
+.os-chat-head p:first-child { font-family: 'Playfair Display', Georgia, serif !important; font-size: 1.1rem !important; font-weight: 600; color: var(--ink) !important; }
+.os-chat-head p:last-child { color: var(--ink-faint) !important; }
+.os-chat .hero-chat-wrap .chat-msg.assistant { background: #F2F4F7; color: var(--ink); border: 1px solid var(--divider); }
+.os-chat .hero-chat-wrap .chat-msg.booking-nudge { background: rgba(244, 90, 64, 0.08); border-color: rgba(244, 90, 64, 0.35); color: var(--ink); }
+.os-chat .hero-chat-wrap .chat-msg.booking-nudge a { color: var(--coral); }
+.os-chat .hero-chat-wrap::-webkit-scrollbar-thumb { background: var(--divider); }
+.os-chat-input-row { border-top: 1px solid var(--divider) !important; }
+#chat-input { background: #F4F6F9 !important; border: 1px solid var(--divider) !important; color: var(--ink) !important; border-radius: 999px !important; padding: 9px 16px !important; }
+#chat-input:focus { border-color: var(--coral) !important; }
+#chat-input::placeholder { color: var(--ink-faint); }
+#chat-send { border-radius: 50% !important; }
+
+/* ── HOME SECTIONS ON CARDS ───────────────────────────────── */
+.os-feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+.os-feature-grid > a { border-radius: 20px; box-shadow: var(--card-shadow); }
+.os-feature-grid > a:hover img { transform: scale(1.03); }
+
+.os-point {
+  display: flex; align-items: flex-start; gap: 14px; padding: 20px 22px; margin-bottom: 14px;
+  background: #F4F6F9; border-radius: 14px; border-left: 3px solid var(--coral);
+}
+.os-point:last-child { margin-bottom: 0; }
+.os-point strong { display: block; font-size: 15px; color: var(--ink); margin-bottom: 4px; font-weight: 600; }
+.os-point p { font-size: 14px; color: var(--ink-soft); line-height: 1.65; }
+
+/* Updates listed inside a card: rows with thin dividers */
+.os-card .update-card { background: transparent; border: none; border-bottom: 1px solid var(--divider); border-radius: 0; margin: 0; }
+.os-card .update-card:last-child { border-bottom: none; }
+.os-card .update-card:hover { background: #F7F8FA; box-shadow: none; }
+.os-card .uc-head { padding: 18px 8px; }
+.os-card .update-card h5 { font-size: 15px; font-weight: 500; }
+.os-card .update-card:hover .uc-body, .os-card .update-card.is-open .uc-body { border-top: none; padding: 0 8px 18px; }
+.uc-source-link { border-radius: 999px; }
+
+/* Final CTA as a card */
+.final-cta { background: var(--card); border-radius: 20px; box-shadow: var(--card-shadow); padding: clamp(48px, 7vw, 88px) clamp(24px, 5vw, 64px); }
+.final-cta::before, .final-cta::after { display: none; }
+.final-cta h2 { color: var(--ink); font-weight: 600; }
+.final-cta p { color: var(--ink-soft); }
+
+/* ── FOOTER ───────────────────────────────────────────────── */
+footer { background: var(--navy); border-top: 1px solid rgba(255, 255, 255, 0.08); }
+.ft-brand p { color: rgba(255, 255, 255, 0.72); }
+.ft-tagline { color: rgba(255, 255, 255, 0.5); }
+.ft-ack { color: rgba(255, 255, 255, 0.6); border-left-color: var(--coral); }
+.ft-bottom { border-top-color: rgba(255, 255, 255, 0.08); }
+.ft-copy, .ft-links a { color: rgba(255, 255, 255, 0.55); }
+.ft-links a:hover { color: #fff; }
+
+/* ── MODALS & SMALL COMPONENTS ────────────────────────────── */
+.quiz-modal-panel { background: var(--card); border-radius: 20px; }
+.quiz-modal-head { background: var(--navy); }
+.quiz-btn { border-radius: 999px; }
+.quiz-result-inner { border-radius: 16px; }
+.filter-btn { border-radius: 999px; }
+.filter-btn.active { background: var(--coral); border-color: var(--coral); }
+.faq-item, .check-item, .tip-item, .founder-card, .feature-card { border-radius: 16px; }
+
+@media (max-width: 768px) {
+  .os-stack { padding: 92px 12px 40px; gap: 20px; }
+  .os-card { border-radius: 18px; }
+  .os-feature-grid { grid-template-columns: 1fr; gap: 20px; }
+  /* Square photo cards are too short for their text on phones: grow to fit instead */
+  .os-feature-grid > a { aspect-ratio: auto !important; min-height: 420px; display: flex !important; flex-direction: column; justify-content: flex-end; }
+  .os-feature-grid > a > div:last-child { position: relative !important; }
+  [style*="grid-template-columns:1fr 1.1fr"] { grid-template-columns: 1fr !important; gap: 24px !important; }
+  nav { left: 12px; right: 12px; top: 10px; }
+  .mobile-nav { left: 12px; right: 12px; top: 80px; }
+}

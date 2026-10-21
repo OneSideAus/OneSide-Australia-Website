@@ -573,3 +573,67 @@ document.addEventListener('DOMContentLoaded', function () {
     addChatMessage('assistant', 'Hi! How can I help you and your club with child safety today?');
   }
 });
+
+/* ── FLOATING QUESTION BUBBLE (every page) ──────────────
+   A "Have a question?" button fixed to the bottom-right corner.
+   On the homepage it jumps to the chat in the hero; on every other
+   page it opens a chat panel using the same assistant (/api/chat). */
+document.addEventListener('DOMContentLoaded', function () {
+  if (document.getElementById('q-launch')) return;
+  var heroChat = document.getElementById('chat-input');
+
+  var btn = document.createElement('button');
+  btn.id = 'q-launch';
+  btn.className = 'q-launch';
+  btn.type = 'button';
+  btn.setAttribute('aria-label', 'Have a question? Ask our assistant');
+  btn.innerHTML = '<span class="q-launch-label">Have a question?</span>' +
+    '<span class="q-launch-circle"><img src="/favicon.svg" width="44" height="44" alt="" aria-hidden="true"></span>';
+  document.body.appendChild(btn);
+
+  if (heroChat) {
+    btn.addEventListener('click', function () {
+      heroChat.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(function () { heroChat.focus({ preventScroll: true }); }, 400);
+    });
+    return;
+  }
+
+  var panel = document.createElement('div');
+  panel.id = 'chat-panel';
+  panel.className = 'chat-panel q-panel';
+  panel.setAttribute('role', 'dialog');
+  panel.setAttribute('aria-label', 'Ask a question');
+  panel.innerHTML =
+    '<div class="chat-panel-head">' +
+      '<div style="display:flex;align-items:center;gap:10px;">' +
+        '<div class="chat-panel-head-avatar" style="background:white;"><img src="/favicon.svg" width="26" height="26" alt="" aria-hidden="true"></div>' +
+        '<div><div class="chat-panel-head-title">Have a question?</div><div class="chat-panel-head-sub">Ask about child safety or the assessment</div></div>' +
+      '</div>' +
+      '<button type="button" class="q-panel-close" aria-label="Close">&times;</button>' +
+    '</div>' +
+    '<div id="chat-messages" class="chat-messages"></div>' +
+    '<div class="chat-input-row">' +
+      '<textarea id="chat-input" class="chat-input" rows="1" placeholder="Ask a question…"></textarea>' +
+      '<button id="chat-send" class="chat-send" type="button" aria-label="Send"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>' +
+    '</div>';
+  document.body.appendChild(panel);
+
+  var input = panel.querySelector('#chat-input');
+  input.addEventListener('keydown', chatKeydown);
+  panel.querySelector('#chat-send').addEventListener('click', sendChat);
+
+  var greeted = false;
+  function setOpen(open) {
+    panel.classList.toggle('open', open);
+    btn.classList.toggle('is-open', open);
+    btn.setAttribute('aria-expanded', open);
+    if (open) {
+      if (!greeted) { addChatMessage('assistant', 'Hi! How can I help you and your club with child safety today?'); greeted = true; }
+      input.focus();
+    }
+  }
+  btn.addEventListener('click', function () { setOpen(!panel.classList.contains('open')); });
+  panel.querySelector('.q-panel-close').addEventListener('click', function () { setOpen(false); btn.focus(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && panel.classList.contains('open')) { setOpen(false); btn.focus(); } });
+});

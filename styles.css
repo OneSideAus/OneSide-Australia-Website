@@ -463,3 +463,24 @@ nav.scrolled { box-shadow: 0 4px 20px rgba(13,31,53,0.08); }
     max-width: 100% !important;
   }
 }
+
+/* ── FLOATING QUESTION BUBBLE (every page) ── */
+.q-launch { position: fixed; right: 24px; bottom: 24px; z-index: 9000; display: flex; align-items: center; gap: 10px; background: none; border: none; padding: 0; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+.q-launch-label { background: var(--midnight); color: white; font-size: 14px; font-weight: 600; padding: 10px 16px; border-radius: 100px; box-shadow: 0 6px 20px rgba(13,31,53,0.25); white-space: nowrap; }
+.q-launch-circle { width: 60px; height: 60px; border-radius: 50%; background: white; border: 3px solid var(--midnight); display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(242,92,68,0.45); transition: transform 0.2s; flex-shrink: 0; }
+.q-launch:hover .q-launch-circle { transform: scale(1.06); }
+.q-launch:focus-visible { outline: none; }
+.q-launch:focus-visible .q-launch-circle { outline: 3px solid var(--coral); outline-offset: 3px; }
+.q-launch.is-open .q-launch-label { display: none; }
+.q-panel { bottom: 100px; right: 24px; }
+.q-panel .chat-panel-head { justify-content: space-between; }
+.q-panel-close { background: none; border: none; color: rgba(255,255,255,0.6); font-size: 20px; line-height: 1; cursor: pointer; padding: 4px 6px; }
+.q-panel-close:hover { color: white; }
+@media (max-width: 480px) {
+  .q-launch { right: 14px; bottom: 14px; gap: 8px; }
+  .q-launch-label { font-size: 13px; padding: 8px 13px; }
+  .q-launch-circle { width: 52px; height: 52px; }
+  .q-launch-circle img { width: 38px; height: 38px; }
+  .q-panel { right: 16px; bottom: 80px; max-height: calc(100vh - 110px); }
+}
+@media print { .q-launch, .q-panel { display: none !important; } }

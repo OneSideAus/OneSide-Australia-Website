@@ -197,13 +197,13 @@ async function submitHeroForm() {
       btn.disabled = false;
       btn.textContent = 'Book a discovery call →';
       btn.style.opacity = '1';
-      result.innerHTML = '<p style="color:#FF9A82;font-size:13px;margin-top:8px;">Something went wrong — please try again or email <a href="mailto:info@onesideaustralia.com.au" style="color:#FF9A82;">info@onesideaustralia.com.au</a>.</p>';
+      result.innerHTML = '<p style="color:#FF9A82;font-size:13px;margin-top:8px;">Something went wrong. Please try again or email <a href="mailto:info@onesideaustralia.com.au" style="color:#FF9A82;">info@onesideaustralia.com.au</a>.</p>';
     }
   } catch(err) {
     btn.disabled = false;
     btn.textContent = 'Book a discovery call →';
     btn.style.opacity = '1';
-    result.innerHTML = '<p style="color:#FF9A82;font-size:13px;margin-top:8px;">Something went wrong — please try again or email <a href="mailto:info@onesideaustralia.com.au" style="color:#FF9A82;">info@onesideaustralia.com.au</a>.</p>';
+    result.innerHTML = '<p style="color:#FF9A82;font-size:13px;margin-top:8px;">Something went wrong. Please try again or email <a href="mailto:info@onesideaustralia.com.au" style="color:#FF9A82;">info@onesideaustralia.com.au</a>.</p>';
   }
 }
 
@@ -221,7 +221,7 @@ async function submitContactForm() {
   var btn   = document.getElementById('cf-btn');
 
   if (!email || !email.includes('@')) {
-    result.innerHTML = '<p style="color:#D24530;font-size:13px;margin-top:8px;">Please enter a valid email address.</p>';
+    result.innerHTML = '<p style="color:#F25C44;font-size:13px;margin-top:8px;">Please enter a valid email address.</p>';
     return;
   }
 
@@ -241,12 +241,12 @@ async function submitContactForm() {
     } else {
       btn.disabled = false;
       btn.textContent = 'Send enquiry ↗';
-      result.innerHTML = '<p style="color:#D24530;font-size:13px;margin-top:8px;">Something went wrong — please try again or email <a href="mailto:info@onesideaustralia.com.au" style="color:#D24530;">info@onesideaustralia.com.au</a>.</p>';
+      result.innerHTML = '<p style="color:#F25C44;font-size:13px;margin-top:8px;">Something went wrong. Please try again or email <a href="mailto:info@onesideaustralia.com.au" style="color:#F25C44;">info@onesideaustralia.com.au</a>.</p>';
     }
   } catch(err) {
     btn.disabled = false;
     btn.textContent = 'Send enquiry ↗';
-    result.innerHTML = '<p style="color:#D24530;font-size:13px;margin-top:8px;">Something went wrong — please try again or email <a href="mailto:info@onesideaustralia.com.au" style="color:#D24530;">info@onesideaustralia.com.au</a>.</p>';
+    result.innerHTML = '<p style="color:#F25C44;font-size:13px;margin-top:8px;">Something went wrong. Please try again or email <a href="mailto:info@onesideaustralia.com.au" style="color:#F25C44;">info@onesideaustralia.com.au</a>.</p>';
   }
 }
 

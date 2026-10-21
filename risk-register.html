@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Risk Register | OneSide Australia</title>
-<meta name="description" content="See how the OneSide Risk Register turns your gap assessment into a simple, tappable list of child safety actions your committee can tick off.">
+<meta name="description" content="Turn your child safety gap report into a rated, ownable risk register your committee can track. Built from your assessment answers and delivered as an Excel file.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://www.onesideaustralia.com.au/risk-register">
 <meta property="og:title" content="Risk Register | OneSide Australia">
-<meta property="og:description" content="See how the OneSide Risk Register turns your gap assessment into a simple, tappable list of child safety actions your committee can tick off.">
+<meta property="og:description" content="Turn your child safety gap report into a rated, ownable risk register your committee can track. Built from your assessment answers and delivered as an Excel file.">
 <meta property="og:url" content="https://www.onesideaustralia.com.au/risk-register">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="OneSide Australia">
@@ -23,153 +23,46 @@
 <link rel="stylesheet" href="styles.css">
 <script defer src="/_vercel/insights/script.js"></script>
 <style>
-  /* Risk Register demo. Everything is scoped under .reg so it can't clash with styles.css */
-  .reg {
-    --high: #B42318; --high-bg: #FEE4E2;
-    --med: #B54708;  --med-bg: #FEF0C7; --med-bar: #F79009;
-    --low: #067647;  --low-bg: #DCFAE6; --low-bar: #17B26A;
-    --line: var(--muted);
-    --radius: 14px;
-    --tap: 48px;
-    font-size: 17px;
-    line-height: 1.5;
-  }
-  .reg *, .reg *::before, .reg *::after { box-sizing: border-box; }
-  .reg button, .reg input { font: inherit; }
-  .reg-wrap { max-width: 760px; margin: 0 auto; }
-
-  /* Club bar */
-  .reg-club {
-    display: flex; justify-content: space-between; align-items: center; gap: 12px;
-    background: var(--midnight); color: #fff;
-    border-radius: var(--radius); padding: 18px 20px;
-  }
-  .reg-club-name { font-family: 'DM Serif Display', serif; font-size: 22px; line-height: 1.2; }
-  .reg-club-sub { font-size: 14px; color: rgba(255,255,255,0.6); margin-top: 2px; }
-  .reg-sample {
-    flex: 0 0 auto; background: var(--coral); color: #fff;
-    font-size: 12px; font-weight: 700; letter-spacing: .1em;
-    padding: 7px 14px; border-radius: 999px;
-  }
-
-  /* Progress */
-  .reg-progress { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin-top: 14px; }
-  .reg-progress-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
-  .reg-progress-label { font-weight: 700; font-size: 18px; }
-  .reg-progress-pct { color: var(--text-mid); font-size: 15px; }
-  .reg-bar { height: 12px; background: var(--muted); border-radius: 999px; margin-top: 10px; overflow: hidden; }
-  .reg-bar > span { display: block; height: 100%; background: var(--coral); border-radius: 999px; transition: width .3s ease; }
-
-  /* Tabs */
-  .reg-tabs { display: flex; gap: 8px; margin-top: 14px; }
-  .reg-tab {
-    flex: 1; min-height: var(--tap); padding: 10px 8px;
-    border: 1px solid var(--line); background: #fff; color: var(--midnight);
-    border-radius: 12px; font-weight: 700; font-size: 16px; cursor: pointer;
-  }
-  .reg-tab[aria-selected="true"] { background: var(--midnight); color: #fff; border-color: var(--midnight); }
-  .reg-tab:focus-visible, .reg-tick:focus-visible, .reg-btn:focus-visible, .reg input:focus-visible { outline: 3px solid var(--coral); outline-offset: 2px; }
-
-  /* Legend */
-  .reg-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 18px; }
-  .reg-legend-label { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-mid); margin-right: 4px; }
-
-  /* Cards */
-  .reg-list { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 16px; }
-  .reg-item {
-    position: relative; display: flex; gap: 12px; align-items: flex-start;
-    background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
-    padding: 16px 16px 16px 22px; overflow: hidden;
-  }
-  .reg-item::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--bar, var(--line)); }
-  .reg-item.r-High   { --bar: var(--high); }
-  .reg-item.r-Medium { --bar: var(--med-bar); }
-  .reg-item.r-Low    { --bar: var(--low-bar); }
-  .reg-item.is-next  { border-color: var(--coral); box-shadow: 0 0 0 3px rgba(242,92,68,0.15); padding-top: 26px; }
-  .reg-next-tab {
-    position: absolute; top: 0; right: 0;
-    background: var(--coral); color: #fff;
-    font-size: 11px; font-weight: 700; letter-spacing: .1em;
-    padding: 5px 12px; border-bottom-left-radius: 10px;
-  }
-
-  .reg-tick {
-    flex: 0 0 auto; width: var(--tap); height: var(--tap); margin: -6px 0 0 -8px;
-    border: none; background: none; padding: 0; cursor: pointer;
-    display: grid; place-items: center; border-radius: 50%;
-  }
-  .reg-circle { width: 30px; height: 30px; border-radius: 50%; border: 2.5px solid var(--steel); display: grid; place-items: center; transition: background .15s ease; }
-  .reg-tick svg { width: 18px; height: 18px; opacity: 0; }
-  .reg-item.done .reg-circle { background: var(--midnight); border-color: var(--midnight); }
-  .reg-item.done .reg-tick svg { opacity: 1; }
-
-  .reg-body { flex: 1; min-width: 0; }
-  .reg-title { font-weight: 700; font-size: 17px; margin: 0; color: var(--midnight); overflow-wrap: anywhere; }
-  .reg-tags { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 8px; font-size: 14px; color: var(--text-mid); }
-  .reg-badge { font-size: 13px; font-weight: 700; line-height: 1; padding: 6px 10px; border-radius: 999px; white-space: nowrap; }
-  .b-High   { background: var(--high-bg); color: var(--high); }
-  .b-Medium { background: var(--med-bg);  color: var(--med); }
-  .b-Low    { background: var(--low-bg);  color: var(--low); }
-  .reg-owner { font-weight: 600; color: var(--midnight); }
-  .reg-meta { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 8px 0 0; font-size: 14px; color: var(--text-mid); }
-  .reg-urgent { color: var(--midnight); font-weight: 700; }
-  .reg-overdue { color: var(--high); font-weight: 700; }
-
-  .reg-item.done { background: #F1F4F8; }
-  .reg-item.done::before { background: #CBD5E1; }
-  .reg-item.done .reg-title { text-decoration: line-through; color: var(--text-light); font-weight: 500; }
-  .reg-item.done .reg-tags, .reg-item.done .reg-meta { opacity: .55; }
-
-  /* Summary */
-  .reg-summary h2 { font-family: 'DM Serif Display', serif; font-weight: 400; font-size: 26px; margin: 20px 0 0; color: var(--midnight); }
-  .reg-sub { color: var(--text-mid); font-size: 15px; margin: 4px 0 0; }
-  .reg-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 14px; }
-  .reg-stat { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; }
-  .reg-stat .n { font-size: 30px; font-weight: 700; line-height: 1.1; }
-  .reg-stat .l { color: var(--text-mid); font-size: 14px; }
-  .reg-stat.alert .n { color: var(--high); }
-  .reg-section { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin-top: 14px; }
-  .reg-section h3 { margin: 0 0 8px; font-size: 17px; font-weight: 700; color: var(--midnight); }
-  .reg-section ul { margin: 0; padding: 0; list-style: none; }
-  .reg-section li { padding: 10px 0; border-top: 1px solid var(--line); font-size: 15px; }
-  .reg-section li:first-child { border-top: none; padding-top: 2px; }
-  .reg-who { color: var(--text-mid); }
-  .reg-empty { color: var(--text-mid); font-size: 15px; margin: 0; }
-  .reg-owner-row { display: flex; justify-content: space-between; gap: 10px; font-weight: 700; }
-  .reg-owner-row span:last-child { color: var(--text-mid); font-weight: 500; white-space: nowrap; }
-  .reg-owner-items { margin-top: 4px; color: var(--text-mid); }
-
-  /* Reminder + privacy */
-  .reg-remind { background: rgba(242,92,68,0.08); border-radius: var(--radius); padding: 18px; margin-top: 28px; }
-  .reg-remind h2 { font-family: 'DM Serif Display', serif; font-weight: 400; font-size: 22px; margin: 0; color: var(--midnight); }
-  .reg-remind p { margin: 6px 0 0; font-size: 15px; color: var(--text-mid); }
-  .reg-remind form { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
-  .reg-remind label { font-weight: 700; font-size: 15px; display: block; margin-bottom: 6px; }
-  .reg-remind input { width: 100%; min-height: var(--tap); padding: 0 14px; border: 1.5px solid var(--muted); border-radius: 8px; background: #fff; font-size: 17px; color: var(--midnight); }
-  .reg-btn { min-height: var(--tap); padding: 0 22px; background: var(--coral); color: #fff; border: none; border-radius: 8px; font-weight: 700; font-size: 16px; cursor: pointer; }
-  .reg-btn.ghost { background: transparent; color: var(--midnight); border: 1px solid var(--midnight); }
-  .reg-msg { font-size: 15px; font-weight: 500; margin-top: 8px; min-height: 1em; color: var(--midnight) !important; }
-  .reg-privacy { color: var(--text-mid); font-size: 14px; margin: 22px 0 0; padding-top: 16px; border-top: 1px solid var(--line); }
-  .reg-privacy strong { color: var(--midnight); }
-  .reg [hidden] { display: none !important; }
-
-  @media (min-width: 600px) {
-    .reg-stats { grid-template-columns: repeat(4, 1fr); }
-    .reg-remind form { flex-direction: row; align-items: flex-end; }
-    .reg-remind .reg-field { flex: 1; }
-  }
-  @media (max-width: 359px) {
-    .reg { font-size: 16px; }
-    .reg-tab { font-size: 15px; }
-    .reg-item { padding: 14px 12px 14px 18px; gap: 8px; }
-    .reg-item.is-next { padding-top: 26px; }
-    .reg-club-name { font-size: 19px; }
-  }
-  @media print {
-    nav, .mobile-nav, footer, .reg-hero, .reg-cta, .reg-tabs, .reg-remind, .reg-noprint, #reg-view-list { display: none !important; }
-    #reg-view-summary { display: block !important; }
-    .reg-page { padding: 0 !important; background: #fff !important; }
-    .reg-section, .reg-stat { break-inside: avoid; }
+  .reg-figure { margin: 0; }
+  .reg-scroll { background: white; border: 1px solid var(--muted); border-radius: 16px; padding: 14px; overflow-x: auto; box-shadow: 0 10px 30px rgba(13,31,53,0.08); }
+  .reg-scroll img { display: block; width: 100%; height: auto; min-width: 960px; border-radius: 6px; }
+  .reg-scroll:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
+  .reg-figure figcaption { font-size: 13px; color: var(--text-light); text-align: center; margin-top: 14px; line-height: 1.6; }
+  .reg-swipe { display: none; }
+  .reg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .reg-card { background: white; border: 1px solid var(--muted); border-radius: 16px; padding: 32px; border-top: 3px solid var(--coral); }
+  .reg-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+  .reg-icon.coral { background: rgba(242,92,68,0.1); }
+  .reg-icon.steel { background: rgba(27,94,138,0.1); }
+  .reg-card h3 { font-family: 'DM Serif Display', serif; font-weight: 400; font-size: 1.2rem; color: var(--midnight); margin: 0 0 10px; line-height: 1.3; }
+  .reg-card p { font-size: 14px; color: var(--text-mid); line-height: 1.7; margin: 0 0 14px; }
+  .reg-card p strong { color: var(--midnight); }
+  .reg-card .reg-note { font-size: 13px; color: var(--text-light); line-height: 1.6; margin: 0; }
+  .reg-key { display: flex; flex-wrap: wrap; gap: 6px; }
+  .reg-key span { font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 6px; }
+  .reg-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+  .reg-step { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 20px; }
+  .reg-step-n { width: 30px; height: 30px; border-radius: 50%; background: var(--coral); color: white; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+  .reg-step h3 { font-size: 15px; font-weight: 600; color: white; margin: 0 0 6px; }
+  .reg-step p { font-size: 13px; color: rgba(255,255,255,0.55); line-height: 1.65; margin: 0; }
+  .reg-two { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+  .reg-checklist { background: white; border: 1px solid var(--muted); border-radius: 16px; padding: 28px; display: flex; flex-direction: column; gap: 14px; }
+  .reg-checklist div { display: flex; gap: 12px; align-items: flex-start; font-size: 14px; color: var(--midnight); line-height: 1.5; }
+  .reg-checklist svg, .reg-price-list svg, .reg-point svg { flex-shrink: 0; margin-top: 2px; }
+  .reg-price-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; max-width: 760px; margin: 0 auto; }
+  .reg-price { background: white; border: 1px solid var(--muted); border-radius: 16px; padding: 36px; display: flex; flex-direction: column; }
+  .reg-price .btn-primary, .reg-price .btn-outline { margin-top: auto; }
+  .reg-price-label { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; }
+  .reg-price-n { font-family: 'DM Serif Display', serif; font-size: 3rem; color: var(--midnight); line-height: 1; margin-bottom: 4px; }
+  .reg-price-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+  .reg-price-list div { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--text-mid); }
+  .reg-point { display: flex; align-items: flex-start; gap: 14px; }
+  .reg-point strong { font-size: 14px; color: var(--midnight); font-weight: 600; }
+  .reg-point p { font-size: 14px; color: var(--text-mid); line-height: 1.7; margin: 3px 0 0; }
+  @media (max-width: 768px) {
+    .reg-two, .reg-grid { grid-template-columns: 1fr; gap: 28px; }
+    .reg-swipe { display: inline; }
+    .reg-card, .reg-price { padding: 26px; }
   }
 </style>
 </head>
@@ -207,105 +100,169 @@
 
 <main>
 
-  <!-- PAGE HEADER -->
-  <section class="reg-hero" style="padding:100px 2rem 64px;background:var(--midnight);position:relative;overflow:hidden;">
-    <div style="position:absolute;top:-20%;right:-8%;width:55%;height:140%;background:linear-gradient(135deg,rgba(27,94,138,0.2) 0%,transparent 70%);transform:skewX(-10deg);pointer-events:none;"></div>
-    <div style="position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,0.03) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;"></div>
-    <div class="section-inner" style="max-width:760px;position:relative;z-index:1;">
-      <div class="eyebrow" style="color:var(--coral-light);">Risk Register</div>
-      <h1 style="font-family:'DM Serif Display',serif;font-size:clamp(2rem,4vw,3rem);color:white;line-height:1.1;margin-bottom:16px;">Your gaps, turned into a list your committee can tick off</h1>
-      <p style="font-size:17px;color:rgba(255,255,255,0.6);line-height:1.8;">Every gap in your assessment becomes an action with an owner, a risk rating and a due date. Try the sample below: tap a circle to mark an action done and watch the list re-order.</p>
+  <div class="page-hero">
+    <div class="ph-band"></div><div class="ph-dots"></div><div class="ph-line"></div>
+    <div class="ph-inner">
+      <div class="ph-tag">The OneSide Risk Register</div>
+      <h1>Your gap report shows what's missing.<br><em>Your Risk Register helps you fix it.</em></h1>
+      <p>Every finding in your gap report becomes a rated, ownable risk in a spreadsheet your committee can work through, meeting by meeting. Built automatically from your assessment answers and delivered straight after your report.</p>
     </div>
-  </section>
+  </div>
 
-  <!-- DEMO -->
-  <section class="reg-page" style="padding:48px 1rem 72px;background:var(--off-white);">
-    <div class="reg reg-wrap">
+  <section style="padding:80px 2rem;background:var(--off-white);">
+    <div class="section-inner">
 
-      <div class="reg-club">
-        <div>
-          <div class="reg-club-name" id="reg-club-name">Sample Netball Club</div>
-          <div class="reg-club-sub">Victoria · Child safety risk register</div>
+      <!-- SEE INSIDE -->
+      <div style="margin-bottom:72px;">
+        <div style="text-align:center;max-width:600px;margin:0 auto 36px;">
+          <div class="eyebrow">See inside</div>
+          <h2 class="section-title">A working register, ready from day one.</h2>
+          <p style="font-size:15px;color:var(--text-mid);line-height:1.8;">No blank template to fill in. Your register arrives pre-filled with your club's risks, ratings and recommended actions, ready to assign and track.</p>
         </div>
-        <span class="reg-sample">SAMPLE</span>
-      </div>
-
-      <div class="reg-progress" aria-live="polite">
-        <div class="reg-progress-row">
-          <span class="reg-progress-label" id="reg-progress-label">0 of 0 done</span>
-          <span class="reg-progress-pct" id="reg-progress-pct">0%</span>
-        </div>
-        <div class="reg-bar" role="progressbar" aria-label="Actions completed" aria-valuemin="0" aria-valuemax="100" id="reg-progress-bar">
-          <span id="reg-progress-fill" style="width:0%"></span>
-        </div>
-      </div>
-
-      <div class="reg-tabs" role="tablist" aria-label="Views">
-        <button class="reg-tab" role="tab" id="reg-tab-list" aria-controls="reg-view-list" aria-selected="true">Risk register</button>
-        <button class="reg-tab" role="tab" id="reg-tab-summary" aria-controls="reg-view-summary" aria-selected="false">Committee summary</button>
-      </div>
-
-      <!-- Risk list -->
-      <div id="reg-view-list" role="tabpanel" aria-labelledby="reg-tab-list">
-        <div class="reg-legend" aria-hidden="true">
-          <span class="reg-legend-label">Risk colours</span>
-          <span class="reg-badge b-High">High</span><span class="reg-badge b-Medium">Medium</span><span class="reg-badge b-Low">Low</span>
-        </div>
-        <ul class="reg-list" id="reg-list"></ul>
-      </div>
-
-      <!-- Committee summary -->
-      <div id="reg-view-summary" class="reg-summary" role="tabpanel" aria-labelledby="reg-tab-summary" hidden>
-        <h2>Committee summary</h2>
-        <p class="reg-sub" id="reg-summary-date"></p>
-        <div class="reg-stats">
-          <div class="reg-stat"><div class="n" id="reg-s-done">0</div><div class="l">Done</div></div>
-          <div class="reg-stat"><div class="n" id="reg-s-open">0</div><div class="l">Still open</div></div>
-          <div class="reg-stat alert"><div class="n" id="reg-s-overdue">0</div><div class="l">Overdue</div></div>
-          <div class="reg-stat"><div class="n" id="reg-s-soon">0</div><div class="l">Due in next 14 days</div></div>
-        </div>
-        <div class="reg-section"><h3>Overdue</h3><ul id="reg-sum-overdue"></ul></div>
-        <div class="reg-section"><h3>Due soon (next 14 days)</h3><ul id="reg-sum-soon"></ul></div>
-        <div class="reg-section"><h3>Who owns what</h3><ul id="reg-sum-owners"></ul></div>
-        <p class="reg-noprint" style="margin-top:16px;">
-          <button class="reg-btn ghost" type="button" onclick="window.print()">Print for meeting</button>
-        </p>
-      </div>
-
-      <!-- Monthly reminder (concept only) -->
-      <div class="reg-remind" aria-labelledby="reg-remind-h">
-        <h2 id="reg-remind-h">Monthly reminder</h2>
-        <p>One email a month with what is overdue and due soon. Opt-in only. Unsubscribe any time. This is a preview, so nothing is sent yet.</p>
-        <form id="reg-remind-form" novalidate>
-          <div class="reg-field">
-            <label for="reg-email">Email address</label>
-            <input id="reg-email" type="email" inputmode="email" autocomplete="email" placeholder="cso@yourclub.org.au">
+        <figure class="reg-figure">
+          <div class="reg-scroll" tabindex="0" aria-label="Sample Risk Register spreadsheet. Scroll sideways to see all columns.">
+            <img src="/images/risk-register-sample.webp" width="2000" height="680" loading="lazy" alt="Sample Risk Register spreadsheet for a fictional netball club, showing each child safe standard requirement with its result, risk, likelihood, consequence, colour-coded risk rating, existing controls, recommended actions, owner, target date and status.">
           </div>
-          <button class="reg-btn" type="submit">Remind me</button>
-        </form>
-        <p class="reg-msg" id="reg-remind-msg" role="status"></p>
+          <figcaption>Sample register for a fictional club, cropped to five rows. <span class="reg-swipe">Swipe sideways to see every column.</span> Yours is built from your own assessment answers.</figcaption>
+        </figure>
       </div>
 
-      <p class="reg-privacy">
-        <strong>Your privacy:</strong> nothing you tick on this page is saved. Reloading the page resets it.
-        A real version would store only an email address you choose to give us and your tick list.
-        Uploads and reports are never kept.
-      </p>
+      <!-- WHAT'S IN YOUR REGISTER -->
+      <div style="margin-bottom:72px;">
+        <div style="text-align:center;max-width:560px;margin:0 auto 48px;">
+          <div class="eyebrow">What's in your register</div>
+          <h2 class="section-title">Every gap becomes a tracked, ownable risk.</h2>
+          <p style="font-size:15px;color:var(--text-mid);line-height:1.8;">Here's exactly what your committee receives.</p>
+        </div>
+        <div class="reg-grid">
+
+          <div class="reg-card" style="border-top-color:var(--coral);">
+            <div class="reg-icon coral"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F25C44" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
+            <h3>Every requirement, one line at a time</h3>
+            <p>Each minimum requirement of your state's child safe standards gets its own row, with a Result already filled in from your gap report: <strong>Met</strong>, <strong>Partially Met</strong>, <strong>Not Met</strong> or <strong>Opportunity for Improvement</strong>.</p>
+            <p class="reg-note">Uses the same Result wording as the regulator's own self-assessment tool, so your register can stand in for it.</p>
+          </div>
+
+          <div class="reg-card" style="border-top-color:var(--steel);">
+            <div class="reg-icon steel"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B5E8A" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            <h3>Risks rated by likelihood and consequence</h3>
+            <p>For each requirement, the register describes what could realistically go wrong for a child at your club, then rates it on likelihood and consequence. The rating is colour coded so the urgent items stand out.</p>
+            <div class="reg-key" aria-label="Risk rating scale">
+              <span style="background:#E8192C;color:#fff;">Highest priority</span><span style="background:#F25C44;color:#fff;">High</span><span style="background:#FFD60A;color:#0D1F35;">Medium</span><span style="background:#2E86C1;color:#fff;">Low</span>
+            </div>
+          </div>
+
+          <div class="reg-card" style="border-top-color:var(--coral);">
+            <div class="reg-icon coral"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F25C44" stroke-width="2" stroke-linecap="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+            <h3>What you already do, and what to do next</h3>
+            <p>Your existing controls are recorded alongside recommended actions drawn from your gap report, so your committee can see what's already in place and the next practical step for each risk.</p>
+            <p class="reg-note">Options, not mandates. Your committee decides what to take on and when.</p>
+          </div>
+
+          <div class="reg-card" style="border-top-color:var(--steel);">
+            <div class="reg-icon steel"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B5E8A" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <h3>Owners, dates and status, ready to track</h3>
+            <p>Assign an owner and a target date to each risk, then update the Status as you go: Not Started, In Progress or Complete. A tracking summary counts your progress automatically.</p>
+            <p class="reg-note">Includes a "How to use this register" tab for your committee.</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- HOW YOU GET IT -->
+      <div style="background:var(--midnight);border-radius:12px;padding:2rem;margin-bottom:72px;">
+        <p style="font-size:11px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--coral);margin:0 0 10px;">How you get it</p>
+        <h2 style="font-family:'DM Serif Display',serif;font-size:1.6rem;color:white;margin:0 0 8px;line-height:1.2;">Three steps to your Risk Register.</h2>
+        <p style="font-size:14px;color:rgba(255,255,255,0.55);margin:0 0 1.5rem;">No extra forms. Your register is built from the assessment you're already doing.</p>
+        <div class="reg-steps">
+          <div class="reg-step">
+            <div class="reg-step-n">1</div>
+            <h3>Choose the bundle</h3>
+            <p>Select Assessment + Risk Register at checkout, then complete your assessment as normal. It takes around 30 to 40 minutes.</p>
+          </div>
+          <div class="reg-step">
+            <div class="reg-step-n">2</div>
+            <h3>Get your gap report</h3>
+            <p>Your gap report is generated as soon as you finish, with findings against every standard and practical options for each gap.</p>
+          </div>
+          <div class="reg-step">
+            <div class="reg-step-n">3</div>
+            <h3>Your register follows</h3>
+            <p>Straight after your report, your Risk Register is built from its findings. You can download it on screen, and it's also emailed to you as an Excel spreadsheet.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- BUILT FOR COMMITTEE MEETINGS -->
+      <div class="reg-two" style="margin-bottom:72px;">
+        <div>
+          <div class="eyebrow">Built for committee meetings</div>
+          <h2 class="section-title">Turn child safety into a standing agenda item.</h2>
+          <p style="font-size:15px;color:var(--text-mid);line-height:1.8;margin-bottom:16px;">A gap report is a snapshot. A risk register is how you keep moving. Bring it to each committee or child safety meeting, work through the highest rated risks first, and record what was decided.</p>
+          <p style="font-size:15px;color:var(--text-mid);line-height:1.8;">When your annual reassessment comes around, you'll have a clear record of what your club has done.</p>
+        </div>
+        <div class="reg-checklist">
+          <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A7A4A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Confirm an owner for each risk, by role or by name</span></div>
+          <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A7A4A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Work through Highest priority and High risks first</span></div>
+          <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A7A4A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Set target dates so owners know when to report back</span></div>
+          <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A7A4A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Update the status as actions are completed</span></div>
+          <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A7A4A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Use the notes column to record decisions and dates</span></div>
+          <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A7A4A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Review the whole register at least once a season</span></div>
+        </div>
+      </div>
+
+      <!-- PRICING -->
+      <div id="pricing" style="margin-bottom:72px;">
+        <div style="text-align:center;max-width:560px;margin:0 auto 40px;">
+          <div class="eyebrow">Pricing</div>
+          <h2 class="section-title">Add your Risk Register for $80.</h2>
+          <p style="font-size:15px;color:var(--text-mid);line-height:1.8;">The same flat price for every club, regardless of size.</p>
+        </div>
+        <div class="reg-price-grid">
+          <div class="reg-price" style="border-top:3px solid var(--midnight);">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+              <div class="reg-price-label" style="color:var(--midnight);">Assessment + Risk Register</div>
+              <div style="font-size:10.5px;font-weight:700;color:white;background:var(--midnight);padding:3px 10px;border-radius:100px;">Best value</div>
+            </div>
+            <div class="reg-price-n">$350</div>
+            <div style="font-size:13px;color:var(--text-mid);margin-bottom:24px;">Year 1</div>
+            <div class="reg-price-list">
+              <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Everything in the Initial Assessment</div>
+              <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>A Risk Register built from your assessment answers</div>
+              <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Every requirement rated by likelihood and consequence</div>
+              <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Delivered on screen and by email as an Excel file</div>
+            </div>
+            <a href="https://oneside-australia.vercel.app/payment-select.html?type=bundle" class="btn-primary" style="width:100%;justify-content:center;background:var(--midnight);" target="_blank">Get the bundle ↗</a>
+          </div>
+          <div class="reg-price" style="border-top:3px solid var(--coral);">
+            <div class="reg-price-label" style="color:var(--coral);margin-bottom:16px;">Initial assessment only</div>
+            <div class="reg-price-n">$270</div>
+            <div style="font-size:13px;color:var(--text-mid);margin-bottom:24px;">Year 1</div>
+            <p style="font-size:14px;color:var(--text-mid);line-height:1.7;margin:0 0 24px;">The full gap report with practical options for every gap and a priority actions list, without the Risk Register.</p>
+            <a href="/assessment#pricing" class="btn-outline" style="width:100%;justify-content:center;">See all pricing →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- YOURS TO RUN -->
+      <div style="background:white;border:1px solid var(--muted);border-radius:16px;padding:40px;margin-bottom:40px;border-left:4px solid var(--coral);">
+        <div class="eyebrow" style="margin-bottom:16px;">Your register, your call</div>
+        <h2 class="section-title" style="font-size:1.4rem;margin-bottom:24px;">A working tool your club owns.</h2>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="reg-point"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A7A4A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><div><strong>It belongs to your club.</strong><p>Like your gap report, your register is never shared with your sporting body, league, regulator or any third party.</p></div></div>
+          <div class="reg-point"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A7A4A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><div><strong>Your committee makes the decisions.</strong><p>The register is a starting point, not a new assessment. Once it's with your club, keeping it up to date and judging each risk is your committee's role.</p></div></div>
+          <div class="reg-point"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A7A4A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><div><strong>Edit it however you like.</strong><p>It's a standard Excel file. Change ratings, add risks, rename owners or add your own columns.</p></div></div>
+        </div>
+        <div style="margin-top:24px;"><a href="/privacy" class="btn-outline" style="font-size:13px;padding:9px 18px;">Full privacy policy →</a></div>
+      </div>
 
     </div>
   </section>
 
-  <!-- CTA -->
-  <section class="reg-cta" style="padding:72px 2rem 96px;background:white;">
-    <div class="section-inner" style="max-width:760px;text-align:center;">
-      <div class="eyebrow">Assessment + Risk Register</div>
-      <h2 class="section-title">Get a register built from your own answers</h2>
-      <p style="font-size:15px;color:var(--text-mid);line-height:1.8;max-width:560px;margin:0 auto 28px;">With the $350 bundle, every gap your assessment finds becomes a tracked risk with an owner, a rating and a due date. Your register arrives by email as a spreadsheet straight after your gap report.</p>
-      <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;">
-        <a href="https://oneside-australia.vercel.app/payment-select.html?type=bundle" class="btn-primary" target="_blank">Get the bundle ↗</a>
-        <a href="/assessment#pricing" class="btn-outline">Compare pricing →</a>
-      </div>
-    </div>
+  <section class="final-cta">
+    <h2>Questions about the Risk Register?</h2>
+    <p>Book a free 30-minute discovery call. No obligation, just clarity on what's involved.</p>
+    <div class="fca"><a href="https://outlook.office.com/book/OneSideAustralia30minDiscoveryCall@onesideaustralia.com.au/?ismsaljsauthenabled" target="_blank" class="btn-primary" style="font-size:16px;padding:16px 32px;">Book a discovery call ↗</a></div>
   </section>
 
 </main>
@@ -334,189 +291,6 @@ window.addEventListener('load',function(){
   var wrap=document.getElementById('logo-sub-wrap');
   if(brand&&wrap){wrap.style.width=brand.offsetWidth+'px';}
 });
-</script>
-<script>
-/* =========================================================
-   RISK REGISTER DEMO
-   To use real data later, replace SAMPLE_CSV with a CSV of real
-   risk items (same headings). Columns:
-     title, category (People|Policies|Processes), owner,
-     rating (High|Medium|Low), priority (Urgent|Normal),
-     due, done (yes|no)
-   "due" can be a date (YYYY-MM-DD) or, for sample data, a number
-   of days from today (e.g. -7 means a week overdue). Sample dates
-   are relative so the demo never goes stale.
-   ========================================================= */
-(function () {
-  const CLUB_NAME = "Sample Netball Club";
-
-  const SAMPLE_CSV = `title,category,owner,rating,priority,due,done
-Check Working with Children Checks for all new volunteer coaches,People,Secretary,High,Urgent,-7,no
-Publish the child safety complaints process on the club website,Processes,Secretary,High,Normal,7,no
-Run child safety induction for coaches and team managers,People,Child Safety Officer,High,Normal,41,no
-Collect a signed Code of Conduct from every coach,Policies,President,Medium,Urgent,9,no
-Set up a change room supervision roster,Processes,Coaching Coordinator,Medium,Normal,15,no
-Update the Child Safe Policy for Standard 1 (Aboriginal cultural safety),Policies,Child Safety Officer,Medium,Normal,25,yes
-Refresh photo and video consent forms for players,Processes,Secretary,Low,Normal,30,no
-Add child safety as a standing committee agenda item,Policies,President,Low,Normal,-11,yes`;
-
-  const DAY = 86400000;
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-
-  function parseCSV(text) {
-    const rows = [];
-    for (const line of text.trim().split(/\r?\n/)) {
-      const cells = []; let cur = "", inQ = false;
-      for (let i = 0; i < line.length; i++) {
-        const c = line[i];
-        if (c === '"') { if (inQ && line[i + 1] === '"') { cur += '"'; i++; } else inQ = !inQ; }
-        else if (c === "," && !inQ) { cells.push(cur.trim()); cur = ""; }
-        else cur += c;
-      }
-      cells.push(cur.trim());
-      rows.push(cells);
-    }
-    const head = rows.shift().map(h => h.toLowerCase());
-    return rows.map((r, i) => {
-      const o = { id: i };
-      head.forEach((h, j) => o[h] = r[j] || "");
-      o.done = /^(yes|y|true|1|done)$/i.test(o.done);
-      o.dueDate = /^-?\d+$/.test(o.due)
-        ? new Date(today.getTime() + Number(o.due) * DAY)
-        : (([y, m, d]) => new Date(y, m - 1, d))(o.due.split("-").map(Number));
-      return o;
-    });
-  }
-
-  const items = parseCSV(SAMPLE_CSV);
-  document.getElementById("reg-club-name").textContent = CLUB_NAME;
-
-  const daysUntil = it => Math.round((it.dueDate - today) / DAY);
-  const isOverdue = it => !it.done && daysUntil(it) < 0;
-  const isSoon = it => !it.done && daysUntil(it) >= 0 && daysUntil(it) <= 14;
-  const fmt = d => d.toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" });
-  const RATING = { High: 0, Medium: 1, Low: 2 };
-
-  function byQueue(a, b) {
-    if (a.done !== b.done) return a.done ? 1 : -1;                     // open first
-    const r = (RATING[a.rating] ?? 3) - (RATING[b.rating] ?? 3);       // highest rating
-    if (r) return r;
-    const d = a.dueDate - b.dueDate;                                   // nearest due date
-    if (d) return d;
-    return (a.priority === "Urgent" ? 0 : 1) - (b.priority === "Urgent" ? 0 : 1); // Urgent breaks ties
-  }
-
-  function dueText(it) {
-    if (it.done) return "Done";
-    const n = daysUntil(it);
-    if (n < 0) return `Overdue by ${-n} day${n === -1 ? "" : "s"}`;
-    if (n === 0) return "Due today";
-    if (n === 1) return "Due tomorrow";
-    return `Due ${fmt(it.dueDate)}`;
-  }
-
-  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
-
-  function renderList() {
-    const sorted = [...items].sort(byQueue);
-    const nextId = sorted.find(i => !i.done)?.id;
-    document.getElementById("reg-list").innerHTML = sorted.map(it => {
-      const over = isOverdue(it), next = it.id === nextId;
-      return `
-        <li class="reg-item r-${esc(it.rating)}${it.done ? " done" : ""}${next ? " is-next" : ""}">
-          ${next ? '<span class="reg-next-tab">NEXT UP</span>' : ""}
-          <button class="reg-tick" type="button" data-id="${it.id}" aria-pressed="${it.done}"
-            aria-label="${it.done ? "Reopen" : "Mark done"}: ${esc(it.title)}">
-            <span class="reg-circle">${CHECK}</span>
-          </button>
-          <div class="reg-body">
-            <p class="reg-title">${esc(it.title)}</p>
-            <div class="reg-tags">
-              <span class="reg-badge b-${esc(it.rating)}">${esc(it.rating)} risk</span>
-              <span>${esc(it.category)}</span>
-              <span class="reg-owner">${esc(it.owner)}</span>
-            </div>
-            <p class="reg-meta">
-              <span class="${it.priority === "Urgent" && !it.done ? "reg-urgent" : ""}">${esc(it.priority)} priority</span>
-              <span class="${over ? "reg-overdue" : ""}">${dueText(it)}</span>
-            </p>
-          </div>
-        </li>`;
-    }).join("");
-  }
-
-  function renderProgress() {
-    const done = items.filter(i => i.done).length;
-    const pct = items.length ? Math.round(done / items.length * 100) : 0;
-    document.getElementById("reg-progress-label").textContent = `${done} of ${items.length} done`;
-    document.getElementById("reg-progress-pct").textContent = `${pct}%`;
-    document.getElementById("reg-progress-fill").style.width = pct + "%";
-    document.getElementById("reg-progress-bar").setAttribute("aria-valuenow", pct);
-  }
-
-  function renderSummary() {
-    const open = items.filter(i => !i.done);
-    const overdue = open.filter(isOverdue).sort(byQueue);
-    const soon = open.filter(isSoon).sort(byQueue);
-    document.getElementById("reg-summary-date").textContent =
-      `${CLUB_NAME} · as at ${today.toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}`;
-    document.getElementById("reg-s-done").textContent = items.length - open.length;
-    document.getElementById("reg-s-open").textContent = open.length;
-    document.getElementById("reg-s-overdue").textContent = overdue.length;
-    document.getElementById("reg-s-soon").textContent = soon.length;
-
-    const line = it => `<li>${esc(it.title)}<br><span class="reg-who">${esc(it.owner)} · ${esc(it.rating)} risk · ${dueText(it)}</span></li>`;
-    document.getElementById("reg-sum-overdue").innerHTML = overdue.length ? overdue.map(line).join("") : '<li class="reg-empty">Nothing overdue.</li>';
-    document.getElementById("reg-sum-soon").innerHTML = soon.length ? soon.map(line).join("") : '<li class="reg-empty">Nothing due in the next 14 days.</li>';
-
-    const owners = {};
-    items.forEach(it => {
-      owners[it.owner] ??= { open: [], done: 0 };
-      it.done ? owners[it.owner].done++ : owners[it.owner].open.push(it);
-    });
-    document.getElementById("reg-sum-owners").innerHTML = Object.keys(owners).sort().map(name => {
-      const o = owners[name];
-      const list = o.open.sort(byQueue).map(i => esc(i.title)).join("; ");
-      return `<li><div class="reg-owner-row"><span>${esc(name)}</span><span>${o.open.length} open · ${o.done} done</span></div>${list ? `<div class="reg-owner-items">${list}</div>` : ""}</li>`;
-    }).join("");
-  }
-
-  function renderAll() { renderList(); renderProgress(); renderSummary(); }
-
-  document.getElementById("reg-list").addEventListener("click", e => {
-    const btn = e.target.closest(".reg-tick");
-    if (!btn) return;
-    const it = items.find(i => i.id === Number(btn.dataset.id));
-    it.done = !it.done;
-    renderAll();
-    document.querySelector(`.reg-tick[data-id="${it.id}"]`)?.focus({ preventScroll: true });
-  });
-
-  function showTab(which) {
-    const isList = which === "list";
-    document.getElementById("reg-tab-list").setAttribute("aria-selected", isList);
-    document.getElementById("reg-tab-summary").setAttribute("aria-selected", !isList);
-    document.getElementById("reg-view-list").hidden = !isList;
-    document.getElementById("reg-view-summary").hidden = isList;
-  }
-  document.getElementById("reg-tab-list").onclick = () => showTab("list");
-  document.getElementById("reg-tab-summary").onclick = () => showTab("summary");
-
-  document.getElementById("reg-remind-form").addEventListener("submit", e => {
-    e.preventDefault();
-    const input = document.getElementById("reg-email");
-    const msg = document.getElementById("reg-remind-msg");
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value.trim())) {
-      msg.textContent = "Please enter a valid email address.";
-      return;
-    }
-    msg.textContent = "Thanks. This is a preview only, so nothing has been sent or stored.";
-    input.value = "";
-  });
-
-  renderAll();
-})();
 </script>
 </body>
 </html>

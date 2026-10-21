@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Risk Register | OneSide Australia</title>
+<meta name="description" content="Turn your child safety gap report into a rated, ownable risk register your committee can track. Built from your assessment answers and delivered as an Excel file.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://www.onesideaustralia.com.au/risk-register">
+<meta property="og:title" content="Risk Register | OneSide Australia">
+<meta property="og:description" content="Turn your child safety gap report into a rated, ownable risk register your committee can track. Built from your assessment answers and delivered as an Excel file.">
+<meta property="og:url" content="https://www.onesideaustralia.com.au/risk-register">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="OneSide Australia">
+<meta property="og:image" content="https://www.onesideaustralia.com.au/images/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.onesideaustralia.com.au/images/og-image.png">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:wght@700&family=Raleway:wght@300&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="alternate icon" href="/favicon.ico">
+<link rel="stylesheet" href="styles.css">
+<script defer src="/_vercel/insights/script.js"></script>
+<style>
+  .reg-figure { margin: 0; }
+  .reg-scroll { background: white; border: 1px solid var(--muted); border-radius: 16px; padding: 14px; overflow-x: auto; box-shadow: 0 10px 30px rgba(13,31,53,0.08); }
+  .reg-scroll img { display: block; width: 100%; height: auto; min-width: 960px; border-radius: 6px; }
+  .reg-scroll:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
+  .reg-figure figcaption { font-size: 13px; color: var(--text-light); text-align: center; margin-top: 14px; line-height: 1.6; }
+  .reg-swipe { display: none; }
+  .reg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .reg-card { background: white; border: 1px solid var(--muted); border-radius: 16px; padding: 32px; border-top: 3px solid var(--coral); }
+  .reg-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+  .reg-icon.coral { background: rgba(242,92,68,0.1); }
+  .reg-icon.steel { background: rgba(27,94,138,0.1); }
+  .reg-card h3 { font-family: 'DM Serif Display', serif; font-weight: 400; font-size: 1.2rem; color: var(--midnight); margin: 0 0 10px; line-height: 1.3; }
+  .reg-card p { font-size: 14px; color: var(--text-mid); line-height: 1.7; margin: 0 0 14px; }
+  .reg-card p strong { color: var(--midnight); }
+  .reg-card .reg-note { font-size: 13px; color: var(--text-light); line-height: 1.6; margin: 0; }
+  .reg-key { display: flex; flex-wrap: wrap; gap: 6px; }
+  .reg-key span { font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 6px; }
+  .reg-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+  .reg-step { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 20px; }
+  .reg-step-n { width: 30px; height: 30px; border-radius: 50%; background: var(--coral); color: white; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+  .reg-step h3 { font-size: 15px; font-weight: 600; color: white; margin: 0 0 6px; }
+  .reg-step p { font-size: 13px; color: rgba(255,255,255,0.55); line-height: 1.65; margin: 0; }
+  .reg-two { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+  .reg-checklist { background: white; border: 1px solid var(--muted); border-radius: 16px; padding: 28px; display: flex; flex-direction: column; gap: 14px; }
+  .reg-checklist div { display: flex; gap: 12px; align-items: flex-start; font-size: 14px; color: var(--midnight); line-height: 1.5; }
+  .reg-checklist svg, .reg-price-list svg, .reg-point svg { flex-shrink: 0; margin-top: 2px; }
+  .reg-price-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; max-width: 760px; margin: 0 auto; }
+  .reg-price { background: white; border: 1px solid var(--muted); border-radius: 16px; padding: 36px; display: flex; flex-direction: column; }
+  .reg-price .btn-primary, .reg-price .btn-outline { margin-top: auto; }
+  .reg-price-label { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; }
+  .reg-price-n { font-family: 'DM Serif Display', serif; font-size: 3rem; color: var(--midnight); line-height: 1; margin-bottom: 4px; }
+  .reg-price-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+  .reg-price-list div { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--text-mid); }
+  .reg-point { display: flex; align-items: flex-start; gap: 14px; }
+  .reg-point strong { font-size: 14px; color: var(--midnight); font-weight: 600; }
+  .reg-point p { font-size: 14px; color: var(--text-mid); line-height: 1.7; margin: 3px 0 0; }
+  @media (max-width: 768px) {
+    .reg-two, .reg-grid { grid-template-columns: 1fr; gap: 28px; }
+    .reg-swipe { display: inline; }
+    .reg-card, .reg-price { padding: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <a href="/" style="text-decoration:none;">
+      <div>
+        <div id="nav-brand" style="font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:22px;line-height:1;letter-spacing:-0.3px;white-space:nowrap;"><span style="color:#0D1F35">One</span><span style="color:#F25C44">Side</span><span style="color:#0D1F35"> Australia</span></div>
+        <div id="logo-sub-wrap" style="margin-top:5px;">
+          <div style="display:flex;justify-content:space-between;"><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">C</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">H</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">I</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">L</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">D</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">&nbsp;&nbsp;</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">S</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">A</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">F</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">E</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">T</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">Y</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">&nbsp;&nbsp;</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">I</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">N</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">&nbsp;&nbsp;</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">S</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">P</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">O</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">R</span><span style="font-family:'Raleway',sans-serif;font-weight:300;font-size:10.5px;color:#4A6580;">T</span></div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <ul class="nav-links">
+    <li><a href="/assessment">Your Assessment</a></li>
+    <li><a href="/prepare">Prepare</a></li>
+    <li><a href="/updates">Updates</a></li>
+    <li><a href="/about">About</a></li>
+    <li><a href="/contact" class="nav-cta">Get started</a></li>
+  </ul>
+  <button class="hamburger" onclick="toggleMobileNav()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+<div class="mobile-nav" id="mobileNav">
+  <a href="/assessment">Your Assessment</a>
+  <a href="/prepare">Prepare</a>
+  <a href="/updates">Updates</a>
+  <a href="/about">About</a>
+  <a href="/contact" class="nav-cta">Get started</a>
+</div>
+
+<main>
+
+  <div class="page-hero">
+    <div class="ph-band"></div><div class="ph-dots"></div><div class="ph-line"></div>
+    <div class="ph-inner">
+      <div class="ph-tag">The OneSide Risk Register</div>
+      <h1>Your gap report shows what's missing.<br><em>Your Risk Register helps you fix it.</em></h1>
+      <p>Every finding in your gap report becomes a rated, ownable risk in a spreadsheet your committee can work through, meeting by meeting. Built automatically from your assessment answers and delivered straight after your report.</p>
+    </div>
+  </div>
+
+  <section style="padding:80px 2rem;background:var(--off-white);">
+    <div class="section-inner">
+
+      <!-- SEE INSIDE -->
+      <div style="margin-bottom:72px;">
+        <div style="text-align:center;max-width:600px;margin:0 auto 36px;">
+          <div class="eyebrow">See inside</div>
+          <h2 class="section-title">A working register, ready from day one.</h2>
+          <p style="font-size:15px;color:var(--text-mid);line-height:1.8;">No blank template to fill in. Your register arrives pre-filled with your club's risks, ratings and recommended actions, ready to assign and track.</p>
+        </div>
+        <figure class="reg-figure">
+          <div class="reg-scroll" tabindex="0" aria-label="Sample Risk Register spreadsheet. Scroll sideways to see all columns.">
+            <img src="/images/risk-register-sample.webp" width="2000" height="680" loading="lazy" alt="Sample Risk Register spreadsheet for a fictional netball club, showing each child safe standard requirement with its result, risk, likelihood, consequence, colour-coded risk rating, existing controls, recommended actions, owner, target date and status.">
+          </div>
+          <figcaption>Sample register for a fictional club, cropped to five rows. <span class="reg-swipe">Swipe sideways to see every column.</span> Yours is built from your own assessment answers.</figcaption>
+        </figure>
+      </div>
+
+      <!-- WHAT'S IN YOUR REGISTER -->
+      <div style="margin-bottom:72px;">
+        <div style="text-align:center;max-width:560px;margin:0 auto 48px;">
+          <div class="eyebrow">What's in your register</div>
+          <h2 class="section-title">Every gap becomes a tracked, ownable risk.</h2>
+          <p style="font-size:15px;color:var(--text-mid);line-height:1.8;">Here's exactly what your committee receives.</p>
+        </div>
+        <div class="reg-grid">
+
+          <div class="reg-card" style="border-top-color:var(--coral);">
+            <div class="reg-icon coral"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F25C44" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
+            <h3>Every requirement, one line at a time</h3>
+            <p>Each minimum requirement of your state's child safe standards gets its own row, with a Result already filled in from your gap report: <strong>Met</strong>, <strong>Partially Met</strong>, <strong>Not Met</strong> or <strong>Opportunity for Improvement</strong>.</p>
+            <p class="reg-note">Uses the same Result wording as the regulator's own self-assessment tool, so your register can stand in for it.</p>
+          </div>
+
+          <div class="reg-card" style="border-top-color:var(--steel);">
+            <div class="reg-icon steel"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B5E8A" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            <h3>Risks rated by likelihood and consequence</h3>
+            <p>For each requirement, the register describes what could realistically go wrong for a child at your club, then rates it on likelihood and consequence. The rating is colour coded so the urgent items stand out.</p>
+            <div class="reg-key" aria-label="Risk rating scale">
+              <span style="background:#E8192C;color:#fff;">Highest priority</span><span style="background:#F25C44;color:#fff;">High</span><span style="background:#FFD60A;color:#0D1F35;">Medium</span><span style="background:#2E86C1;color:#fff;">Low</span>
+            </div>
+          </div>
+
+          <div class="reg-card" style="border-top-color:var(--coral);">
+            <div class="reg-icon coral"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F25C44" stroke-width="2" stroke-linecap="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+            <h3>What you already do, and what to do next</h3>
+            <p>Your existing controls are recorded alongside recommended actions drawn from your gap report, so your committee can see what's already in place and the next practical step for each risk.</p>
+            <p class="reg-note">Options, not mandates. Your committee decides what to take on and when.</p>
+          </div>
+
+          <div class="reg-card" style="border-top-color:var(--steel);">
+            <div class="reg-icon steel"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B5E8A" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <h3>Owners, dates and status, ready to track</h3>
+            <p>Assign an owner and a target date to each risk, then update the Status as you go: Not Started, In Progress or Complete. A tracking summary counts your progress automatically.</p>
+            <p class="reg-note">Includes a "How to use this register" tab for your committee.</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- HOW YOU GET IT -->
+      <div style="background:var(--midnight);border-radius:12px;padding:2rem;margin-bottom:72px;">
+        <p style="font-size:11px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--coral);margin:0 0 10px;">How you get it</p>
+        <h2 style="font-family:'DM Serif Display',serif;font-size:1.6rem;color:white;margin:0 0 8px;line-height:1.2;">Three steps to your Risk Register.</h2>
+        <p style="font-size:14px;color:rgba(255,255,255,0.55);margin:0 0 1.5rem;">No extra forms. Your register is built from the assessment you're already doing.</p>
+        <div class="reg-steps">
+          <div class="reg-step">
+            <div class="reg-step-n">1</div>
+            <h3>Choose the bundle</h3>
+            <p>Select Assessment + Risk Register at checkout, then complete your assessment as normal. It takes around 30 to 40 minutes.</p>
+          </div>
+          <div class="reg-step">
+            <div class="reg-step-n">2</div>
+            <h3>Get your gap report</h3>
+            <p>Your gap report is generated as soon as you finish, with findings against every standard and practical options for each gap.</p>
+          </div>
+          <div class="reg-step">
+            <div class="reg-step-n">3</div>
+            <h3>Your register follows</h3>
+            <p>Straight after your report, your Risk Register is built from its findings. You can download it on screen, and it's also emailed to you as an Excel spreadsheet.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- BUILT FOR COMMITTEE MEETINGS -->
+      <div class="reg-two" style="margin-bottom:72px;">
+        <div>
+          <div class="eyebrow">Built for committee meetings</div>
+          <h2 class="section-title">Turn child safety into a standing agenda item.</h2>
+          <p style="font-size:15px;color:var(--text-mid);line-height:1.8;margin-bottom:16px;">A gap report is a snapshot. A risk register is how you keep moving. Bring it to each committee or child safety meeting, work through the highest rated risks first, and record what was decided.</p>
+          <p style="font-size:15px;color:var(--text-mid);line-height:1.8;">When your annual reassessment comes around, you'll have a clear record of what your club has done.</p>
+        </div>
+        <div class="reg-checklist">
+          <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A7A4A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Confirm an owner for each risk, by role or by name</span></div>
+          <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A7A4A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Work through Highest priority and High risks first</span></div>
+          <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A7A4A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Set target dates so owners know when to report back</span></div>
+          <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A7A4A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Update the status as actions are completed</span></div>
+          <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A7A4A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Use the notes column to record decisions and dates</span></div>
+          <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A7A4A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Review the whole register at least once a season</span></div>
+        </div>
+      </div>
+
+      <!-- PRICING -->
+      <div id="pricing" style="margin-bottom:72px;">
+        <div style="text-align:center;max-width:560px;margin:0 auto 40px;">
+          <div class="eyebrow">Pricing</div>
+          <h2 class="section-title">Add your Risk Register for $80.</h2>
+          <p style="font-size:15px;color:var(--text-mid);line-height:1.8;">The same flat price for every club, regardless of size.</p>
+        </div>
+        <div class="reg-price-grid">
+          <div class="reg-price" style="border-top:3px solid var(--midnight);">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+              <div class="reg-price-label" style="color:var(--midnight);">Assessment + Risk Register</div>
+              <div style="font-size:10.5px;font-weight:700;color:white;background:var(--midnight);padding:3px 10px;border-radius:100px;">Best value</div>
+            </div>
+            <div class="reg-price-n">$350</div>
+            <div style="font-size:13px;color:var(--text-mid);margin-bottom:24px;">Year 1</div>
+            <div class="reg-price-list">
+              <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Everything in the Initial Assessment</div>
+              <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>A Risk Register built from your assessment answers</div>
+              <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Every requirement rated by likelihood and consequence</div>
+              <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Delivered on screen and by email as an Excel file</div>
+            </div>
+            <a href="https://oneside-australia.vercel.app/payment-select.html?type=bundle" class="btn-primary" style="width:100%;justify-content:center;background:var(--midnight);" target="_blank">Get the bundle ↗</a>
+          </div>
+          <div class="reg-price" style="border-top:3px solid var(--coral);">
+            <div class="reg-price-label" style="color:var(--coral);margin-bottom:16px;">Initial assessment only</div>
+            <div class="reg-price-n">$270</div>
+            <div style="font-size:13px;color:var(--text-mid);margin-bottom:24px;">Year 1</div>
+            <p style="font-size:14px;color:var(--text-mid);line-height:1.7;margin:0 0 24px;">The full gap report with practical options for every gap and a priority actions list, without the Risk Register.</p>
+            <a href="/assessment#pricing" class="btn-outline" style="width:100%;justify-content:center;">See all pricing →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- YOURS TO RUN -->
+      <div style="background:white;border:1px solid var(--muted);border-radius:16px;padding:40px;margin-bottom:40px;border-left:4px solid var(--coral);">
+        <div class="eyebrow" style="margin-bottom:16px;">Your register, your call</div>
+        <h2 class="section-title" style="font-size:1.4rem;margin-bottom:24px;">A working tool your club owns.</h2>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="reg-point"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A7A4A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><div><strong>It belongs to your club.</strong><p>Like your gap report, your register is never shared with your sporting body, league, regulator or any third party.</p></div></div>
+          <div class="reg-point"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A7A4A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><div><strong>Your committee makes the decisions.</strong><p>The register is a starting point, not a new assessment. Once it's with your club, keeping it up to date and judging each risk is your committee's role.</p></div></div>
+          <div class="reg-point"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A7A4A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><div><strong>Edit it however you like.</strong><p>It's a standard Excel file. Change ratings, add risks, rename owners or add your own columns.</p></div></div>
+        </div>
+        <div style="margin-top:24px;"><a href="/privacy" class="btn-outline" style="font-size:13px;padding:9px 18px;">Full privacy policy →</a></div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="final-cta">
+    <h2>Questions about the Risk Register?</h2>
+    <p>Book a free 30-minute discovery call. No obligation, just clarity on what's involved.</p>
+    <div class="fca"><a href="https://outlook.office.com/book/OneSideAustralia30minDiscoveryCall@onesideaustralia.com.au/?ismsaljsauthenabled" target="_blank" class="btn-primary" style="font-size:16px;padding:16px 32px;">Book a discovery call ↗</a></div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="ft-top">
+    <div class="ft-brand">
+      <a href="/" aria-label="OneSide Australia" style="text-decoration:none;display:inline-block;">
+        <div style="font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:20px;line-height:1;letter-spacing:-0.3px;white-space:nowrap;"><span style="color:#fff">One</span><span style="color:#F25C44">Side</span><span style="color:#fff"> Australia</span></div><div style="margin-top:5px;font-family:'Raleway',sans-serif;font-weight:300;font-size:9.5px;letter-spacing:0.16em;color:rgba(255,255,255,0.35);">CHILD&nbsp;&nbsp;SAFETY&nbsp;&nbsp;IN&nbsp;&nbsp;SPORT</div>
+      </a>
+      <p>Empowering clubs. Protecting children.</p>
+      <div class="ft-tagline">Because when it comes to protecting children, there is only OneSide.</div>
+    </div>
+    <div class="ft-ack">OneSide Australia acknowledges the Traditional Custodians of Country throughout Australia and their continuing connection to land, waters, and community. We pay our respects to Elders past and present.<br><br>OneSide is committed to the safety of all children, including Aboriginal and Torres Strait Islander children, and recognises that child safe practices must reflect and respect the cultures of all children we serve.</div>
+  </div>
+  <div class="ft-bottom">
+    <div class="ft-copy">© 2026 OneSide Australia. Child Safety in Sport, across Australia.</div>
+    <ul class="ft-links"><li><a href="/privacy">Privacy</a></li><li><a href="/terms">Terms</a></li><li><a href="/faq">FAQ</a></li><li><a href="/contact">Contact</a></li></ul>
+  </div>
+</footer>
+
+<script src="scripts.js"></script>
+<script>
+window.addEventListener('load',function(){
+  var brand=document.getElementById('nav-brand');
+  var wrap=document.getElementById('logo-sub-wrap');
+  if(brand&&wrap){wrap.style.width=brand.offsetWidth+'px';}
+});
+</script>
+</body>
+</html>

@@ -582,7 +582,7 @@ document.addEventListener('DOMContentLoaded', function () {
    HERO_CHAT_SECONDS it shrinks into the corner button, which then opens
    the chat panel like every other page. If the visitor has started using
    the hero chat it stays put, so their conversation isn't interrupted. */
-var HERO_CHAT_SECONDS = 30;
+var HERO_CHAT_SECONDS = 15;
 
 document.addEventListener('DOMContentLoaded', function () {
   if (document.getElementById('q-launch')) return;

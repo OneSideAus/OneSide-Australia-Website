@@ -433,14 +433,26 @@
   </div>
 </div>
 <script>
+/* Newsletter popup. Shows once per visit: straight after the hero chat moves
+   to the corner (see scripts.js), or at 40 seconds if the visitor is using the chat. */
 (function(){
-  if(sessionStorage.getItem('osModalShown'))return;
-  setTimeout(function(){
+  var shown = false;
+  try { shown = !!sessionStorage.getItem('osModalShown'); } catch(e) {}
+  window.osNewsletterShown = function(){ return shown; };
+  window.osShowNewsletter = function(){
+    if (shown) return false;
+    shown = true;
     document.getElementById('newsletter-modal').style.display='flex';
-    sessionStorage.setItem('osModalShown','1');
-  },40000);
+    try { sessionStorage.setItem('osModalShown','1'); } catch(e) {}
+    return true;
+  };
+  setTimeout(window.osShowNewsletter, 40000);
 })();
-function closeNewsletterModal(){document.getElementById('newsletter-modal').style.display='none';}
+function closeNewsletterModal(){
+  // On the homepage the popup can shrink into the hero instead (scripts.js)
+  if (window.osCloseNewsletterIntoHero && window.osCloseNewsletterIntoHero()) return;
+  document.getElementById('newsletter-modal').style.display='none';
+}
 (function(){
   function fitSubtitle(){
     var brand=document.getElementById('nav-brand');

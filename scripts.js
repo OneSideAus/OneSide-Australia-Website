@@ -28,6 +28,8 @@ async function submitSubscribe(e) {
       msg.style.color = '#1A7A4A';
       msg.textContent = 'You\'re on the list. We\'ll be in touch monthly.';
       document.getElementById('subscribe-email').value = '';
+      try { sessionStorage.setItem('osSubscribed', '1'); } catch (err) {}
+      document.dispatchEvent(new CustomEvent('os:subscribed'));
     } else {
       throw new Error('Server error');
     }
@@ -681,11 +683,13 @@ document.addEventListener('DOMContentLoaded', function () {
       var marker = heroWidget.parentNode.nextElementSibling || heroWidget.parentNode;
       var before = marker.getBoundingClientRect().top;
       var wasAbove = heroWidget.getBoundingClientRect().bottom <= 0;
+      var slotParent = heroWidget.parentNode, slotNext = heroWidget.nextSibling;
       heroWidget.parentNode.removeChild(heroWidget);
       if (wasAbove) window.scrollBy(0, marker.getBoundingClientRect().top - before);
 
       mode = 'panel';
       buildPanel();
+      heroSlotFreed(slotParent, slotNext);
       if (!reduceMotion && circle.animate) {
         circle.animate(
           [{ transform: 'scale(1)' }, { transform: 'scale(1.18)' }, { transform: 'scale(0.94)' }, { transform: 'scale(1)' }],
@@ -729,4 +733,152 @@ document.addEventListener('DOMContentLoaded', function () {
       finish();
     };
   }
+
+  /* ── After the hero chat leaves: subscription popup, then a card in its place ──
+     First time this visit, the subscription popup comes up straight after the
+     chat moves to the corner. When it's closed (or they subscribe), it shrinks
+     into the empty spot in the hero and becomes a subscribe card there, or a
+     thank-you card if they subscribed. */
+  var slot = null;          // where the hero chat used to be
+  var slotFilled = false;
+  var heroReduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var CARD_BOX = 'background:rgba(9,19,34,0.82);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);' +
+    'border-radius:14px;border:1px solid rgba(255,255,255,0.12);padding:24px 22px;';
+
+  function heroSlotFreed(parent, next) {
+    slot = { parent: parent, next: next };
+    if (window.osShowNewsletter && !window.osNewsletterShown()) {
+      // Let the corner button's pulse finish, then bring up the popup
+      setTimeout(function () { if (!window.osShowNewsletter()) fillSlot(); }, 800);
+    } else {
+      fillSlot();   // they've already seen the popup this visit
+    }
+  }
+
+  function isSubscribed() {
+    try { return !!sessionStorage.getItem('osSubscribed'); } catch (e) { return false; }
+  }
+
+  function thanksHtml() {
+    return '<div style="' + CARD_BOX + 'text-align:center;">' +
+      '<div style="width:36px;height:36px;border-radius:50%;background:rgba(92,221,154,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">' +
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5CDD9A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>' +
+      '<p style="font-family:\'DM Serif Display\',serif;font-size:1.15rem;color:rgba(255,255,255,0.92);margin-bottom:4px;">You\'re on the list.</p>' +
+      '<p style="font-size:12px;color:rgba(255,255,255,0.5);">We\'ll be in touch monthly.</p>' +
+    '</div>';
+  }
+
+  function subscribeHtml() {
+    return '<div style="' + CARD_BOX + '">' +
+      '<p style="font-family:\'DM Serif Display\',serif;font-size:1.15rem;color:rgba(255,255,255,0.92);margin-bottom:4px;line-height:1.25;">Stay across child safety in sport</p>' +
+      '<p style="font-size:12px;color:rgba(255,255,255,0.5);">Monthly updates, in plain language, for clubs.</p>' +
+      '<form class="hs-form" style="display:flex;flex-direction:column;gap:10px;margin-top:16px;">' +
+        '<input type="email" class="hs-email" required placeholder="Your email address" aria-label="Email address" ' +
+          'style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:10px 12px;font-size:14px;color:white;font-family:\'DM Sans\',sans-serif;outline:none;">' +
+        '<button type="submit" class="hs-btn" style="background:var(--coral);color:white;border:none;border-radius:8px;padding:11px 16px;font-size:14px;font-weight:600;font-family:\'DM Sans\',sans-serif;cursor:pointer;">Subscribe →</button>' +
+        '<p class="hs-msg" style="font-size:12px;min-height:16px;margin:0;color:#FF9A82;"></p>' +
+      '</form>' +
+      '<p style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:2px;">No spam. Unsubscribe any time. <a href="/privacy" style="color:rgba(255,255,255,0.55);">Privacy policy</a></p>' +
+    '</div>';
+  }
+
+  function wireSubscribe(card) {
+    var form = card.querySelector('.hs-form');
+    if (!form) return;
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var email = card.querySelector('.hs-email').value.trim();
+      var btn = card.querySelector('.hs-btn');
+      var msg = card.querySelector('.hs-msg');
+      btn.disabled = true; btn.textContent = 'Subscribing...'; msg.textContent = '';
+      try {
+        var res = await fetch('/api/subscribe', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email })
+        });
+        if (!res.ok) throw new Error('Server error');
+        try { sessionStorage.setItem('osSubscribed', '1'); } catch (err) {}
+        card.innerHTML = thanksHtml();
+        if (!heroReduceMotion && card.animate) card.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 350 });
+      } catch (err) {
+        btn.disabled = false; btn.textContent = 'Subscribe →';
+        msg.textContent = 'Something went wrong. Please try again.';
+      }
+    });
+  }
+
+  // Put the card where the chat was, without making the page jump if that spot is above the reader
+  function placeCard() {
+    if (slotFilled || !slot) return null;
+    slotFilled = true;
+    var card = document.createElement('div');
+    card.id = 'hero-subscribe';
+    card.setAttribute('data-clarity-mask', 'True');
+    card.style.cssText = 'flex:0 0 340px;min-width:280px;max-width:100%;';
+    card.innerHTML = isSubscribed() ? thanksHtml() : subscribeHtml();
+    wireSubscribe(card);
+    var marker = slot.parent.nextElementSibling || slot.parent;
+    var before = marker.getBoundingClientRect().top;
+    var above = before <= 0;
+    slot.parent.insertBefore(card, slot.next && slot.next.parentNode === slot.parent ? slot.next : null);
+    if (above) window.scrollBy(0, marker.getBoundingClientRect().top - before);
+    return card;
+  }
+
+  function inView(el) {
+    var r = el.getBoundingClientRect();
+    return r.bottom > 0 && r.top < window.innerHeight;
+  }
+
+  function fillSlot() {
+    var card = placeCard();
+    if (card && !heroReduceMotion && card.animate && inView(card)) {
+      card.animate([{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 450, easing: 'ease-out' });
+    }
+  }
+
+  // Called by closeNewsletterModal() on the homepage. Returns true if it handled the close.
+  window.osCloseNewsletterIntoHero = function () {
+    if (!slot || slotFilled) return false;   // chat is still in the hero, or the card is already there
+    var modal = document.getElementById('newsletter-modal');
+    var panel = modal && modal.firstElementChild;
+    if (!panel) return false;
+    var from = panel.getBoundingClientRect();
+    var card = placeCard();
+    card.style.visibility = 'hidden';
+    var to = card.getBoundingClientRect();
+    var anims = [];
+
+    function done() {
+      modal.style.display = 'none';
+      anims.forEach(function (a) { a.cancel(); });
+      card.style.visibility = '';
+      if (!heroReduceMotion && card.animate && inView(card)) card.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 350 });
+    }
+
+    if (heroReduceMotion || !panel.animate || !inView(card)) { done(); return true; }
+
+    var dx = (to.left + to.width / 2) - (from.left + from.width / 2);
+    var dy = (to.top + to.height / 2) - (from.top + from.height / 2);
+    var sx = to.width / from.width, sy = to.height / from.height;
+    anims.push(modal.animate(
+      [{ backgroundColor: 'rgba(13,31,53,0.85)', backdropFilter: 'blur(3px)' }, { backgroundColor: 'rgba(13,31,53,0)', backdropFilter: 'blur(0px)' }],
+      { duration: 750, fill: 'forwards' }
+    ));
+    var shrink = panel.animate([
+      { transform: 'translate(0,0) scale(1)', opacity: 1, offset: 0 },
+      { transform: 'translate(' + (dx * 0.6) + 'px,' + (dy * 0.6) + 'px) scale(' + ((1 + sx) / 2) + ',' + ((1 + sy) / 2) + ')', opacity: 0.85, offset: 0.6 },
+      { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ')', opacity: 0, offset: 1 }
+    ], { duration: 750, easing: 'cubic-bezier(0.45, 0, 0.25, 1)', fill: 'forwards' });
+    anims.push(shrink);
+    shrink.onfinish = done;
+    return true;
+  };
+
+  // Subscribed in the popup: let them see the confirmation, then close it into the hero
+  document.addEventListener('os:subscribed', function () {
+    setTimeout(function () {
+      var modal = document.getElementById('newsletter-modal');
+      if (modal && window.getComputedStyle(modal).display !== 'none') closeNewsletterModal();
+    }, 1800);
+  });
 });

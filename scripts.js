@@ -576,11 +576,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
 /* ── FLOATING QUESTION BUBBLE (every page) ──────────────
    A "Have a question?" button fixed to the bottom-right corner.
-   On the homepage it jumps to the chat in the hero; on every other
-   page it opens a chat panel using the same assistant (/api/chat). */
+   On every page except the homepage it opens a chat panel using the
+   same assistant (/api/chat).
+   On the homepage the large chat box in the hero shows first. After
+   HERO_CHAT_SECONDS it shrinks into the corner button, which then opens
+   the chat panel like every other page. If the visitor has started using
+   the hero chat it stays put, so their conversation isn't interrupted. */
+var HERO_CHAT_SECONDS = 30;
+
 document.addEventListener('DOMContentLoaded', function () {
   if (document.getElementById('q-launch')) return;
-  var heroChat = document.getElementById('chat-input');
+  var heroWidget = document.getElementById('hero-chat');
+  var heroChat = heroWidget ? document.getElementById('chat-input') : null;
 
   var btn = document.createElement('button');
   btn.id = 'q-launch';
@@ -591,39 +598,38 @@ document.addEventListener('DOMContentLoaded', function () {
     '<span class="q-launch-circle"><img src="/favicon.svg" width="44" height="44" alt="" aria-hidden="true"></span>';
   document.body.appendChild(btn);
 
-  if (heroChat) {
-    btn.addEventListener('click', function () {
-      heroChat.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      setTimeout(function () { heroChat.focus({ preventScroll: true }); }, 400);
-    });
-    return;
+  // What the corner button does: 'hero' scrolls to the hero chat, 'panel' toggles the panel.
+  var mode = heroChat ? 'hero' : 'panel';
+  var panel = null, input = null, greeted = false;
+
+  function buildPanel() {
+    panel = document.createElement('div');
+    panel.id = 'chat-panel';
+    panel.className = 'chat-panel q-panel';
+    panel.setAttribute('role', 'dialog');
+    panel.setAttribute('aria-label', 'Ask a question');
+    panel.innerHTML =
+      '<div class="chat-panel-head">' +
+        '<div style="display:flex;align-items:center;gap:10px;">' +
+          '<div class="chat-panel-head-avatar" style="background:white;"><img src="/favicon.svg" width="26" height="26" alt="" aria-hidden="true"></div>' +
+          '<div><div class="chat-panel-head-title">Have a question?</div><div class="chat-panel-head-sub">Ask about child safety or the assessment</div></div>' +
+        '</div>' +
+        '<button type="button" class="q-panel-close" aria-label="Close">&times;</button>' +
+      '</div>' +
+      '<div id="chat-messages" class="chat-messages"></div>' +
+      '<div class="chat-input-row">' +
+        '<textarea id="chat-input" class="chat-input" rows="1" placeholder="Ask a question…"></textarea>' +
+        '<button id="chat-send" class="chat-send" type="button" aria-label="Send"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>' +
+      '</div>';
+    document.body.appendChild(panel);
+
+    input = panel.querySelector('#chat-input');
+    input.addEventListener('keydown', chatKeydown);
+    panel.querySelector('#chat-send').addEventListener('click', sendChat);
+    panel.querySelector('.q-panel-close').addEventListener('click', function () { setOpen(false); btn.focus(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && panel.classList.contains('open')) { setOpen(false); btn.focus(); } });
   }
 
-  var panel = document.createElement('div');
-  panel.id = 'chat-panel';
-  panel.className = 'chat-panel q-panel';
-  panel.setAttribute('role', 'dialog');
-  panel.setAttribute('aria-label', 'Ask a question');
-  panel.innerHTML =
-    '<div class="chat-panel-head">' +
-      '<div style="display:flex;align-items:center;gap:10px;">' +
-        '<div class="chat-panel-head-avatar" style="background:white;"><img src="/favicon.svg" width="26" height="26" alt="" aria-hidden="true"></div>' +
-        '<div><div class="chat-panel-head-title">Have a question?</div><div class="chat-panel-head-sub">Ask about child safety or the assessment</div></div>' +
-      '</div>' +
-      '<button type="button" class="q-panel-close" aria-label="Close">&times;</button>' +
-    '</div>' +
-    '<div id="chat-messages" class="chat-messages"></div>' +
-    '<div class="chat-input-row">' +
-      '<textarea id="chat-input" class="chat-input" rows="1" placeholder="Ask a question…"></textarea>' +
-      '<button id="chat-send" class="chat-send" type="button" aria-label="Send"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>' +
-    '</div>';
-  document.body.appendChild(panel);
-
-  var input = panel.querySelector('#chat-input');
-  input.addEventListener('keydown', chatKeydown);
-  panel.querySelector('#chat-send').addEventListener('click', sendChat);
-
-  var greeted = false;
   function setOpen(open) {
     panel.classList.toggle('open', open);
     btn.classList.toggle('is-open', open);
@@ -633,7 +639,93 @@ document.addEventListener('DOMContentLoaded', function () {
       input.focus();
     }
   }
-  btn.addEventListener('click', function () { setOpen(!panel.classList.contains('open')); });
-  panel.querySelector('.q-panel-close').addEventListener('click', function () { setOpen(false); btn.focus(); });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && panel.classList.contains('open')) { setOpen(false); btn.focus(); } });
+
+  btn.addEventListener('click', function () {
+    if (mode === 'hero') {
+      heroChat.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(function () { heroChat.focus({ preventScroll: true }); }, 400);
+    } else {
+      setOpen(!panel.classList.contains('open'));
+    }
+  });
+
+  if (mode === 'panel') { buildPanel(); return; }
+
+  /* Homepage: hand the hero chat over to the corner button after a while */
+  var engaged = false, hovering = false;
+  heroChat.addEventListener('focus', function () { engaged = true; });
+  heroChat.addEventListener('input', function () { engaged = true; });
+  heroWidget.addEventListener('mouseenter', function () { hovering = true; });
+  heroWidget.addEventListener('mouseleave', function () { hovering = false; });
+
+  function tryCollapse() {
+    if (engaged || chatHistory.length > 0) return;   // they're using it: leave it alone
+    var popup = document.getElementById('newsletter-modal');
+    var popupOpen = popup && window.getComputedStyle(popup).display !== 'none';
+    // Wait while their mouse is on the chat, or the newsletter popup is covering the page
+    if (hovering || popupOpen) { setTimeout(tryCollapse, popupOpen ? 1500 : 3000); return; }
+    collapseHeroChat();
+  }
+  setTimeout(tryCollapse, HERO_CHAT_SECONDS * 1000);
+
+  function collapseHeroChat() {
+    var from = heroWidget.getBoundingClientRect();
+    var circle = btn.querySelector('.q-launch-circle');
+    var to = circle.getBoundingClientRect();
+    var inView = from.bottom > 0 && from.top < window.innerHeight;
+    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function finish() {
+      // Remove the hero chat without making the page jump if it's above where they're reading
+      var marker = heroWidget.parentNode.nextElementSibling || heroWidget.parentNode;
+      var before = marker.getBoundingClientRect().top;
+      var wasAbove = heroWidget.getBoundingClientRect().bottom <= 0;
+      heroWidget.parentNode.removeChild(heroWidget);
+      if (wasAbove) window.scrollBy(0, marker.getBoundingClientRect().top - before);
+
+      mode = 'panel';
+      buildPanel();
+      if (!reduceMotion && circle.animate) {
+        circle.animate(
+          [{ transform: 'scale(1)' }, { transform: 'scale(1.18)' }, { transform: 'scale(0.94)' }, { transform: 'scale(1)' }],
+          { duration: 650, easing: 'ease-out' }
+        );
+      }
+    }
+
+    if (!inView || reduceMotion || !heroWidget.animate) {
+      if (inView && heroWidget.animate) {
+        heroWidget.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 400, fill: 'forwards' }).onfinish = finish;
+      } else {
+        finish();
+      }
+      return;
+    }
+
+    // A floating copy travels over the page (the hero clips anything moving outside it)
+    var ghost = heroWidget.cloneNode(true);
+    ghost.removeAttribute('id');
+    ghost.setAttribute('aria-hidden', 'true');
+    Array.prototype.forEach.call(ghost.querySelectorAll('[id]'), function (el) { el.removeAttribute('id'); });
+    ghost.style.cssText += ';position:fixed;margin:0;flex:none;min-width:0;z-index:8999;pointer-events:none;' +
+      'left:' + from.left + 'px;top:' + from.top + 'px;width:' + from.width + 'px;height:' + from.height + 'px;' +
+      'transform-origin:center center;will-change:transform,opacity;';
+    document.body.appendChild(ghost);
+    heroWidget.style.visibility = 'hidden';
+
+    var dx = (to.left + to.width / 2) - (from.left + from.width / 2);
+    var dy = (to.top + to.height / 2) - (from.top + from.height / 2);
+    var s = Math.max(to.width / from.width, 0.08);
+
+    // Brief squeeze, then glide along a gentle curve and accelerate into the button
+    ghost.animate([
+      { transform: 'translate(0,0) scale(1)', opacity: 1, offset: 0, easing: 'ease-out' },
+      { transform: 'translate(0,0) scale(0.94,0.97)', opacity: 1, offset: 0.15, easing: 'cubic-bezier(0.4, 0, 0.6, 1)' },
+      { transform: 'translate(' + (dx * 0.45) + 'px,' + (dy * 0.25) + 'px) scale(0.55)', opacity: 0.95, offset: 0.55, easing: 'cubic-bezier(0.5, 0, 0.9, 0.7)' },
+      { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + s + ')', opacity: 0, offset: 1 }
+    ], { duration: 1200, fill: 'forwards' }).onfinish = function () {
+      ghost.parentNode.removeChild(ghost);
+      finish();
+    };
+  }
 });

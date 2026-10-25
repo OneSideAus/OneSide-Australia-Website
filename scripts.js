@@ -608,6 +608,7 @@ document.addEventListener('DOMContentLoaded', function () {
     panel.className = 'chat-panel q-panel';
     panel.setAttribute('role', 'dialog');
     panel.setAttribute('aria-label', 'Ask a question');
+    panel.setAttribute('data-clarity-mask', 'True');  // Clarity never records chat content
     panel.innerHTML =
       '<div class="chat-panel-head">' +
         '<div style="display:flex;align-items:center;gap:10px;">' +

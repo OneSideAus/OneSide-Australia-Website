@@ -10,7 +10,7 @@
 //   - reads its own Google News queries (leads only).
 
 // News outlets every agent may read for leads, on top of its own local outlets.
-export const NATIONAL_NEWS_DOMAINS = ['abc.net.au', 'sbs.com.au', 'theguardian.com', 'theconversation.com'];
+export const NATIONAL_NEWS_DOMAINS = ['abc.net.au', 'sbs.com.au', 'theconversation.com'];
 
 // National sport websites that also host state bodies' pages (e.g. Tennis
 // Victoria lives at tennis.com.au/vic, AFL Tasmania at play.afl), so every
@@ -167,7 +167,7 @@ export const REGIONS = {
     category: 'VIC',
     focus: 'Victoria: Working with Children Check (now run by the Social Services Regulator, incl. WWC Connect for applicants and organisations verifying workers, mandatory child safety training from 19 October 2026, Service Victoria transactions), the Child Safe Standards and Reportable Conduct Scheme (moving from the Commission for Children and Young People to the Social Services Regulator), Sport and Recreation Victoria, Vicsport.',
     domains: ['vic.gov.au', 'vicsport.com.au'],
-    newsDomains: ['theage.com.au', 'heraldsun.com.au'],
+    newsDomains: [],
     watchedPages: [
       { url: 'https://www.workingwithchildren.vic.gov.au/', label: 'Working with Children Check Victoria' },
       { url: 'https://www.vic.gov.au/social-services-regulator-media-centre', label: 'Social Services Regulator Victoria: News' },

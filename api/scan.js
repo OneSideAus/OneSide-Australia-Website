@@ -208,15 +208,25 @@ function parseAgentJson(text) {
   }
 }
 
+// Reads the domain list out of "The following domains are not accessible to our user agent: ['a.com', 'b.com']".
+function blockedDomainsFromError(status, body) {
+  if (status !== 400) return [];
+  const match = body.match(/not accessible to our user agent: \[([^\]]*)\]/);
+  if (!match) return [];
+  return [...match[1].matchAll(/['"]([^'"]+)['"]/g)].map(m => m[1]);
+}
+
 async function runRegionAgent(region, newsDomains, prompt, deadline) {
-  const readableDomains = [...region.domains, ...newsDomains];
-  const tools = [
+  let readableDomains = [...region.domains, ...newsDomains];
+  const buildTools = () => [
     { type: 'web_search_20260209', name: 'web_search', max_uses: 12, allowed_domains: readableDomains,
       user_location: { type: 'approximate', country: 'AU' } },
     { type: 'web_fetch_20260209', name: 'web_fetch', max_uses: 15, allowed_domains: readableDomains }
   ];
+  let tools = buildTools();
   const messages = [{ role: 'user', content: prompt }];
   let text = '';
+  let blockedRetries = 0;
 
   // Server-side tool loops can pause (stop_reason "pause_turn"); resend to resume.
   for (let attempt = 0; attempt < 4; attempt++) {
@@ -242,7 +252,21 @@ async function runRegionAgent(region, newsDomains, prompt, deadline) {
       signal: AbortSignal.timeout(remaining)
     });
 
-    if (!response.ok) throw new Error(`Claude API ${response.status}: ${(await response.text()).substring(0, 300)}`);
+    if (!response.ok) {
+      const body = await response.text();
+      // Some sites block Anthropic's crawler, and the API rejects the whole request if any
+      // of them are in allowed_domains. Drop the blocked sites and try again.
+      const blocked = blockedDomainsFromError(response.status, body);
+      if (blocked.length && blockedRetries < 3) {
+        blockedRetries++;
+        console.warn(`[${region.name}] Skipping sites that block Claude: ${blocked.join(', ')}`);
+        readableDomains = readableDomains.filter(d => !blocked.includes(d));
+        tools = buildTools();
+        attempt--;
+        continue;
+      }
+      throw new Error(`Claude API ${response.status}: ${body.substring(0, 300)}`);
+    }
     const data = await response.json();
     if (data.stop_reason === 'refusal') throw new Error('Claude declined the request');
 

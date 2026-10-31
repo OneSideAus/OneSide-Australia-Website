@@ -1,6 +1,10 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
+  "redirects": [
+    { "source": "/pay", "destination": "https://oneside-australia.vercel.app/payment-select.html?type=initial", "permanent": false },
+    { "source": "/renew", "destination": "https://oneside-australia.vercel.app/payment-select.html?type=renewal", "permanent": false }
+  ],
   "rewrites": [
     { "source": "/assessment", "destination": "/assessment.html" },
     { "source": "/prepare", "destination": "/prepare.html" },

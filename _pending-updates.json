@@ -39,5 +39,46 @@
     "status": "verified",
     "id": "0adf858deeec",
     "addedAt": "2026-11-02T00:04:05.384Z"
+  },
+  {
+    "title": "Child safety workshops for Illawarra sporting clubs, 10 to 12 November",
+    "body": "The NSW Office of Sport and Wollongong City Council are running interactive child safety workshops in Wollongong, Dapto and Woonona from 10 to 12 November 2026. Delivered by the Office of Sport and the Office of the Children's Guardian, they cover de-escalating challenging behaviour, managing child safety risks and implementing Child Safe Standards. Illawarra sporting organisations can register through the Illawarra Sport Integrity Roadshow page.",
+    "category": "NSW",
+    "type": "Resource",
+    "source": "Office of Sport NSW",
+    "sourceUrl": "https://www.nsw.gov.au/departments-and-agencies/office-of-sport/news-media/keeping-children-safe-sport",
+    "date": "November 2026",
+    "verifiedQuote": "The NSW Office of Sport and Wollongong City Council will host a series of interactive child safety workshops in the Illawarra next week to help local sporting organisations keep children safe from harm and abuse in sport.",
+    "correction": "The workshops are not free according to the source text, which does not mention cost at all, so this claim must be removed.",
+    "status": "verified",
+    "id": "8eea2596845e",
+    "addedAt": "2026-11-09T00:22:26.197Z"
+  },
+  {
+    "title": "SAFE NT closed over Christmas and New Year",
+    "body": "SAFE NT, which handles Working with Children Clearances (Ochre Cards), will close its Customer Service Centre at 71 Smith St and its Call Centre from Monday 21 December 2026 to Friday 1 January 2027, reopening Monday 4 January 2027. Online self-service options stay available during the break. Clubs should remind coaches and volunteers who need in-person or phone help with an Ochre Card to contact SAFE NT before 21 December.",
+    "category": "NT",
+    "type": "Reminder",
+    "source": "NT Police, Fire and Emergency Services (SAFE NT)",
+    "sourceUrl": "https://pfes.nt.gov.au/SAFENT",
+    "date": "November 2026",
+    "verifiedQuote": "SAFE NT is taking a short end of year break, from Monday 21 December 2026 through to Friday 1 January 2027. This will include our Customer Service Centre at 71 Smith St and the Call Centre. Both will remain closed for this two-week period. We look forward to serving you in the new year, from Monday 4 January 2027. Online self-service options will continue to be available throughout the holiday period.",
+    "status": "verified",
+    "id": "de59611a6716",
+    "addedAt": "2026-11-09T00:22:26.197Z"
+  },
+  {
+    "title": "Blue Card Services webinars for clubs with volunteers",
+    "body": "Blue Card Services is running online sessions on Microsoft Teams for organisations that have volunteers working with children, on 18 November and 9 December 2026. Sessions cover who needs a blue card, how to apply for a volunteer blue card and what volunteers and organisations must do under blue card laws. A Ready, Set, Compliant session on 1 December 2026 covers linking requirements, the employee register and the Organisation Portal.",
+    "category": "QLD",
+    "type": "Resource",
+    "source": "Blue Card Services, Queensland Government",
+    "sourceUrl": "https://www.qld.gov.au/jobs/blue-card/contacting/events",
+    "date": "November 2026",
+    "verifiedQuote": "Blue cards for volunteers 18 November 2026... Blue cards for volunteers 09 December 2026... Ready, Set, Compliant! 01 December 2026... linking requirements the employee register how the Organisation Portal helps you meet your legal responsibilities.",
+    "correction": "The source text does not describe these as 'free' webinars, and the Ready, Set, Compliant session is on 1 December (not 'also' on that date, it's a separate session type).",
+    "status": "verified",
+    "id": "702baf19e59c",
+    "addedAt": "2026-11-09T00:22:26.197Z"
   }
 ]

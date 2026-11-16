@@ -1,1 +1,31 @@
-[]
+[
+  {
+    "title": "Blue card portals offline Saturday 21 November 2026",
+    "body": "Blue Card Services has scheduled maintenance that will make both the Applicant Portal and the Organisation Portal unavailable from 7am to 5pm on Saturday 21 November 2026. Clubs that use the Organisation Portal to link and track volunteers' blue cards should get any urgent linking or checks done before then. Volunteers should also avoid lodging or renewing applications during that window. The portals will be available again after 5pm.",
+    "category": "QLD",
+    "type": "Reminder",
+    "source": "Blue Card Services, Queensland Government",
+    "sourceUrl": "https://www.qld.gov.au/jobs/blue-card-services",
+    "date": "November 2026",
+    "verifiedQuote": "The Applicant Portal and Organisation Portal will be unavailable between 7am and 5pm on Saturday 21 November 2026 due to planned maintenance. These portals will be available again after 5pm.",
+    "status": "verified",
+    "id": "52249d79c1af",
+    "addedAt": "2026-11-16T00:34:20.192Z"
+  },
+  {
+    "title": "Football Victoria releases updated Working with Children Check Policy",
+    "body": "Football Victoria has published version 3 of its Working with Children Check Policy, dated 30 October 2026, which updates scope, exemptions and processes following the introduction of WWC Connect by the Social Services Regulator. It requires coaches, team managers, match officials, club committee members, volunteers and contractors in child-related roles to hold a valid WWCC, whether paid or unpaid and even if they are a parent or close relative of a player, and anyone registering on PlayFootball in these roles must provide their WWCC number, issue date, expiry date and a copy or photo of their card. PlayFootball administrators and registrars need a WWCC even if they are a registered teacher or police officer, clubs must verify checks before the person starts and link workers and volunteers to their WWC Connect profile, and clubs that do not comply may face sanctions under the Club Compliance By-Law.",
+    "category": "VIC",
+    "type": "Update",
+    "source": "Football Victoria",
+    "sourceUrl": "https://footballvictoria.com.au/sites/ffv/files/2026-11/FV_WWCC_Policy_2026Oct.pdf",
+    "date": "November 2026",
+    "evidence": "FA requires that all PlayFootball Administrators/Registrars have a WWCC even if they are a Registered Teacher or Police Officer.",
+    "verdict": "CONTRADICTED",
+    "reason": "The fetched text is a corrupt PDF file containing only metadata and binary stream objects, with no readable policy content that could verify any of the claims about Football Victoria's WWCC Policy.",
+    "status": "check",
+    "regionName": "Victoria",
+    "id": "aab76de83c29",
+    "addedAt": "2026-11-16T00:34:20.192Z"
+  }
+]
